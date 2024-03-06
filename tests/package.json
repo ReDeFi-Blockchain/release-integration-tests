@@ -1,0 +1,32 @@
+{
+  "name": "redefi_deploy_test",
+  "version": "0.0.1",
+  "description": "",
+  "author": "Unique Network",
+  "license": "Apache 2.0",
+  "type": "module",
+  "scripts": {
+    "test": "mocha --timeout 9999999 --loader=ts-node/esm.mjs --trace-uncaught tests.ts"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "5.0.1",
+    "@typechain/ethers-v5": "11.1.2",
+    "chai": "5.0.3",
+    "ethers": "5.7.0",
+    "mocha": "^10.3.0",
+    "typechain": "8.3.2",
+    "typescript": "5.3.3"
+  },
+  "devDependencies": {
+    "@polkadot/api": "8.6.2",
+    "@polkadot/keyring": "9.3.1",
+    "@polkadot/networks": "9.3.1",
+    "@polkadot/util": "9.3.1",
+    "@polkadot/util-crypto": "9.3.1",
+    "@polkadot/wasm-crypto": "6.1.1",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "solc": "0.8.20",
+    "ts-node": "10.9.2"
+  }
+}
