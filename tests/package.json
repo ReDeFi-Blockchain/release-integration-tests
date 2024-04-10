@@ -6,7 +6,9 @@
   "license": "Apache 2.0",
   "type": "module",
   "scripts": {
-    "test": "mocha --timeout 9999999 --loader=ts-node/esm.mjs --trace-uncaught tests.ts"
+    "test": "mocha --timeout 9999999 --loader=ts-node/esm.mjs --trace-uncaught tests.ts",
+    "codestyle": "prettier . --write",
+    "lint": "eslint . --fix"
   },
   "dependencies": {
     "@openzeppelin/contracts": "5.0.1",
@@ -26,6 +28,11 @@
     "@polkadot/wasm-crypto": "6.1.1",
     "@types/chai": "^4.3.11",
     "@types/mocha": "^10.0.6",
+    "@typescript-eslint/eslint-plugin": "7.6.0",
+    "@typescript-eslint/parser": "7.6.0",
+    "eslint": "8.56.0",
+    "eslint-config-prettier": "9.1.0",
+    "prettier": "3.2.5",
     "solc": "0.8.20",
     "ts-node": "10.9.2"
   }

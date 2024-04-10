@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { ApiPromise, WsProvider, Keyring } from "@polkadot/api";
 import { IKeyringPair } from "@polkadot/types/types";
 
@@ -16,7 +17,7 @@ export const getTransactionStatus = ({ events, status }): string => {
   }
   if (status.isInBlock || status.isFinalized) {
     const errors = events.filter(
-      (e) => e.event.data.method === "ExtrinsicFailed"
+      (e) => e.event.data.method === "ExtrinsicFailed",
     );
     if (errors.length > 0) {
       return transactionStatus.FAIL;
@@ -35,11 +36,11 @@ export const getTransactionStatus = ({ events, status }): string => {
 export const signTransaction = (
   sender: IKeyringPair,
   transaction: any,
-  label = "transaction"
+  label = "transaction",
 ) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let unsub = await transaction.signAndSend(sender, (result) => {
+      const unsub = await transaction.signAndSend(sender, (result) => {
         const status = getTransactionStatus(result);
 
         if (status === transactionStatus.SUCCESS) {
@@ -48,7 +49,7 @@ export const signTransaction = (
           unsub();
         } else if (status === transactionStatus.FAIL) {
           console.error(
-            `Something went wrong with ${label}. Status: ${status}`
+            `Something went wrong with ${label}. Status: ${status}`,
           );
           console.error(result.toHuman());
           reject({ result, status });

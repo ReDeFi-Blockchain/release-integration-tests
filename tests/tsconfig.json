@@ -2,9 +2,9 @@
   "compilerOptions": {
     "baseUrl": "./",
     "allowSyntheticDefaultImports": true,
-		"module": "ESNext",
-		"moduleResolution": "Bundler",
-		"target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2022",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "outDir": "./dist",

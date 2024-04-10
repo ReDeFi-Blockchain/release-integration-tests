@@ -6,7 +6,7 @@ async function main() {
   // find all files matching the glob
   const allFiles = glob(cwd, [`${__dirname}/sol/ABI/*.json`]);
 
-  const result = await runTypeChain({
+  await runTypeChain({
     cwd,
     filesToProcess: allFiles,
     allFiles,

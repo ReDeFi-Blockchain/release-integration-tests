@@ -1,8 +1,9 @@
+/* eslint-disable */
 import { readFile } from "fs/promises";
 import { ethers } from "ethers";
-import { config } from "./config/index.js";
+import { config } from "../config/index.js";
 import { evmToAddress } from "@polkadot/util-crypto";
-import * as abigen from "./ABIGEN/index.js";
+import * as abigen from "../ABIGEN/index.js";
 import { connectApi, fromSeed, signTransaction } from "./utils.js";
 
 export const deployContract = async (): Promise<void> => {
@@ -22,9 +23,9 @@ export const deployContract = async (): Promise<void> => {
     alice,
     polka.tx.balances.transferKeepAlive(
       evmToAddress(wallet.address),
-      3000n * oneToken
+      3000n * oneToken,
     ),
-    "api.tx.balances.transfer"
+    "api.tx.balances.transfer",
   );
 
   const erc20Binary = await readFile("sol/ETH20/bin/ERC20Contract.bin");
@@ -33,7 +34,7 @@ export const deployContract = async (): Promise<void> => {
   const factory = new ethers.ContractFactory(
     JSON.parse(erc20Abi.toString()),
     "0x" + erc20Binary.toString(),
-    wallet
+    wallet,
   );
   const contract = await factory.deploy(wallet.address);
   await contract.deployTransaction.wait();
@@ -44,13 +45,13 @@ export const deployContract = async (): Promise<void> => {
   finalizedBlock = await provider.getBlock("finalized");
   const lastBlock = await provider.getBlockNumber();
   console.log(
-    `finalized block after contract deployment: ${finalizedBlock.number}`
+    `finalized block after contract deployment: ${finalizedBlock.number}`,
   );
   console.log(`last block: ${lastBlock}`);
   console.log(`transaction hash: \n ${contract.deployTransaction.hash}`);
   const tr = await provider.getTransaction(contract.deployTransaction.hash);
   console.log(
-    `tr confirmations : ${tr.confirmations}\ntr block: ${tr.blockNumber}`
+    `tr confirmations : ${tr.confirmations}\ntr block: ${tr.blockNumber}`,
   );
   console.log("\n ***Contract calls***\n");
 
@@ -60,16 +61,16 @@ export const deployContract = async (): Promise<void> => {
   const mintReceipt = await mintTx.wait();
   const transferToWalletEventFilter = typizedErc20Contract.filters.Transfer(
     null,
-    wallet.address
+    wallet.address,
   );
   const events = await typizedErc20Contract.queryFilter(
-    transferToWalletEventFilter
+    transferToWalletEventFilter,
   );
 
   console.log(events);
   console.log(
     `Mint to ${wallet.address}:
-    tx hash: ${mintTx.hash} || confirmations: ${mintReceipt.confirmations} || block number: ${mintReceipt.blockNumber}`
+    tx hash: ${mintTx.hash} || confirmations: ${mintReceipt.confirmations} || block number: ${mintReceipt.blockNumber}`,
   );
 
   const balanceAfterMint = (
@@ -78,14 +79,14 @@ export const deployContract = async (): Promise<void> => {
 
   console.log(
     `Balance for ${wallet.address}:  ${balanceAfterMint}.
-    Is expected value: ${balanceAfterMint == oneToken}`
+    Is expected value: ${balanceAfterMint == oneToken}`,
   );
 
   const halfToken = oneToken / 2n;
   const transferTx = await typizedErc20Contract.transfer(
     ethRecevier.address,
     halfToken,
-    { from: wallet.address }
+    { from: wallet.address },
   );
 
   const transferReceipt = await transferTx.wait();
@@ -108,7 +109,7 @@ export const deployContract = async (): Promise<void> => {
     Is expected values: ${
       walletBalanceAftertransfer == halfToken &&
       receiverBalanceAfterTransfer == halfToken
-    }`
+    }`,
   );
   await polka.disconnect();
 };

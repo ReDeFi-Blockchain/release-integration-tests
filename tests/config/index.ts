@@ -1,5 +1,6 @@
-import globalConfig  from './global.js';
-// @ts-ignore
-import localConfig from './local.js';
+import globalConfig from "./global.js";
+import localConfig from "./local.js";
 
-export const config = localConfig ? { ...globalConfig, ...localConfig } : { ...globalConfig }
+export const config = localConfig
+  ? { ...globalConfig, ...localConfig }
+  : { ...globalConfig };
