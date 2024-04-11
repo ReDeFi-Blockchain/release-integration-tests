@@ -1,12 +1,12 @@
-import { readFileSync } from "fs";
-import { ethers } from "ethers";
-import { config } from "./config/index.js";
-import { evmToAddress } from "@polkadot/util-crypto";
-import * as abigen from "./ABIGEN/index.js";
-import { connectApi, fromSeed, signTransaction } from "./utils/utils.js";
-import { IKeyringPair } from "@polkadot/types/types";
 import { ApiPromise } from "@polkadot/api";
-import { expect } from "chai";
+import { IKeyringPair } from "@polkadot/types/types";
+import { evmToAddress } from "@polkadot/util-crypto";
+import { ethers } from "ethers";
+import { readFileSync } from "fs";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import * as abigen from "./ABIGEN/index.js";
+import { config } from "./config";
+import { connectApi, fromSeed, signTransaction } from "./utils/utils";
 
 describe("Redefi EVM Tests", () => {
   let alice: IKeyringPair;
@@ -22,7 +22,7 @@ describe("Redefi EVM Tests", () => {
   const oneToken = 10n ** 18n;
   const halfToken = oneToken / 2n;
 
-  before(async () => {
+  beforeAll(async () => {
     expect(config.wsEndpoint).to.be.not.undefined;
     provider = new ethers.providers.WebSocketProvider(config.wsEndpoint);
     wallet = ethers.Wallet.createRandom().connect(provider);
@@ -46,13 +46,13 @@ describe("Redefi EVM Tests", () => {
     );
   });
 
-  after(async () => {
+  afterAll(async () => {
     await polka.disconnect();
     await provider.destroy();
   });
 
   describe("ERC20", () => {
-    it("Should deploy contract", async () => {
+    test("Should deploy contract", async () => {
       contract = (await factory.deploy(wallet.address)) as abigen.ERC20Contract;
       await contract.deployTransaction.wait();
       const code = await provider.getCode(contract.address);
@@ -60,7 +60,7 @@ describe("Redefi EVM Tests", () => {
       expect(code, "the contract code is emtpy").to.be.not.null;
     });
 
-    it("Calls & events", async () => {
+    test("Calls & events", async () => {
       expect(await typizedErc20Contract.decimals()).to.be.equal(18);
       const mintTx = await typizedErc20Contract.mint(wallet.address, oneToken);
       await mintTx.wait();

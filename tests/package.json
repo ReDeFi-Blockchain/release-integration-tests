@@ -6,16 +6,15 @@
   "license": "Apache 2.0",
   "type": "module",
   "scripts": {
-    "test": "mocha --timeout 9999999 --loader=ts-node/esm.mjs --trace-uncaught tests.ts",
+    "test": "vitest run",
     "codestyle": "prettier . --write",
     "lint": "eslint . --fix"
   },
   "dependencies": {
     "@openzeppelin/contracts": "5.0.1",
     "@typechain/ethers-v5": "11.1.2",
-    "chai": "5.0.3",
+    "dotenv": "^16.4.5",
     "ethers": "5.7.0",
-    "mocha": "^10.3.0",
     "typechain": "8.3.2",
     "typescript": "5.3.3"
   },
@@ -26,14 +25,13 @@
     "@polkadot/util": "9.3.1",
     "@polkadot/util-crypto": "9.3.1",
     "@polkadot/wasm-crypto": "6.1.1",
-    "@types/chai": "^4.3.11",
-    "@types/mocha": "^10.0.6",
     "@typescript-eslint/eslint-plugin": "7.6.0",
     "@typescript-eslint/parser": "7.6.0",
     "eslint": "8.56.0",
     "eslint-config-prettier": "9.1.0",
     "prettier": "3.2.5",
     "solc": "0.8.20",
-    "ts-node": "10.9.2"
+    "ts-node": "10.9.2",
+    "vitest": "^1.4.0"
   }
 }

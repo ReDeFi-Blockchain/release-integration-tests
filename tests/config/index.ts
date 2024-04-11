@@ -1,5 +1,5 @@
-import globalConfig from "./global.js";
-import localConfig from "./local.js";
+import globalConfig from "./global";
+import localConfig from "./local";
 
 export const config = localConfig
   ? { ...globalConfig, ...localConfig }
