@@ -1,29 +1,21 @@
-import { ApiPromise } from "@polkadot/api";
-import { ERC20Contract, ERC20Contract__factory } from "ABIGEN";
-import { config } from "config";
-import ethers from "ethers";
-import { ADDRESS } from "utils/constants";
-import { connectApi } from "utils/utils";
+import EtherHelper from "../utils/ether";
+import SubHelper from "../utils/polka";
 
-type BaseFixtue = {
-  polka: ApiPromise;
-  etherProvider: ethers.providers.WebSocketProvider;
-  nativeErc20: ERC20Contract;
+type BaseFixture = {
+  sub: SubHelper;
+  eth: EtherHelper;
 };
 
 let initialized: boolean;
-let polka: ApiPromise;
-let etherProvider: ethers.providers.WebSocketProvider;
-let nativeErc20: ERC20Contract;
+let sub: SubHelper;
+let eth: EtherHelper;
 
-export const loadFixture = async (): Promise<BaseFixtue> => {
-  if (initialized) return { polka, etherProvider, nativeErc20 };
+export const loadFixture = async (): Promise<BaseFixture> => {
+  if (initialized) return { sub, eth };
 
-  polka = await connectApi(config.wsEndpoint);
-  etherProvider = new ethers.providers.WebSocketProvider(config.wsEndpoint);
-  nativeErc20 = ERC20Contract__factory.connect(
-    ADDRESS.NATIVE_ERC20,
-    etherProvider,
-  );
-  return { polka, etherProvider, nativeErc20 };
+  sub = await SubHelper.init();
+  eth = new EtherHelper();
+
+  initialized = true;
+  return { sub, eth };
 };

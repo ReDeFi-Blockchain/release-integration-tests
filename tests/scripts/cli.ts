@@ -1,4 +1,4 @@
-import { deployContract } from "./deploy-contract.js";
+import { deployContract } from "./deploy-contract";
 
 const args = process.argv.slice(2);
 

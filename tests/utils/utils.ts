@@ -1,80 +1,27 @@
-/* eslint-disable */
-import { ApiPromise, WsProvider, Keyring } from "@polkadot/api";
-import { IKeyringPair } from "@polkadot/types/types";
+import { BigNumber } from "ethers";
 
-export const transactionStatus = {
-  NOT_READY: "NotReady",
-  FAIL: "Fail",
-  SUCCESS: "Success",
-};
-
-export const getTransactionStatus = ({ events, status }): string => {
-  if (status.isReady) {
-    return transactionStatus.NOT_READY;
-  }
-  if (status.isBroadcast) {
-    return transactionStatus.NOT_READY;
-  }
-  if (status.isInBlock || status.isFinalized) {
-    const errors = events.filter(
-      (e) => e.event.data.method === "ExtrinsicFailed",
-    );
-    if (errors.length > 0) {
-      return transactionStatus.FAIL;
-    }
-    if (
-      events.filter((e) => e.event.data.method === "ExtrinsicSuccess").length >
-      0
-    ) {
-      return transactionStatus.SUCCESS;
+const floatPowerTenToBigNumber = (float: number, power: number): BigNumber => {
+  let floatString = String(float);
+  if (floatString.indexOf(".") < 0)
+    return BigNumber.from(floatString + "0".repeat(power));
+  for (let i = 0; i < power; i++) {
+    const dotIndex = floatString.indexOf(".");
+    if (dotIndex < 0) {
+      floatString += "0";
+    } else if (dotIndex === floatString.length - 2) {
+      floatString = floatString.replace(".", "");
+    } else {
+      floatString =
+        floatString.slice(0, dotIndex) +
+        floatString.charAt(dotIndex + 1) +
+        "." +
+        floatString.slice(dotIndex + 2, floatString.length);
     }
   }
 
-  return status.FAIL;
+  return BigNumber.from(floatString);
 };
 
-export const signTransaction = (
-  sender: IKeyringPair,
-  transaction: any,
-  label = "transaction",
-) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const unsub = await transaction.signAndSend(sender, (result) => {
-        const status = getTransactionStatus(result);
-
-        if (status === transactionStatus.SUCCESS) {
-          console.log(`${label} successful`);
-          resolve({ result, status });
-          unsub();
-        } else if (status === transactionStatus.FAIL) {
-          console.error(
-            `Something went wrong with ${label}. Status: ${status}`,
-          );
-          console.error(result.toHuman());
-          reject({ result, status });
-          unsub();
-        }
-      });
-    } catch (e) {
-      console.error(e);
-      reject(e);
-    }
-  });
-};
-
-export const connectApi = async (wsEndpoint: string): Promise<ApiPromise> => {
-  const api = new ApiPromise({
-    provider: new WsProvider(wsEndpoint),
-  });
-
-  await api.isReadyOrError;
-
-  return api;
-};
-
-export const fromSeed = (seed: string, ss58Format = 0) => {
-  const keyring = new Keyring({ type: "sr25519", ss58Format });
-
-  return keyring.addFromUri(seed);
+export const BUX = (float: number) => {
+  return floatPowerTenToBigNumber(float, 18);
 };

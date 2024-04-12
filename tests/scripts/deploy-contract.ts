@@ -1,10 +1,10 @@
 /* eslint-disable */
 import { readFile } from "fs/promises";
 import { ethers } from "ethers";
-import { config } from "../config/index.js";
 import { evmToAddress } from "@polkadot/util-crypto";
-import * as abigen from "../ABIGEN/index.js";
-import { connectApi, fromSeed, signTransaction } from "./utils.js";
+import * as abigen from "../ABIGEN";
+import SubHelper from "../utils/polka";
+import config from "../config";
 
 export const deployContract = async (): Promise<void> => {
   const provider = new ethers.providers.WebSocketProvider(config.wsEndpoint);
@@ -12,16 +12,15 @@ export const deployContract = async (): Promise<void> => {
   const ethRecevier = ethers.Wallet.createRandom().connect(provider);
   let finalizedBlock = await provider.getBlock("finalized");
   console.log(`finalized block: ${finalizedBlock.number}`);
-  const polka = await connectApi(config.wsEndpoint);
-  const alice = fromSeed(config.aliceSeed);
+  const polka = await SubHelper.init(config.wsEndpoint);
 
-  console.log(alice.address);
+  console.log(polka.keyrings.alice.address);
   console.log(wallet.address);
 
   const oneToken = 10n ** 18n;
-  await signTransaction(
-    alice,
-    polka.tx.balances.transferKeepAlive(
+  await polka.utils.signAndSend(
+    polka.keyrings.alice,
+    polka.api.tx.balances.transferKeepAlive(
       evmToAddress(wallet.address),
       3000n * oneToken,
     ),
@@ -111,5 +110,5 @@ export const deployContract = async (): Promise<void> => {
       receiverBalanceAfterTransfer == halfToken
     }`,
   );
-  await polka.disconnect();
+  await polka.api.disconnect();
 };

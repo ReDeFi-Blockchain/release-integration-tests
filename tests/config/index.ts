@@ -1,6 +1,14 @@
-import globalConfig from "./global";
-import localConfig from "./local";
+import { env } from "./env";
 
-export const config = localConfig
-  ? { ...globalConfig, ...localConfig }
-  : { ...globalConfig };
+const getConfig = () => {
+  return {
+    wsEndpoint: env.REDEFI_RELAY_URL,
+    rpcEndpoint: env.REDEFI_RELAY_HTTP_URL,
+    appHost: env.REDEFI_RELAY_HTTP_URL,
+    aliceSeed: "//Alice",
+    bobSeed: "//Bob",
+    charlieSeed: "//Charlie",
+  };
+};
+
+export default getConfig();
