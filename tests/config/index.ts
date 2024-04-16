@@ -8,6 +8,7 @@ const getConfig = () => {
     aliceSeed: "//Alice",
     bobSeed: "//Bob",
     charlieSeed: "//Charlie",
+    ethSeed: "test test test test test test test test test test test junk",
   };
 };
 

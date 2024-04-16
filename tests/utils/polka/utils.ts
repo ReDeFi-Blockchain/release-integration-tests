@@ -3,6 +3,7 @@ import { SubmittableExtrinsic } from "@polkadot/api/types/submittable";
 import { EventRecord, ExtrinsicStatus } from "@polkadot/types/interfaces";
 import { IKeyringPair, ISubmittableResult } from "@polkadot/types/types";
 import { SubBase } from "./base";
+import { SignerOptions } from "@polkadot/api/types";
 
 export const transactionStatus = {
   NOT_READY: "NotReady",
@@ -21,31 +22,31 @@ export class SubUtils extends SubBase {
   signAndSend(
     sender: IKeyringPair,
     transaction: SubmittableExtrinsic<"promise">,
-    label = "transaction",
+    options: Partial<SignerOptions> = null,
   ): Promise<{ result: ISubmittableResult; status: TransactionStatus }> {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       try {
-        const unsub = await transaction.signAndSend(sender, (result) => {
-          const txStatus = this.getTransactionStatus(
-            result as unknown as {
-              events: EventRecord[];
-              status: ExtrinsicStatus;
-            },
-          );
-          if (txStatus === transactionStatus.SUCCESS) {
-            console.log(`${label} successful`);
-            resolve({ result, status: txStatus });
-            unsub();
-          } else if (txStatus === transactionStatus.FAIL) {
-            console.error(
-              `Something went wrong with ${label}. Status: ${txStatus}`,
+        const unsub = await transaction.signAndSend(
+          sender,
+          options,
+          (result) => {
+            const txStatus = this.getTransactionStatus(
+              result as unknown as {
+                events: EventRecord[];
+                status: ExtrinsicStatus;
+              },
             );
-            console.error(result.toHuman());
-            reject({ result, status: txStatus });
-            unsub();
-          }
-        });
+            if (txStatus === transactionStatus.SUCCESS) {
+              resolve({ result, status: txStatus });
+              unsub();
+            } else if (txStatus === transactionStatus.FAIL) {
+              console.error(result.toHuman());
+              reject({ result, status: txStatus });
+              unsub();
+            }
+          },
+        );
       } catch (e) {
         console.error(e);
         reject(e);

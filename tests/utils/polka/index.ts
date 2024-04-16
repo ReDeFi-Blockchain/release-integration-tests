@@ -1,6 +1,6 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { IKeyringPair } from "@polkadot/types/types";
-import { SubBalance } from "./balance";
+import { SubAccount } from "./account";
 import { SubSystem } from "./system";
 import { SubUtils } from "./utils";
 import config from "../../config";
@@ -8,7 +8,7 @@ import config from "../../config";
 export default class SubHelper {
   readonly api: ApiPromise;
   readonly utils: SubUtils;
-  readonly balance: SubBalance;
+  readonly account: SubAccount;
   readonly system: SubSystem;
   readonly keyrings: {
     alice: IKeyringPair;
@@ -17,7 +17,7 @@ export default class SubHelper {
   private constructor(api: ApiPromise) {
     this.api = api;
     this.utils = new SubUtils(api);
-    this.balance = new SubBalance(api, this.utils);
+    this.account = new SubAccount(api, this.utils);
     this.system = new SubSystem(api);
     this.keyrings = {
       alice: this.utils.fromSeed("//Alice"),
