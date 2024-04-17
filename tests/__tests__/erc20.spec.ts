@@ -12,7 +12,7 @@ describe("Redefi EVM Tests", () => {
   let eth: EtherHelper;
 
   beforeAll(async () => {
-    const helpers = await loadFixture(import.meta.filename);
+    const helpers = await loadFixture(__filename);
     eth = helpers.eth;
     wallet = helpers.eth.donor;
     ethReceiver = await eth.accounts.getRandomWallet();
