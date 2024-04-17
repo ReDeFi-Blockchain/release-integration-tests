@@ -4,7 +4,7 @@ import { beforeAll, describe, it } from "vitest";
 import { loadFixture } from "../fixtures";
 import EtherHelper from "../utils/ether";
 import SubHelper from "../utils/polka";
-import { BAX } from "../utils/utils";
+import { BAX } from "../utils/currency";
 
 let sub: SubHelper;
 let eth: EtherHelper;
@@ -35,7 +35,7 @@ describe("Native token as ERC-20", () => {
 
   describe("should return balanceOf", () => {
     it("for non-existent account", async () => {
-      const newEthAccount = await eth.getRandomWallet();
+      const newEthAccount = await eth.accounts.getRandomWallet();
       const balanceOfEmpty = await eth.nativeErc20.balanceOf(
         newEthAccount.address,
       );
@@ -44,7 +44,7 @@ describe("Native token as ERC-20", () => {
 
     it("for account with balance", async () => {
       const BALANCE = BAX(0.5890002);
-      const ethAccount = await eth.getRandomWallet(BALANCE);
+      const ethAccount = await eth.accounts.getRandomWallet(BALANCE);
 
       const balance = await eth.nativeErc20.balanceOf(ethAccount.address);
       expect(balance).to.deep.eq(BALANCE);
@@ -53,8 +53,8 @@ describe("Native token as ERC-20", () => {
 
   it("can be sent by transfer", async () => {
     const AMOUNT = BAX(14.7888);
-    const sender = await eth.getRandomWallet(BAX(20));
-    const receiver = await eth.getRandomWallet();
+    const sender = await eth.accounts.getRandomWallet(BAX(20));
+    const receiver = await eth.accounts.getRandomWallet();
 
     // Act
     const transferTx = await eth.nativeErc20
@@ -73,8 +73,8 @@ describe("Native token as ERC-20", () => {
 
   describe("allowance", () => {
     it("zero by default", async () => {
-      const randomAccount1 = await eth.getRandomWallet();
-      const randomAccount2 = await eth.getRandomWallet();
+      const randomAccount1 = await eth.accounts.getRandomWallet();
+      const randomAccount2 = await eth.accounts.getRandomWallet();
 
       const allowance = await eth.nativeErc20.allowance(
         randomAccount1.address,
@@ -86,8 +86,8 @@ describe("Native token as ERC-20", () => {
 
     it("can be approved for transferFrom", async () => {
       const APPROVED = BAX(0.8);
-      const approver = await eth.getRandomWallet(BAX(1.5));
-      const spender = await eth.getRandomWallet(BAX(0.3));
+      const approver = await eth.accounts.getRandomWallet(BAX(1.5));
+      const spender = await eth.accounts.getRandomWallet(BAX(0.3));
 
       const approveTx = await eth.nativeErc20
         .connect(approver)
@@ -110,8 +110,8 @@ describe("Native token as ERC-20", () => {
       const APPROVED_VALUE = BAX(0.8);
       const TRANSFER_FROM_VALUE = BAX(0.6);
 
-      const approver = await eth.getRandomWallet(APPROVER_BALANCE);
-      const spender = await eth.getRandomWallet(SPENDER_BALANCE);
+      const approver = await eth.accounts.getRandomWallet(APPROVER_BALANCE);
+      const spender = await eth.accounts.getRandomWallet(SPENDER_BALANCE);
 
       const approveTx = await eth.nativeErc20
         .connect(approver)

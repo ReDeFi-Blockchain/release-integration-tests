@@ -7,12 +7,13 @@ import config from "../../config";
 
 export default class SubHelper {
   readonly api: ApiPromise;
-  readonly utils: SubUtils;
-  readonly account: SubAccount;
-  readonly system: SubSystem;
   readonly keyrings: {
     alice: IKeyringPair;
   };
+
+  readonly utils: SubUtils;
+  readonly account: SubAccount;
+  readonly system: SubSystem;
 
   private constructor(api: ApiPromise) {
     this.api = api;

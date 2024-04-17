@@ -1,8 +1,9 @@
 import fs from "fs/promises";
 import path from "path";
 import SubHelper from "./utils/polka";
-import { BAX } from "./utils/utils";
+import { BAX } from "./utils/currency";
 import EtherHelper from "./utils/ether";
+import { getFilenameWallet } from "./utils/filename-wallet";
 
 export const setup = async () => {
   console.log("💰 depositing funds into the sponsors' accounts...");
@@ -13,7 +14,7 @@ export const setup = async () => {
 
   const txs = [];
   for (const file of testFiles) {
-    const wallet = eth.getFilenameWallet(file);
+    const wallet = getFilenameWallet(file).connect(eth.provider);
 
     txs.push(
       sub.account.transfer(

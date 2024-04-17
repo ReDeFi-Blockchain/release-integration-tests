@@ -1,45 +1,36 @@
 import { ethers } from "ethers";
-import { readFileSync } from "fs";
 import { beforeAll, describe, expect, test } from "vitest";
-import * as abigen from "../ABIGEN";
 import { loadFixture } from "../fixtures";
 import EtherHelper from "../utils/ether";
-import { BAX } from "../utils/utils";
+import { BAX } from "../utils/currency";
+import { ERC20Contract__factory } from "../ABIGEN";
 
 describe("Redefi EVM Tests", () => {
-  let contract: ethers.Contract;
-  let erc20Contract: abigen.ERC20Contract;
   let ethReceiver: ethers.Wallet;
-  let factory: ethers.ContractFactory;
-  const erc20Binary = readFileSync("sol/ETH20/bin/ERC20Contract.bin");
-  const erc20Abi = readFileSync("sol/ABI/ERC20Contract.abi");
   let wallet: ethers.Wallet;
-
+  let ERC20Factory: ERC20Contract__factory;
   let eth: EtherHelper;
 
   beforeAll(async () => {
     const helpers = await loadFixture(import.meta.filename);
     eth = helpers.eth;
-    wallet = helpers.eth.wallets.donor;
-    ethReceiver = await eth.getRandomWallet();
-
-    factory = new ethers.ContractFactory(
-      erc20Abi.toString(),
-      "0x" + erc20Binary.toString(),
-      eth.wallets.donor,
-    );
+    wallet = helpers.eth.donor;
+    ethReceiver = await eth.accounts.getRandomWallet();
+    ERC20Factory = new ERC20Contract__factory(wallet);
   });
 
   describe("ERC20", () => {
     test("Should deploy contract", async () => {
-      contract = await factory.deploy(wallet.address);
-      await contract.deployTransaction.wait();
-      const code = await eth.provider.getCode(contract.address);
-      erc20Contract = contract as abigen.ERC20Contract;
+      const erc20Contract = await ERC20Factory.deploy(wallet.address);
+      await erc20Contract.deployTransaction.wait();
+      const code = await eth.provider.getCode(erc20Contract.address);
       expect(code, "the contract code is emtpy").to.be.not.null;
     });
 
-    test("Calls & events", async () => {
+    test("Calls and events", async () => {
+      const erc20Contract = await ERC20Factory.deploy(wallet.address);
+      const deployReceipt = await erc20Contract.deployTransaction.wait();
+
       expect(await erc20Contract.decimals()).to.be.equal(18);
       const mintTx = await erc20Contract.mint(wallet.address, BAX(1));
       await mintTx.wait();
@@ -51,7 +42,10 @@ describe("Redefi EVM Tests", () => {
         null,
         wallet.address,
       );
-      const events = await erc20Contract.queryFilter(mintToWalletEventFilter);
+      const events = await erc20Contract.queryFilter(
+        mintToWalletEventFilter,
+        deployReceipt.blockNumber,
+      );
       expect(events.length).to.not.equal(0);
 
       const transferTx = await erc20Contract.transfer(

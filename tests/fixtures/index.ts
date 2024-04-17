@@ -10,7 +10,7 @@ let initialized: boolean;
 let sub: SubHelper;
 let eth: EtherHelper;
 
-export const loadFixture = async (filename?: string): Promise<BaseFixture> => {
+export const loadFixture = async (filename: string): Promise<BaseFixture> => {
   if (initialized) return { sub, eth };
 
   sub = await SubHelper.init();
