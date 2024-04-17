@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { beforeAll, describe, expect, test } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { loadFixture } from "../fixtures";
 import EtherHelper from "../utils/ether";
 import { BAX } from "../utils/currency";
@@ -20,14 +20,14 @@ describe("Redefi EVM Tests", () => {
   });
 
   describe("ERC20", () => {
-    test("Should deploy contract", async () => {
+    it("Should deploy contract", async () => {
       const erc20Contract = await ERC20Factory.deploy(wallet.address);
       await erc20Contract.deployTransaction.wait();
       const code = await eth.provider.getCode(erc20Contract.address);
       expect(code, "the contract code is emtpy").to.be.not.null;
     });
 
-    test("Calls and events", async () => {
+    it("Calls and events", async () => {
       const erc20Contract = await ERC20Factory.deploy(wallet.address);
       const deployReceipt = await erc20Contract.deployTransaction.wait();
 
@@ -48,14 +48,13 @@ describe("Redefi EVM Tests", () => {
       );
       expect(events.length).to.not.equal(0);
 
-      const transferTx = await erc20Contract.transfer(
-        ethReceiver.address,
-        BAX(0.5),
-        { from: wallet.address },
+      const transferTx = await eth.signAndSend(
+        erc20Contract.transfer(ethReceiver.address, BAX(0.5), {
+          from: wallet.address,
+        }),
       );
 
-      const transferReceipt = await transferTx.wait();
-      expect(transferReceipt.confirmations).to.be.not.equal(0);
+      expect(transferTx.receipt.confirmations).to.be.not.equal(0);
 
       const walletBalanceAfterTransfer = await erc20Contract.balanceOf(
         wallet.address,

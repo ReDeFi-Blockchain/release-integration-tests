@@ -30,6 +30,7 @@
     "@typescript-eslint/parser": "7.6.0",
     "eslint": "8.56.0",
     "eslint-config-prettier": "9.1.0",
+    "ethereum-waffle": "^4.0.10",
     "prettier": "3.2.5",
     "solc": "0.8.20",
     "ts-node": "10.9.2",

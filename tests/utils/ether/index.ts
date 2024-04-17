@@ -1,4 +1,4 @@
-import { Wallet, ethers } from "ethers";
+import { ContractTransaction, Wallet, ethers } from "ethers";
 import { ERC20Contract, ERC20Contract__factory } from "../../ABIGEN";
 import config from "../../config";
 import { ADDRESS } from "../constants";
@@ -26,5 +26,12 @@ export default class EtherHelper {
     } else this.donor = filenameOrWallet;
 
     this.accounts = new EthAccount(this.provider, this.donor);
+  }
+
+  async signAndSend(tx: Promise<ContractTransaction>) {
+    const transaction = await tx;
+    const receipt = await transaction.wait();
+    const fee = receipt.gasUsed.mul(receipt.effectiveGasPrice);
+    return { receipt, fee, events: receipt.events };
   }
 }
