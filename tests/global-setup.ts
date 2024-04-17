@@ -1,10 +1,11 @@
 import fs from "fs/promises";
 import path from "path";
 import SubHelper from "./utils/polka";
-import { BUX } from "./utils/utils";
+import { BAX } from "./utils/utils";
 import EtherHelper from "./utils/ether";
 
 export const setup = async () => {
+  console.log("💰 depositing funds into the sponsors' accounts...");
   const testFiles = await readDirRecursive("__tests__");
   const sub = await SubHelper.init();
   const eth = new EtherHelper();
@@ -16,7 +17,7 @@ export const setup = async () => {
 
     txs.push(
       sub.account.transfer(
-        { to: wallet.address, value: BUX(1000) },
+        { to: wallet.address, value: BAX(1000) },
         sub.keyrings.alice,
         { nonce },
       ),

@@ -22,6 +22,6 @@ const floatPowerTenToBigNumber = (float: number, power: number): BigNumber => {
   return BigNumber.from(floatString);
 };
 
-export const BUX = (float: number) => {
+export const BAX = (float: number) => {
   return floatPowerTenToBigNumber(float, 18);
 };

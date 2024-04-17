@@ -4,7 +4,7 @@ import { beforeAll, describe, expect, test } from "vitest";
 import * as abigen from "../ABIGEN";
 import { loadFixture } from "../fixtures";
 import EtherHelper from "../utils/ether";
-import { BUX } from "../utils/utils";
+import { BAX } from "../utils/utils";
 
 describe("Redefi EVM Tests", () => {
   let contract: ethers.Contract;
@@ -41,10 +41,10 @@ describe("Redefi EVM Tests", () => {
 
     test("Calls & events", async () => {
       expect(await erc20Contract.decimals()).to.be.equal(18);
-      const mintTx = await erc20Contract.mint(wallet.address, BUX(1));
+      const mintTx = await erc20Contract.mint(wallet.address, BAX(1));
       await mintTx.wait();
       expect(await erc20Contract.balanceOf(wallet.address)).to.deep.equal(
-        BUX(1),
+        BAX(1),
       );
 
       const mintToWalletEventFilter = erc20Contract.filters.Transfer(
@@ -56,7 +56,7 @@ describe("Redefi EVM Tests", () => {
 
       const transferTx = await erc20Contract.transfer(
         ethReceiver.address,
-        BUX(0.5),
+        BAX(0.5),
         { from: wallet.address },
       );
 
@@ -66,12 +66,12 @@ describe("Redefi EVM Tests", () => {
       const walletBalanceAfterTransfer = await erc20Contract.balanceOf(
         wallet.address,
       );
-      expect(walletBalanceAfterTransfer).to.deep.equal(BUX(0.5));
+      expect(walletBalanceAfterTransfer).to.deep.equal(BAX(0.5));
 
       const receiverBalanceAfterTransfer = await erc20Contract.balanceOf(
         ethReceiver.address,
       );
-      expect(receiverBalanceAfterTransfer).to.deep.equal(BUX(0.5));
+      expect(receiverBalanceAfterTransfer).to.deep.equal(BAX(0.5));
     });
   });
 });
