@@ -1,7 +1,10 @@
 import { BigNumber } from "ethers";
 
-const floatPowerTenToBigNumber = (float: number, power: number): BigNumber => {
-  let floatString = String(float);
+const floatPowerTenToBigNumber = (
+  float: number | string,
+  power: number,
+): BigNumber => {
+  let floatString = float.toString();
   if (floatString.indexOf(".") < 0)
     return BigNumber.from(floatString + "0".repeat(power));
   for (let i = 0; i < power; i++) {
@@ -22,6 +25,6 @@ const floatPowerTenToBigNumber = (float: number, power: number): BigNumber => {
   return BigNumber.from(floatString);
 };
 
-export const BAX = (float: number) => {
+export const BAX = (float: number | string) => {
   return floatPowerTenToBigNumber(float, 18);
 };

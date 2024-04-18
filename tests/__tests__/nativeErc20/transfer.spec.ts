@@ -45,4 +45,22 @@ describe("Native token as ERC-20", () => {
       .to.emit(nativeErc20, "Transfer")
       .withArgs(sender.address, eth.donor.address, BAX(18));
   });
+
+  it("cannot send more than have", async () => {
+    const sender = await eth.accounts.getRandomWallet(BAX(20));
+
+    await expect(
+      nativeErc20
+        .connect(sender)
+        .transfer(eth.donor.address, BAX("20.000000000000000001")),
+    ).to.be.revertedWith(""); // TODO custom error
+  });
+
+  it("cannot send full balance because of fee", async () => {
+    const sender = await eth.accounts.getRandomWallet(BAX(20));
+
+    await expect(
+      nativeErc20.connect(sender).transfer(eth.donor.address, BAX(20)),
+    ).to.be.revertedWith(""); // TODO custom error
+  });
 });
