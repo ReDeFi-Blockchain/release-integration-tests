@@ -1,13 +1,14 @@
-import { beforeAll, describe, it, expect } from "vitest";
-import { loadFixture } from "../../fixtures";
 import EtherHelper from "../../utils/ether";
 import { BAX } from "../../utils/currency";
-import { ERC20Contract } from "../../ABIGEN";
+import { TestERC20 } from "../../typechain-types";
+import { loadFixture } from "../../utils/fixture";
+import { expect } from "chai";
+import { txExpect } from "../../utils/matchers/txEvents";
 
 let eth: EtherHelper;
-let nativeErc20: ERC20Contract;
+let nativeErc20: TestERC20;
 
-beforeAll(async () => {
+before(async () => {
   const helpers = await loadFixture(__filename);
   eth = helpers.eth;
   nativeErc20 = helpers.eth.nativeErc20;
@@ -36,13 +37,13 @@ describe("Native token as ERC-20", () => {
 
     // Assert balances after transferFrom
     const approverBalance = await nativeErc20.balanceOf(approver.address);
-    expect(approverBalance).to.deep.eq(
-      APPROVER_BALANCE.sub(TRANSFER_FROM_VALUE).sub(approveTx.fee),
+    expect(approverBalance).to.be.equal(
+      APPROVER_BALANCE - TRANSFER_FROM_VALUE - approveTx.fee,
     );
 
     const spenderBalance = await nativeErc20.balanceOf(spender.address);
     expect(spenderBalance).to.deep.eq(
-      SPENDER_BALANCE.add(TRANSFER_FROM_VALUE).sub(transferFromTx.fee),
+      SPENDER_BALANCE + TRANSFER_FROM_VALUE - transferFromTx.fee,
     );
 
     // Assert allowance decreased
@@ -50,7 +51,7 @@ describe("Native token as ERC-20", () => {
       approver.address,
       spender.address,
     );
-    expect(allowance).to.deep.eq(APPROVED_VALUE.sub(TRANSFER_FROM_VALUE));
+    expect(allowance).to.deep.eq(APPROVED_VALUE - TRANSFER_FROM_VALUE);
   });
 
   it("transferFrom emits Transfer and Approval event", async () => {
@@ -63,7 +64,7 @@ describe("Native token as ERC-20", () => {
       nativeErc20.connect(approver).approve(spender.address, APPROVED_VALUE),
     );
 
-    await expect(
+    await txExpect(
       nativeErc20
         .connect(spender)
         .transferFrom(approver.address, spender.address, APPROVED_VALUE),
@@ -82,18 +83,12 @@ describe("Native token as ERC-20", () => {
       nativeErc20.connect(approver).approve(spender.address, BAX(8)),
     );
 
-    await eth.signAndSend(
+    // Assert - cannot transfer more than initially approved
+    await txExpect(
       nativeErc20
         .connect(spender)
         .transferFrom(approver.address, spender.address, BAX(9), {}),
-    );
-
-    // Assert - cannot transfer more than initially approved
-    const badTransferFromTx = nativeErc20
-      .connect(spender)
-      .transferFrom(approver.address, spender.address, BAX(9), {});
-
-    await expect(badTransferFromTx).to.be.revertedWith(""); // TODO custom errors check
+    ).revertedWith("ERC20InsufficientAllowance"); // FIXME custom error
 
     // Assert - cannot transfer more than left after transfer
     await eth.signAndSend(
@@ -102,11 +97,10 @@ describe("Native token as ERC-20", () => {
         .transferFrom(approver.address, spender.address, BAX(6)),
     );
 
-    const badTransferFromTx2 = eth.signAndSend(
+    await txExpect(
       nativeErc20
         .connect(spender)
         .transferFrom(approver.address, spender.address, BAX(2.00000001), {}),
-    );
-    await expect(badTransferFromTx2).to.be.revertedWith("");
+    ).revertedWith("ERC20InsufficientAllowance");
   });
 });

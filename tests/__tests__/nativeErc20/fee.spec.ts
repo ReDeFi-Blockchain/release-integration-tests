@@ -1,13 +1,13 @@
-import { beforeAll, describe, expect, it } from "vitest";
-import { ERC20Contract } from "../../ABIGEN";
-import { loadFixture } from "../../fixtures";
 import { BAX } from "../../utils/currency";
 import EtherHelper from "../../utils/ether";
+import { TestERC20 } from "../../typechain-types";
+import { loadFixture } from "../../utils/fixture";
+import { expect } from "chai";
 
 let eth: EtherHelper;
-let nativeErc20: ERC20Contract;
+let nativeErc20: TestERC20;
 
-beforeAll(async () => {
+before(async () => {
   const helpers = await loadFixture(__filename);
   eth = helpers.eth;
   nativeErc20 = helpers.eth.nativeErc20;
@@ -15,27 +15,27 @@ beforeAll(async () => {
 
 describe("Native token as ERC-20 should withdraw reasonable fee", () => {
   it("for transfer", async () => {
-    const REASONABLE_FEE = BAX(0.02).toBigInt();
+    const REASONABLE_FEE = BAX(0.02);
     const user = await eth.accounts.getRandomWallet(BAX(10));
     const transferTx = await eth.signAndSend(
       nativeErc20.connect(user).transfer(eth.donor.address, BAX(5)),
     );
 
-    expect(transferTx.fee.toBigInt()).toBeLessThan(REASONABLE_FEE);
+    expect(transferTx.fee).lessThan(REASONABLE_FEE);
   });
 
   it("for approve", async () => {
-    const REASONABLE_FEE = BAX(0.01).toBigInt();
+    const REASONABLE_FEE = BAX(0.01);
     const user = await eth.accounts.getRandomWallet(BAX(10));
     const approveTx = await eth.signAndSend(
       nativeErc20.connect(user).approve(eth.donor.address, BAX(10)),
     );
 
-    expect(approveTx.fee.toBigInt()).toBeLessThan(REASONABLE_FEE);
+    expect(approveTx.fee).lessThan(REASONABLE_FEE);
   });
 
   it("for transferFrom", async () => {
-    const REASONABLE_FEE = BAX(0.02).toBigInt();
+    const REASONABLE_FEE = BAX(0.02);
     const user = await eth.accounts.getRandomWallet(BAX(10));
 
     await eth.signAndSend(
@@ -48,6 +48,6 @@ describe("Native token as ERC-20 should withdraw reasonable fee", () => {
         .transferFrom(eth.donor.address, user.address, BAX(5)),
     );
 
-    expect(transferTx.fee.toBigInt()).toBeLessThan(REASONABLE_FEE);
+    expect(transferTx.fee).lessThan(REASONABLE_FEE);
   });
 });

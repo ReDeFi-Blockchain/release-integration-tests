@@ -1,16 +1,15 @@
-import { BigNumber } from "ethers";
-import { beforeAll, describe, it, expect } from "vitest";
-import { loadFixture } from "../../fixtures";
 import EtherHelper from "../../utils/ether";
-import SubHelper from "../../utils/polka";
 import { BAX } from "../../utils/currency";
-import { ERC20Contract } from "../../ABIGEN";
+import { TestERC20 } from "../../typechain-types";
+import { loadFixture } from "../../utils/fixture";
+import SubHelper from "../../utils/substrate";
+import { expect } from "chai";
 
 let sub: SubHelper;
 let eth: EtherHelper;
-let nativeErc20: ERC20Contract;
+let nativeErc20: TestERC20;
 
-beforeAll(async () => {
+before(async () => {
   const helpers = await loadFixture(__filename);
   sub = helpers.sub;
   eth = helpers.eth;
@@ -39,7 +38,7 @@ describe("Native token as ERC-20", () => {
     it("for non-existent account", async () => {
       const newEthAccount = await eth.accounts.getRandomWallet();
       const balanceOfEmpty = await nativeErc20.balanceOf(newEthAccount.address);
-      expect(balanceOfEmpty).to.deep.eq(BigNumber.from(0));
+      expect(balanceOfEmpty).to.deep.eq(0);
     });
 
     it("for account with balance", async () => {

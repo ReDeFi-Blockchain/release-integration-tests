@@ -1,17 +1,17 @@
-import { Wallet, ethers } from "ethers";
+import { HDNodeWallet, ethers } from "ethers";
 
 export class EthAccount {
-  protected readonly provider: ethers.providers.WebSocketProvider;
-  protected readonly donor: Wallet;
+  protected readonly provider: ethers.WebSocketProvider;
+  protected readonly donor: HDNodeWallet;
 
-  constructor(provider: ethers.providers.WebSocketProvider, donor: Wallet) {
+  constructor(provider: ethers.WebSocketProvider, donor: HDNodeWallet) {
     this.provider = provider;
     this.donor = donor;
   }
 
   async transfer(
     params: { to: string; value: ethers.BigNumberish },
-    signer: Wallet,
+    signer: HDNodeWallet,
   ) {
     const tx = await signer.sendTransaction({
       to: params.to,
@@ -20,8 +20,8 @@ export class EthAccount {
     return tx.wait();
   }
 
-  async getRandomWallet(balance?: ethers.BigNumberish) {
-    const wallet = ethers.Wallet.createRandom().connect(this.provider);
+  async getRandomWallet(balance?: ethers.BigNumberish, donor = this.donor) {
+    const wallet = ethers.HDNodeWallet.createRandom().connect(this.provider);
     if (balance) {
       await this.transfer({ to: wallet.address, value: balance }, this.donor);
     }

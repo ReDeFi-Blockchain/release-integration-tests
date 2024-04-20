@@ -1,3 +1,4 @@
+import { Mnemonic } from "ethers";
 import { env } from "./env";
 
 const getConfig = () => {
@@ -8,7 +9,9 @@ const getConfig = () => {
     aliceSeed: "//Alice",
     bobSeed: "//Bob",
     charlieSeed: "//Charlie",
-    ethSeed: "test test test test test test test test test test test junk",
+    ethSeed: Mnemonic.fromPhrase(
+      "test test test test test test test test test test test junk",
+    ),
   };
 };
 

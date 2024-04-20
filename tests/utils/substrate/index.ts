@@ -1,15 +1,13 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { IKeyringPair } from "@polkadot/types/types";
+import config from "../config";
+import { SubUtils } from "./utils";
 import { SubAccount } from "./account";
 import { SubSystem } from "./system";
-import { SubUtils } from "./utils";
-import config from "../../config";
 
 export default class SubHelper {
   readonly api: ApiPromise;
-  readonly keyrings: {
-    alice: IKeyringPair;
-  };
+  readonly donor: IKeyringPair;
 
   readonly utils: SubUtils;
   readonly account: SubAccount;
@@ -20,9 +18,7 @@ export default class SubHelper {
     this.utils = new SubUtils(api);
     this.account = new SubAccount(api, this.utils);
     this.system = new SubSystem(api);
-    this.keyrings = {
-      alice: this.utils.fromSeed("//Alice"),
-    };
+    this.donor = this.utils.fromSeed("//Alice");
   }
 
   static async init(wsEndpoint = config.wsEndpoint) {

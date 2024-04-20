@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20FlashMint.sol";
 
-contract ERC20Contract is
+contract TestERC20 is
     ERC20,
     ERC20Burnable,
     ERC20Pausable,

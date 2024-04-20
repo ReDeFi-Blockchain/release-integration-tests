@@ -1,14 +1,13 @@
-import { BigNumber } from "ethers";
-import { beforeAll, describe, it, expect } from "vitest";
-import { loadFixture } from "../../fixtures";
 import EtherHelper from "../../utils/ether";
 import { BAX } from "../../utils/currency";
-import { ERC20Contract } from "../../ABIGEN";
+import { TestERC20 } from "../../typechain-types";
+import { loadFixture } from "../../utils/fixture";
+import { expect } from "chai";
 
 let eth: EtherHelper;
-let nativeErc20: ERC20Contract;
+let nativeErc20: TestERC20;
 
-beforeAll(async () => {
+before(async () => {
   const helpers = await loadFixture(__filename);
   eth = helpers.eth;
   nativeErc20 = helpers.eth.nativeErc20;
@@ -24,7 +23,7 @@ describe("Native token as ERC-20", () => {
       randomAccount2.address,
     );
 
-    expect(allowance).to.deep.eq(BigNumber.from(0));
+    expect(allowance).to.eq(0);
   });
 
   it("can be changed by approve", async () => {

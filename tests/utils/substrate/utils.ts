@@ -19,10 +19,18 @@ export class SubUtils extends SubBase {
     super(api);
   }
 
+  async batch(
+    sender: IKeyringPair,
+    transactions: SubmittableExtrinsic<"promise">[],
+  ) {
+    const tx = this.api.tx.utility.batch(transactions);
+    return this.signAndSend(sender, tx);
+  }
+
   signAndSend(
     sender: IKeyringPair,
     transaction: SubmittableExtrinsic<"promise">,
-    options: Partial<SignerOptions> = null,
+    options: Partial<SignerOptions> = {},
   ): Promise<{ result: ISubmittableResult; status: TransactionStatus }> {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
     return new Promise(async (resolve, reject) => {

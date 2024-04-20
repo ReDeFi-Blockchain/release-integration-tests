@@ -1,22 +1,21 @@
-import { ContractTransaction, Wallet, ethers } from "ethers";
-import { ERC20Contract, ERC20Contract__factory } from "../../ABIGEN";
-import config from "../../config";
+import { ContractTransactionResponse, HDNodeWallet, ethers } from "ethers";
+import { TestERC20, TestERC20__factory } from "../../typechain-types";
 import { ADDRESS } from "../constants";
-import { getFilenameWallet } from "../filename-wallet";
 import { EthAccount } from "./accounts";
+import config from "../config";
+import { getFilenameWallet } from "../filename-wallet";
 
 export default class EtherHelper {
-  readonly provider: ethers.providers.WebSocketProvider;
-  readonly nativeErc20: ERC20Contract;
-  readonly donor: Wallet;
+  readonly provider: ethers.WebSocketProvider;
+  readonly nativeErc20: TestERC20;
+  readonly donor: HDNodeWallet;
   readonly accounts: EthAccount;
 
-  constructor();
-  constructor(wallet: Wallet);
+  constructor(wallet: HDNodeWallet);
   constructor(filename: string);
-  constructor(filenameOrWallet?: Wallet | string) {
-    this.provider = new ethers.providers.WebSocketProvider(config.wsEndpoint);
-    this.nativeErc20 = ERC20Contract__factory.connect(
+  constructor(filenameOrWallet: HDNodeWallet | string) {
+    this.provider = new ethers.WebSocketProvider(config.wsEndpoint);
+    this.nativeErc20 = TestERC20__factory.connect(
       ADDRESS.NATIVE_ERC20,
       this.provider,
     );
@@ -28,10 +27,12 @@ export default class EtherHelper {
     this.accounts = new EthAccount(this.provider, this.donor);
   }
 
-  async signAndSend(tx: Promise<ContractTransaction>) {
+  async signAndSend(tx: Promise<ContractTransactionResponse>) {
     const transaction = await tx;
     const receipt = await transaction.wait();
-    const fee = receipt.gasUsed.mul(receipt.effectiveGasPrice);
-    return { receipt, fee, events: receipt.events };
+    if (!receipt) throw Error("Cannot get receipt");
+    const fee = receipt.gasPrice * receipt.gasUsed;
+
+    return { receipt, fee };
   }
 }

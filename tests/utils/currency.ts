@@ -1,12 +1,10 @@
-import { BigNumber } from "ethers";
-
-const floatPowerTenToBigNumber = (
+const floatPowerTenToBigInt = (
   float: number | string,
   power: number,
-): BigNumber => {
+): bigint => {
   let floatString = float.toString();
   if (floatString.indexOf(".") < 0)
-    return BigNumber.from(floatString + "0".repeat(power));
+    return BigInt(floatString + "0".repeat(power));
   for (let i = 0; i < power; i++) {
     const dotIndex = floatString.indexOf(".");
     if (dotIndex < 0) {
@@ -22,9 +20,9 @@ const floatPowerTenToBigNumber = (
     }
   }
 
-  return BigNumber.from(floatString);
+  return BigInt(floatString);
 };
 
 export const BAX = (float: number | string) => {
-  return floatPowerTenToBigNumber(float, 18);
+  return floatPowerTenToBigInt(float, 18);
 };

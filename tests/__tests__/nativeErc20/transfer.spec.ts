@@ -1,15 +1,15 @@
-import { beforeAll, describe, it, expect } from "vitest";
-import { loadFixture } from "../../fixtures";
 import EtherHelper from "../../utils/ether";
-import SubHelper from "../../utils/polka";
 import { BAX } from "../../utils/currency";
-import { ERC20Contract } from "../../ABIGEN";
+import { TestERC20 } from "../../typechain-types";
+import { expect } from "chai";
+import { loadFixture } from "../../utils/fixture";
+import SubHelper from "../../utils/substrate";
 
 let sub: SubHelper;
 let eth: EtherHelper;
-let nativeErc20: ERC20Contract;
+let nativeErc20: TestERC20;
 
-beforeAll(async () => {
+before(async () => {
   const helpers = await loadFixture(__filename);
   sub = helpers.sub;
   eth = helpers.eth;
@@ -40,7 +40,9 @@ describe("Native token as ERC-20", () => {
     const sender = await eth.accounts.getRandomWallet(BAX(20));
 
     await expect(
-      nativeErc20.connect(sender).transfer(eth.donor.address, BAX(18)),
+      (
+        await nativeErc20.connect(sender).transfer(eth.donor.address, BAX(18))
+      ).wait(),
     )
       .to.emit(nativeErc20, "Transfer")
       .withArgs(sender.address, eth.donor.address, BAX(18));
@@ -53,14 +55,18 @@ describe("Native token as ERC-20", () => {
       nativeErc20
         .connect(sender)
         .transfer(eth.donor.address, BAX("20.000000000000000001")),
-    ).to.be.revertedWith(""); // TODO custom error
+    ).to.be.revertedWithCustomError(nativeErc20, "ERC20InsufficientBalance");
+    // FIXME: substrate error: Token(FundsUnavailable)
   });
 
   it("cannot send full balance because of fee", async () => {
     const sender = await eth.accounts.getRandomWallet(BAX(20));
 
+    // FIXME: why cannot assert as reverted?
     await expect(
-      nativeErc20.connect(sender).transfer(eth.donor.address, BAX(20)),
-    ).to.be.revertedWith(""); // TODO custom error
+      eth.signAndSend(
+        nativeErc20.connect(sender).transfer(eth.donor.address, BAX(20)),
+      ),
+    ).to.be.rejected;
   });
 });

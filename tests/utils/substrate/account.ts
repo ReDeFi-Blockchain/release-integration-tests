@@ -1,7 +1,6 @@
 import { ApiPromise } from "@polkadot/api";
 import { IKeyringPair } from "@polkadot/types/types";
 import { evmToAddress } from "@polkadot/util-crypto";
-import { BigNumber } from "ethers";
 import { SubBase } from "./base";
 import { SubUtils } from "./utils";
 import { SignerOptions } from "@polkadot/api/types";
@@ -19,13 +18,13 @@ export class SubAccount extends SubBase {
     const balance = await this.api.query.system.account(address);
     const { data } = balance.toJSON() as { data: { free: string } };
 
-    return BigNumber.from(data.free);
+    return BigInt(data.free);
   }
 
   async transfer(
-    params: { to: string; value: BigNumber },
+    params: { to: string; value: bigint },
     signer: IKeyringPair,
-    options: Partial<SignerOptions> = null,
+    options?: Partial<SignerOptions>,
   ) {
     if (params.to.startsWith("0x")) params.to = evmToAddress(params.to);
 
@@ -36,6 +35,20 @@ export class SubAccount extends SubBase {
     );
 
     return result;
+  }
+
+  async batchTransfer(
+    params: { to: string; value: bigint }[],
+    signer: IKeyringPair,
+  ) {
+    const txs = [];
+
+    for (const p of params) {
+      if (p.to.startsWith("0x")) p.to = evmToAddress(p.to);
+      txs.push(this.api.tx.balances.transferKeepAlive(p.to, p.value));
+    }
+
+    await this.utils.batch(signer, txs);
   }
 
   async getNonce(address: string): Promise<number> {
