@@ -16,7 +16,7 @@ describe("Redefi EVM Tests", () => {
     const helpers = await loadFixture(__filename);
     eth = helpers.eth;
     wallet = helpers.eth.donor;
-    ethReceiver = await eth.accounts.getRandomWallet();
+    ethReceiver = await eth.accounts.generate();
     ERC20Factory = await ethers.getContractFactory("TestERC20");
   });
 

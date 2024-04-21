@@ -25,7 +25,6 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 100000,
-    parallel: true,
   },
 };
 

@@ -5,9 +5,9 @@
   "author": "Unique Network",
   "license": "Apache-2.0",
   "scripts": {
-    "test": "yarn test:setup && npx hardhat test",
+    "test": "yarn test:setup && npx hardhat test --parallel",
     "test:setup": "hardhat run ./global-setup.ts",
-    "test:hh": "yarn hardhat test --no-compile --network relay",
+    "test:hh": "yarn test:setup && npx hardhat test --no-compile --network relay",
     "compile": "npx hardhat compile",
     "codestyle": "prettier . --write",
     "lint": "eslint . --fix"

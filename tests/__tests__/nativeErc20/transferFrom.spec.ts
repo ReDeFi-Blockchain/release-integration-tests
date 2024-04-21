@@ -22,8 +22,8 @@ describe("Native token as ERC-20", () => {
     const APPROVED_VALUE = BAX(0.8);
     const TRANSFER_FROM_VALUE = BAX(0.6);
 
-    const approver = await eth.accounts.getRandomWallet(APPROVER_BALANCE);
-    const spender = await eth.accounts.getRandomWallet(SPENDER_BALANCE);
+    const approver = await eth.accounts.generate(APPROVER_BALANCE);
+    const spender = await eth.accounts.generate(SPENDER_BALANCE);
 
     const approveTx = await eth.signAndSend(
       nativeErc20.connect(approver).approve(spender.address, APPROVED_VALUE),
@@ -57,8 +57,8 @@ describe("Native token as ERC-20", () => {
   it("transferFrom emits Transfer and Approval event", async () => {
     const APPROVED_VALUE = BAX(6);
 
-    const approver = await eth.accounts.getRandomWallet(BAX(10));
-    const spender = await eth.accounts.getRandomWallet(BAX(10));
+    const approver = await eth.accounts.generate(BAX(10));
+    const spender = await eth.accounts.generate(BAX(10));
 
     await eth.signAndSend(
       nativeErc20.connect(approver).approve(spender.address, APPROVED_VALUE),
@@ -76,8 +76,8 @@ describe("Native token as ERC-20", () => {
   });
 
   it("cannot transferFrom more than approved", async () => {
-    const approver = await eth.accounts.getRandomWallet(BAX(10));
-    const spender = await eth.accounts.getRandomWallet(BAX(1));
+    const approver = await eth.accounts.generate(BAX(10));
+    const spender = await eth.accounts.generate(BAX(1));
 
     await eth.signAndSend(
       nativeErc20.connect(approver).approve(spender.address, BAX(8)),

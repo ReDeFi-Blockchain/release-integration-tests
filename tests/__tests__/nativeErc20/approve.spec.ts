@@ -15,8 +15,8 @@ before(async () => {
 
 describe("Native token as ERC-20", () => {
   it("allowance is zero by default", async () => {
-    const randomAccount1 = await eth.accounts.getRandomWallet();
-    const randomAccount2 = await eth.accounts.getRandomWallet();
+    const randomAccount1 = await eth.accounts.generate();
+    const randomAccount2 = await eth.accounts.generate();
 
     const allowance = await nativeErc20.allowance(
       randomAccount1.address,
@@ -28,8 +28,8 @@ describe("Native token as ERC-20", () => {
 
   it("can be changed by approve", async () => {
     const APPROVED = BAX(0.8);
-    const approver = await eth.accounts.getRandomWallet(BAX(1.5));
-    const spender = await eth.accounts.getRandomWallet(BAX(0.3));
+    const approver = await eth.accounts.generate(BAX(1.5));
+    const spender = await eth.accounts.generate(BAX(0.3));
 
     await eth.signAndSend(
       nativeErc20.connect(approver).approve(spender.address, APPROVED),

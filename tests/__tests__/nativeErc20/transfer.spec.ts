@@ -19,8 +19,8 @@ before(async () => {
 describe("Native token as ERC-20", () => {
   it("can be sent by transfer", async () => {
     const AMOUNT = BAX(14.7888);
-    const sender = await eth.accounts.getRandomWallet(BAX(20));
-    const receiver = await eth.accounts.getRandomWallet();
+    const sender = await eth.accounts.generate(BAX(20));
+    const receiver = await eth.accounts.generate();
 
     // Act
     await eth.signAndSend(
@@ -37,7 +37,7 @@ describe("Native token as ERC-20", () => {
   });
 
   it("transfer emits Transfer event", async () => {
-    const sender = await eth.accounts.getRandomWallet(BAX(20));
+    const sender = await eth.accounts.generate(BAX(20));
 
     await expect(
       (
@@ -49,7 +49,7 @@ describe("Native token as ERC-20", () => {
   });
 
   it("cannot send more than have", async () => {
-    const sender = await eth.accounts.getRandomWallet(BAX(20));
+    const sender = await eth.accounts.generate(BAX(20));
 
     await expect(
       nativeErc20
@@ -60,7 +60,7 @@ describe("Native token as ERC-20", () => {
   });
 
   it("cannot send full balance because of fee", async () => {
-    const sender = await eth.accounts.getRandomWallet(BAX(20));
+    const sender = await eth.accounts.generate(BAX(20));
 
     // FIXME: why cannot assert as reverted?
     await expect(

@@ -16,7 +16,7 @@ before(async () => {
 describe("Native token as ERC-20 should withdraw reasonable fee", () => {
   it("for transfer", async () => {
     const REASONABLE_FEE = BAX(0.02);
-    const user = await eth.accounts.getRandomWallet(BAX(10));
+    const user = await eth.accounts.generate(BAX(10));
     const transferTx = await eth.signAndSend(
       nativeErc20.connect(user).transfer(eth.donor.address, BAX(5)),
     );
@@ -26,7 +26,7 @@ describe("Native token as ERC-20 should withdraw reasonable fee", () => {
 
   it("for approve", async () => {
     const REASONABLE_FEE = BAX(0.01);
-    const user = await eth.accounts.getRandomWallet(BAX(10));
+    const user = await eth.accounts.generate(BAX(10));
     const approveTx = await eth.signAndSend(
       nativeErc20.connect(user).approve(eth.donor.address, BAX(10)),
     );
@@ -36,7 +36,7 @@ describe("Native token as ERC-20 should withdraw reasonable fee", () => {
 
   it("for transferFrom", async () => {
     const REASONABLE_FEE = BAX(0.02);
-    const user = await eth.accounts.getRandomWallet(BAX(10));
+    const user = await eth.accounts.generate(BAX(10));
 
     await eth.signAndSend(
       nativeErc20.connect(eth.donor).approve(user.address, BAX(10)),

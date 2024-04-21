@@ -36,14 +36,14 @@ describe("Native token as ERC-20", () => {
 
   describe("should return balanceOf", () => {
     it("for non-existent account", async () => {
-      const newEthAccount = await eth.accounts.getRandomWallet();
+      const newEthAccount = await eth.accounts.generate();
       const balanceOfEmpty = await nativeErc20.balanceOf(newEthAccount.address);
       expect(balanceOfEmpty).to.deep.eq(0);
     });
 
     it("for account with balance", async () => {
       const BALANCE = BAX(0.5890002);
-      const ethAccount = await eth.accounts.getRandomWallet(BALANCE);
+      const ethAccount = await eth.accounts.generate(BALANCE);
 
       const balance = await nativeErc20.balanceOf(ethAccount.address);
       expect(balance).to.deep.eq(BALANCE);
