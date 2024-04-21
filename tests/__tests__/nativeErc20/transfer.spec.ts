@@ -4,6 +4,8 @@ import { TestERC20 } from "../../typechain-types";
 import { expect } from "chai";
 import { loadFixture } from "../../utils/fixture";
 import SubHelper from "../../utils/substrate";
+import { ethers } from "hardhat";
+import { ADDRESS } from "../../utils/constants";
 
 let sub: SubHelper;
 let eth: EtherHelper;
@@ -48,7 +50,7 @@ describe("Native token as ERC-20", () => {
       .withArgs(sender.address, eth.donor.address, BAX(18));
   });
 
-  it("cannot send more than have", async () => {
+  it("cannot transfer more than balance", async () => {
     const sender = await eth.accounts.generate(BAX(20));
 
     await expect(
@@ -57,6 +59,15 @@ describe("Native token as ERC-20", () => {
         .transfer(eth.donor.address, BAX("20.000000000000000001")),
     ).to.be.revertedWithCustomError(nativeErc20, "ERC20InsufficientBalance");
     // FIXME: substrate error: Token(FundsUnavailable)
+  });
+
+  it("cannot transfer to zero address", async () => {
+    const sender = await eth.accounts.generate(BAX(20));
+
+    await expect(
+      nativeErc20.connect(sender).transfer(ethers.ZeroAddress, BAX(1)),
+    ).to.be.revertedWithCustomError(nativeErc20, "ERC20InvalidReceiver");
+    // FIXME, also can send to ERC-20 address itself
   });
 
   it("cannot send full balance because of fee", async () => {
