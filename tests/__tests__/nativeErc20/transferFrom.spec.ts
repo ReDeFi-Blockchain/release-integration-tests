@@ -4,6 +4,7 @@ import { TestERC20 } from "../../typechain-types";
 import { loadFixture } from "../../utils/fixture";
 import { expect } from "chai";
 import { txExpect } from "../../utils/matchers/txEvents";
+import { HDNodeWallet, ethers } from "ethers";
 
 let eth: EtherHelper;
 let nativeErc20: TestERC20;
@@ -167,5 +168,50 @@ describe("Native token as ERC-20", () => {
         .connect(spender)
         .transferFrom(approver.address, spender.address, BAX(2.00000001), {}),
     ).revertedWithCustomError(nativeErc20, "ERC20InsufficientAllowance");
+  });
+
+  describe("when unlimited allowance", async () => {
+    let approver: HDNodeWallet;
+    let spender: HDNodeWallet;
+
+    beforeEach(async () => {
+      [approver, spender] = await eth.accounts.generateMany([BAX(10), BAX(1)]);
+
+      // Approve unlimited
+      await eth.signAndSend(
+        nativeErc20
+          .connect(approver)
+          .approve(spender.address, ethers.MaxUint256),
+      );
+    });
+
+    it("does not decrease the spender allowance", async function () {
+      const allowanceBefore = await nativeErc20.allowance(
+        approver.address,
+        spender.address,
+      );
+
+      expect(allowanceBefore).to.eq(ethers.MaxUint256);
+      await eth.signAndSend(
+        nativeErc20
+          .connect(spender)
+          .transferFrom(approver.address, spender.address, BAX(5)),
+      );
+
+      const allowanceAfter = await nativeErc20.allowance(
+        approver.address,
+        spender.address,
+      );
+      // Allowance does not decreased
+      expect(allowanceAfter).to.eq(ethers.MaxUint256);
+    });
+
+    it("does not emit an approval event", async function () {
+      await txExpect(
+        nativeErc20
+          .connect(spender)
+          .transferFrom(approver.address, spender.address, BAX(5)),
+      ).to.not.emit(this.token, "Approval");
+    });
   });
 });
