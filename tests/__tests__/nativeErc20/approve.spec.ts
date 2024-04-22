@@ -3,6 +3,8 @@ import { BAX } from "../../utils/currency";
 import { TestERC20 } from "../../typechain-types";
 import { loadFixture } from "../../utils/fixture";
 import { expect } from "chai";
+import { HDNodeWallet, ethers } from "ethers";
+import { txExpect } from "../../utils/matchers/txEvents";
 
 let eth: EtherHelper;
 let nativeErc20: TestERC20;
@@ -13,8 +15,8 @@ before(async () => {
   nativeErc20 = helpers.eth.nativeErc20;
 });
 
-describe("Native token as ERC-20", () => {
-  it("allowance is zero by default", async () => {
+describe("Native token as ERC-20 allowance", () => {
+  it("zero for new account", async () => {
     const randomAccount1 = await eth.accounts.generate();
     const randomAccount2 = await eth.accounts.generate();
 
@@ -55,5 +57,48 @@ describe("Native token as ERC-20", () => {
     expect(allowanceAfter).to.deep.eq(0);
   });
 
-  it.skip("Can set unlimited allowance");
+  describe("when unlimited allowance", async () => {
+    let approver: HDNodeWallet;
+    let spender: HDNodeWallet;
+
+    beforeEach(async () => {
+      [approver, spender] = await eth.accounts.generateMany([BAX(10), BAX(1)]);
+
+      // Approve unlimited
+      await eth.signAndSend(
+        nativeErc20
+          .connect(approver)
+          .approve(spender.address, ethers.MaxUint256),
+      );
+    });
+
+    it("does not decrease the spender allowance", async function () {
+      const allowanceBefore = await nativeErc20.allowance(
+        approver.address,
+        spender.address,
+      );
+
+      expect(allowanceBefore).to.eq(ethers.MaxUint256);
+      await eth.signAndSend(
+        nativeErc20
+          .connect(spender)
+          .transferFrom(approver.address, spender.address, BAX(5)),
+      );
+
+      const allowanceAfter = await nativeErc20.allowance(
+        approver.address,
+        spender.address,
+      );
+      // Allowance does not decreased
+      expect(allowanceAfter).to.eq(ethers.MaxUint256);
+    });
+
+    it("does not emit an approval event", async function () {
+      await txExpect(
+        nativeErc20
+          .connect(spender)
+          .transferFrom(approver.address, spender.address, BAX(5)),
+      ).to.not.emit(this.token, "Approval");
+    });
+  });
 });

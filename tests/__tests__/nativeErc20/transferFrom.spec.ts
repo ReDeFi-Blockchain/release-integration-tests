@@ -166,6 +166,6 @@ describe("Native token as ERC-20", () => {
       nativeErc20
         .connect(spender)
         .transferFrom(approver.address, spender.address, BAX(2.00000001), {}),
-    ).revertedWith("ERC20InsufficientAllowance");
+    ).revertedWithCustomError(nativeErc20, "ERC20InsufficientAllowance");
   });
 });
