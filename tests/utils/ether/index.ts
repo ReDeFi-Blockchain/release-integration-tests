@@ -7,7 +7,6 @@ import {
 import { TestERC20, TestERC20__factory } from "../../typechain-types";
 import { NETWORK_CONSTANTS, NetworkConstants } from "../constants";
 import { EthAccount } from "./accounts";
-import config from "../config";
 import { getFilenameWallet } from "../filename-wallet";
 
 export default class EtherHelper {
@@ -46,8 +45,11 @@ export default class EtherHelper {
     this.accounts = new EthAccount(this.provider, this.donor);
   }
 
-  static async init(filenameOrWallet: HDNodeWallet | string) {
-    const provider = new ethers.WebSocketProvider(config.wsEndpoint);
+  static async init(
+    filenameOrWallet: HDNodeWallet | string,
+    wsEndpoint: string,
+  ) {
+    const provider = new ethers.WebSocketProvider(wsEndpoint);
     const { chainId } = await provider.getNetwork();
     const constants =
       chainId === NETWORK_CONSTANTS.PARACHAIN.CHAIN_ID

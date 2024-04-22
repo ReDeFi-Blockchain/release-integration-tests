@@ -1,6 +1,5 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { IKeyringPair } from "@polkadot/types/types";
-import config from "../config";
 import { SubUtils } from "./utils";
 import { SubAccount } from "./account";
 import { SubSystem } from "./system";
@@ -21,7 +20,7 @@ export default class SubHelper {
     this.donor = this.utils.fromSeed("//Alice");
   }
 
-  static async init(wsEndpoint = config.wsEndpoint) {
+  static async init(wsEndpoint: string) {
     const api = await ApiPromise.create({
       provider: new WsProvider(wsEndpoint),
     });

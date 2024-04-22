@@ -2,11 +2,12 @@ import fs from "fs/promises";
 import path from "path";
 import SubHelper from "./utils/substrate";
 import { getFilenameWallet } from "./utils/filename-wallet";
+import config from "./utils/config";
 
 export async function mochaGlobalSetup() {
   console.log("💰 depositing funds into the sponsors' accounts...");
   const testFiles = await findTestFiles("__tests__");
-  const sub = await SubHelper.init();
+  const sub = await SubHelper.init(config.wsEndpoint);
 
   const transferParams = [];
   for (const file of testFiles) {
