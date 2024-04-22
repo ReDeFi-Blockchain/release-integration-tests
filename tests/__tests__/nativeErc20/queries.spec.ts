@@ -1,51 +1,39 @@
-import EtherHelper from "../../utils/ether";
 import { BAX } from "../../utils/currency";
-import { TestERC20 } from "../../typechain-types";
-import { loadFixture } from "../../utils/fixture";
-import SubHelper from "../../utils/substrate";
 import { expect } from "chai";
-
-let sub: SubHelper;
-let eth: EtherHelper;
-let nativeErc20: TestERC20;
-
-before(async () => {
-  const helpers = await loadFixture(__filename);
-  sub = helpers.sub;
-  eth = helpers.eth;
-  nativeErc20 = helpers.eth.nativeErc20;
-});
+import { it } from "../../fixtures/general-fixture";
 
 describe("Native token as ERC-20", () => {
-  it("should implement IERC20Metadata", async () => {
-    const name = await nativeErc20.name();
-    const symbol = await nativeErc20.symbol();
-    const decimals = await nativeErc20.decimals();
+  it("should implement IERC20Metadata", async ({ eth }) => {
+    const name = await eth.nativeErc20.name();
+    const symbol = await eth.nativeErc20.symbol();
+    const decimals = await eth.nativeErc20.decimals();
 
     expect(name).to.eq("redefi");
     expect(symbol).to.eq("BAX");
     expect(decimals).to.eq(18);
   });
 
-  it("should return totalSupply", async () => {
+  it("should return totalSupply", async ({ sub, eth }) => {
     const subTotalSupply = await sub.system.getTotalIssuance();
-    const ethTotalSupply = await nativeErc20.totalSupply();
+    const ethTotalSupply = await eth.nativeErc20.totalSupply();
 
     expect(ethTotalSupply).to.deep.eq(subTotalSupply);
   });
 
   describe("should return balanceOf", () => {
-    it("for non-existent account", async () => {
+    it("for non-existent account", async ({ eth }) => {
       const newEthAccount = await eth.accounts.generate();
-      const balanceOfEmpty = await nativeErc20.balanceOf(newEthAccount.address);
+      const balanceOfEmpty = await eth.nativeErc20.balanceOf(
+        newEthAccount.address,
+      );
       expect(balanceOfEmpty).to.deep.eq(0);
     });
 
-    it("for account with balance", async () => {
+    it("for account with balance", async ({ eth }) => {
       const BALANCE = BAX(0.5890002);
       const ethAccount = await eth.accounts.generate(BALANCE);
 
-      const balance = await nativeErc20.balanceOf(ethAccount.address);
+      const balance = await eth.nativeErc20.balanceOf(ethAccount.address);
       expect(balance).to.deep.eq(BALANCE);
     });
   });

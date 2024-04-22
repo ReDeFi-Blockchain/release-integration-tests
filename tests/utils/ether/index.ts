@@ -22,7 +22,7 @@ export default class EtherHelper {
 
     if (typeof filenameOrWallet === "string") {
       this.donor = getFilenameWallet(filenameOrWallet).connect(this.provider);
-    } else this.donor = filenameOrWallet;
+    } else this.donor = filenameOrWallet.connect(this.provider);
 
     this.accounts = new EthAccount(this.provider, this.donor);
   }
