@@ -8,9 +8,9 @@ describe("Native token as ERC-20", () => {
     const symbol = await eth.nativeErc20.symbol();
     const decimals = await eth.nativeErc20.decimals();
 
-    expect(name).to.eq("redefi");
-    expect(symbol).to.eq("BAX");
-    expect(decimals).to.eq(18);
+    expect(name).to.eq(eth.CONSTANTS.NAME);
+    expect(symbol).to.eq(eth.CONSTANTS.SYMBOL);
+    expect(decimals).to.eq(eth.CONSTANTS.DECIMALS);
   });
 
   it("should return totalSupply", async ({ sub, eth }) => {

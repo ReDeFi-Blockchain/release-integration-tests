@@ -1,6 +1,11 @@
-import { ContractTransactionResponse, HDNodeWallet, ethers } from "ethers";
+import {
+  ContractTransactionResponse,
+  HDNodeWallet,
+  WebSocketProvider,
+  ethers,
+} from "ethers";
 import { TestERC20, TestERC20__factory } from "../../typechain-types";
-import { ADDRESS } from "../constants";
+import { NETWORK_CONSTANTS, NetworkConstants } from "../constants";
 import { EthAccount } from "./accounts";
 import config from "../config";
 import { getFilenameWallet } from "../filename-wallet";
@@ -10,13 +15,27 @@ export default class EtherHelper {
   readonly nativeErc20: TestERC20;
   readonly donor: HDNodeWallet;
   readonly accounts: EthAccount;
+  readonly CONSTANTS: NetworkConstants;
 
-  constructor(wallet: HDNodeWallet);
-  constructor(filename: string);
-  constructor(filenameOrWallet: HDNodeWallet | string) {
-    this.provider = new ethers.WebSocketProvider(config.wsEndpoint);
+  private constructor(
+    wallet: HDNodeWallet,
+    provider: WebSocketProvider,
+    constants: NetworkConstants,
+  );
+  private constructor(
+    filename: string,
+    provider: WebSocketProvider,
+    constants: NetworkConstants,
+  );
+  private constructor(
+    filenameOrWallet: HDNodeWallet | string,
+    provider: WebSocketProvider,
+    constants: NetworkConstants,
+  ) {
+    this.provider = provider;
+    this.CONSTANTS = constants;
     this.nativeErc20 = TestERC20__factory.connect(
-      ADDRESS.NATIVE_ERC20,
+      constants.NATIVE_ERC20,
       this.provider,
     );
 
@@ -25,6 +44,19 @@ export default class EtherHelper {
     } else this.donor = filenameOrWallet.connect(this.provider);
 
     this.accounts = new EthAccount(this.provider, this.donor);
+  }
+
+  static async init(filenameOrWallet: HDNodeWallet | string) {
+    const provider = new ethers.WebSocketProvider(config.wsEndpoint);
+    const { chainId } = await provider.getNetwork();
+    const constants =
+      chainId === NETWORK_CONSTANTS.PARACHAIN.CHAIN_ID
+        ? NETWORK_CONSTANTS.PARACHAIN
+        : NETWORK_CONSTANTS.RELAY;
+
+    if (typeof filenameOrWallet === "string")
+      return new EtherHelper(filenameOrWallet, provider, constants);
+    return new EtherHelper(filenameOrWallet, provider, constants);
   }
 
   async signAndSend(tx: Promise<ContractTransactionResponse>) {

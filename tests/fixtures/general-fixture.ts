@@ -7,7 +7,7 @@ export const it = createTestSuite({
     setup: async () => {
       const testFileName = module.parent?.filename;
       if (!testFileName) throw Error("Cannot determine test name");
-      return new EtherHelper(testFileName);
+      return await EtherHelper.init(testFileName);
     },
     teardown: async () => {},
   },
