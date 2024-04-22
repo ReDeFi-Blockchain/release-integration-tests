@@ -2,14 +2,13 @@ import { config } from "dotenv";
 config();
 
 const getEnvs = () => {
-  const { REDEFI_RELAY_HTTP_URL, REDEFI_RELAY_URL } = process.env;
+  const { HTTP_URL, WS_URL } = process.env;
 
-  if (!REDEFI_RELAY_HTTP_URL || !REDEFI_RELAY_URL)
-    throw Error("Did you forget to set .env?");
+  if (!HTTP_URL || !WS_URL) throw Error("Did you forget to set .env?");
 
   return {
-    REDEFI_RELAY_HTTP_URL,
-    REDEFI_RELAY_URL,
+    HTTP_URL,
+    WS_URL,
   };
 };
 
