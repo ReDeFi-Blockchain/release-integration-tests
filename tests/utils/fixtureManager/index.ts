@@ -1,4 +1,4 @@
-type Fixture<T = any> = {
+type Fixture<T = unknown> = {
   setup: () => Promise<T>;
   teardown: (instance: T) => Promise<void> | void;
 };

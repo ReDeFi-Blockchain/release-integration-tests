@@ -39,4 +39,8 @@ async function findTestFiles(
   return fileList;
 }
 
-mochaGlobalSetup();
+mochaGlobalSetup().catch((e) => {
+  console.error("Something went wrong during global-setup");
+  console.error(e);
+  throw e;
+});

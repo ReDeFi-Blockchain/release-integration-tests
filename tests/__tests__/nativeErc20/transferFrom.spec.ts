@@ -1,7 +1,7 @@
 import { BAX } from "../../utils/currency";
 import { expect } from "chai";
 import { txExpect } from "../../utils/matchers/txEvents";
-import { HDNodeWallet, ethers } from "ethers";
+import { ethers } from "ethers";
 import { it } from "../../fixtures/general-fixture";
 
 describe("Native token as ERC-20", () => {
@@ -172,7 +172,7 @@ describe("Native token as ERC-20", () => {
   });
 
   // FIXME: wait for uin256 support
-  describe.skip("when unlimited allowance", async () => {
+  describe.skip("when unlimited allowance", () => {
     it("does not decrease the spender allowance", async ({ eth }) => {
       const [approver, spender] = await eth.accounts.generateMany([
         BAX(10),

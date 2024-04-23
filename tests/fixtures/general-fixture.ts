@@ -8,7 +8,7 @@ export const it = createTestSuite({
     setup: async () => {
       const testFileName = module.parent?.filename;
       if (!testFileName) throw Error("Cannot determine test name");
-      return await EtherHelper.init(testFileName, config.wsEndpoint);
+      return EtherHelper.init(testFileName, config.wsEndpoint);
     },
     teardown: async () => {},
   },
