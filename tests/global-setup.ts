@@ -32,7 +32,7 @@ async function findTestFiles(
     const stat = await fs.stat(filePath);
     if (stat.isDirectory()) {
       await findTestFiles(filePath, fileList);
-    } else if (filePath.endsWith(".spec.ts")) {
+    } else if (filePath.endsWith(".test.ts")) {
       fileList.push(filePath);
     }
   }
