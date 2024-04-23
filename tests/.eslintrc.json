@@ -1,0 +1,43 @@
+{
+  "env": {
+    "es2021": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+      ],
+      "parserOptions": {
+        "project": ["./tsconfig.json"]
+      }
+    }
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "commonjs"
+  },
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        "extendDefaults": true,
+        "types": {
+          "{}": false
+        }
+      }
+    ],
+    "no-empty-pattern": "off",
+    "require-await": "error",
+    "no-return-await": "error"
+  }
+}
