@@ -17,16 +17,6 @@ export default class EtherHelper {
   readonly CONSTANTS: NetworkConstants;
 
   private constructor(
-    wallet: HDNodeWallet,
-    provider: WebSocketProvider,
-    constants: NetworkConstants,
-  );
-  private constructor(
-    filename: string,
-    provider: WebSocketProvider,
-    constants: NetworkConstants,
-  );
-  private constructor(
     filenameOrWallet: HDNodeWallet | string,
     provider: WebSocketProvider,
     constants: NetworkConstants,
@@ -56,8 +46,6 @@ export default class EtherHelper {
         ? NETWORK_CONSTANTS.PARACHAIN
         : NETWORK_CONSTANTS.RELAY;
 
-    if (typeof filenameOrWallet === "string")
-      return new EtherHelper(filenameOrWallet, provider, constants);
     return new EtherHelper(filenameOrWallet, provider, constants);
   }
 
