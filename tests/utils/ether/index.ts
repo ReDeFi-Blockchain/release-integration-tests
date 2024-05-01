@@ -4,14 +4,14 @@ import {
   WebSocketProvider,
   ethers,
 } from "ethers";
-import { TestERC20, TestERC20__factory } from "../../typechain-types";
+import { ERC20, ERC20__factory } from "../../typechain-types";
 import { NETWORK_CONSTANTS, NetworkConstants } from "../constants";
 import { EthAccount } from "./accounts";
 import { getFilenameWallet } from "../filename-wallet";
 
 export default class EtherHelper {
-  readonly provider: ethers.WebSocketProvider;
-  readonly nativeErc20: TestERC20;
+  readonly provider: WebSocketProvider;
+  readonly nativeErc20: ERC20;
   readonly donor: HDNodeWallet;
   readonly accounts: EthAccount;
   readonly CONSTANTS: NetworkConstants;
@@ -23,14 +23,16 @@ export default class EtherHelper {
   ) {
     this.provider = provider;
     this.CONSTANTS = constants;
-    this.nativeErc20 = TestERC20__factory.connect(
+    this.nativeErc20 = ERC20__factory.connect(
       constants.NATIVE_ERC20,
       this.provider,
     );
 
     if (typeof filenameOrWallet === "string") {
       this.donor = getFilenameWallet(filenameOrWallet).connect(this.provider);
-    } else this.donor = filenameOrWallet.connect(this.provider);
+    } else {
+      this.donor = filenameOrWallet.connect(this.provider);
+    }
 
     this.accounts = new EthAccount(this.provider, this.donor);
   }

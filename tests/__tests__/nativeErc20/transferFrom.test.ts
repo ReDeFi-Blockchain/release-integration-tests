@@ -1,6 +1,6 @@
 import { BAX } from "../../utils/currency";
 import { expect } from "chai";
-import { txExpect } from "../../utils/matchers/txEvents";
+import { expectWait } from "../../utils/matchers/expectWait";
 import { ethers } from "ethers";
 import { it } from "../../fixtures/general-fixture";
 
@@ -37,7 +37,7 @@ describe("Native token as ERC-20", () => {
     );
 
     let spenderBalance = await eth.nativeErc20.balanceOf(spender.address);
-    expect(spenderBalance).to.deep.eq(
+    expect(spenderBalance).to.eq(
       SPENDER_BALANCE + TRANSFER_FROM_VALUE1 - transferFromTx.fee,
     );
 
@@ -46,7 +46,7 @@ describe("Native token as ERC-20", () => {
       approver.address,
       spender.address,
     );
-    expect(allowance).to.deep.eq(APPROVED_VALUE - TRANSFER_FROM_VALUE1);
+    expect(allowance).to.eq(APPROVED_VALUE - TRANSFER_FROM_VALUE1);
 
     // Can transferFrom the remaining amount
 
@@ -94,7 +94,7 @@ describe("Native token as ERC-20", () => {
       .connect(spender)
       .transferFrom(approver.address, recipient.address, TRANSFER_VALUE);
 
-    await txExpect(transferFromTx)
+    await expectWait(transferFromTx)
       .to.emit(eth.nativeErc20, "Transfer")
       .withArgs(approver.address, recipient.address, TRANSFER_VALUE);
 
@@ -127,7 +127,7 @@ describe("Native token as ERC-20", () => {
         .approve(spender.address, APPROVED_VALUE),
     );
 
-    await txExpect(
+    await expectWait(
       eth.nativeErc20
         .connect(spender)
         .transferFrom(approver.address, spender.address, APPROVED_VALUE),
@@ -151,7 +151,7 @@ describe("Native token as ERC-20", () => {
     );
 
     // Assert - cannot transfer more than initially approved
-    await txExpect(
+    await expectWait(
       eth.nativeErc20
         .connect(spender)
         .transferFrom(approver.address, spender.address, BAX(9), {}),
@@ -164,7 +164,7 @@ describe("Native token as ERC-20", () => {
         .transferFrom(approver.address, spender.address, BAX(6)),
     );
 
-    await txExpect(
+    await expectWait(
       eth.nativeErc20
         .connect(spender)
         .transferFrom(approver.address, spender.address, BAX(2.00000001), {}),
@@ -219,7 +219,7 @@ describe("Native token as ERC-20", () => {
           .approve(spender.address, ethers.MaxUint256),
       );
 
-      await txExpect(
+      await expectWait(
         eth.nativeErc20
           .connect(spender)
           .transferFrom(approver.address, spender.address, BAX(5)),

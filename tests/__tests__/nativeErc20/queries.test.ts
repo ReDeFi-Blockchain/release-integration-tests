@@ -17,7 +17,7 @@ describe("Native token as ERC-20", () => {
     const subTotalSupply = await sub.system.getTotalIssuance();
     const ethTotalSupply = await eth.nativeErc20.totalSupply();
 
-    expect(ethTotalSupply).to.deep.eq(subTotalSupply);
+    expect(ethTotalSupply).to.eq(subTotalSupply);
   });
 
   describe("should return balanceOf", () => {
@@ -26,7 +26,7 @@ describe("Native token as ERC-20", () => {
       const balanceOfEmpty = await eth.nativeErc20.balanceOf(
         newEthAccount.address,
       );
-      expect(balanceOfEmpty).to.deep.eq(0);
+      expect(balanceOfEmpty).to.eq(0);
     });
 
     it("for account with balance", async ({ eth }) => {
@@ -34,7 +34,7 @@ describe("Native token as ERC-20", () => {
       const ethAccount = await eth.accounts.generate(BALANCE);
 
       const balance = await eth.nativeErc20.balanceOf(ethAccount.address);
-      expect(balance).to.deep.eq(BALANCE);
+      expect(balance).to.eq(BALANCE);
     });
   });
 });

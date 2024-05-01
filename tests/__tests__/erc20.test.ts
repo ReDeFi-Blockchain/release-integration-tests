@@ -31,9 +31,7 @@ describe("Redefi EVM Tests", () => {
       expect(await erc20Contract.decimals()).to.be.equal(18);
       const mintTx = await erc20Contract.mint(eth.donor.address, BAX(1));
       await mintTx.wait();
-      expect(await erc20Contract.balanceOf(eth.donor.address)).to.deep.equal(
-        BAX(1),
-      );
+      expect(await erc20Contract.balanceOf(eth.donor.address)).to.equal(BAX(1));
 
       const mintToWalletEventFilter = erc20Contract.filters.Transfer(
         undefined,
@@ -56,12 +54,12 @@ describe("Redefi EVM Tests", () => {
       const walletBalanceAfterTransfer = await erc20Contract.balanceOf(
         eth.donor.address,
       );
-      expect(walletBalanceAfterTransfer).to.deep.equal(BAX(0.5));
+      expect(walletBalanceAfterTransfer).to.equal(BAX(0.5));
 
       const receiverBalanceAfterTransfer = await erc20Contract.balanceOf(
         ethReceiver.address,
       );
-      expect(receiverBalanceAfterTransfer).to.deep.equal(BAX(0.5));
+      expect(receiverBalanceAfterTransfer).to.equal(BAX(0.5));
     });
   });
 });

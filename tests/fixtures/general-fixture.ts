@@ -14,8 +14,7 @@ export const it = createTestSuite({
   },
   sub: {
     setup: async () => {
-      const sub = await SubHelper.init(config.wsEndpoint);
-      return sub;
+      return SubHelper.init(config.wsEndpoint);
     },
     teardown: async () => {},
   },

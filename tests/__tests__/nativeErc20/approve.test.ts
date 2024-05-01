@@ -30,7 +30,7 @@ describe("Native token as ERC-20 allowance", () => {
       spender.address,
     );
 
-    expect(allowance).to.deep.eq(APPROVED);
+    expect(allowance).to.eq(APPROVED);
 
     // Decrease approve value
     await eth.signAndSend(
@@ -41,6 +41,6 @@ describe("Native token as ERC-20 allowance", () => {
       approver.address,
       spender.address,
     );
-    expect(allowanceAfter).to.deep.eq(0);
+    expect(allowanceAfter).to.eq(0);
   });
 });
