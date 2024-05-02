@@ -11,7 +11,10 @@ import { getFilenameWallet } from "../filename-wallet";
 
 export default class EtherHelper {
   readonly provider: WebSocketProvider;
-  readonly nativeErc20: ERC20;
+  readonly ERC20: {
+    readonly native: ERC20;
+    readonly GBP: ERC20;
+  };
   readonly donor: HDNodeWallet;
   readonly accounts: EthAccount;
   readonly CONSTANTS: NetworkConstants;
@@ -23,10 +26,10 @@ export default class EtherHelper {
   ) {
     this.provider = provider;
     this.CONSTANTS = constants;
-    this.nativeErc20 = ERC20__factory.connect(
-      constants.NATIVE_ERC20,
-      this.provider,
-    );
+    this.ERC20 = {
+      native: ERC20__factory.connect(constants.NAME, this.provider),
+      GBP: ERC20__factory.connect(constants.GBP, this.provider),
+    };
 
     if (typeof filenameOrWallet === "string") {
       this.donor = getFilenameWallet(filenameOrWallet).connect(this.provider);

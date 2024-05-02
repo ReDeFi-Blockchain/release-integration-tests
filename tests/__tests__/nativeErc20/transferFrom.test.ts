@@ -19,30 +19,30 @@ describe("Native token as ERC-20", () => {
     const spender = await eth.accounts.generate(SPENDER_BALANCE);
 
     const approveTx = await eth.signAndSend(
-      eth.nativeErc20
+      eth.ERC20.native
         .connect(approver)
         .approve(spender.address, APPROVED_VALUE),
     );
 
     const transferFromTx = await eth.signAndSend(
-      eth.nativeErc20
+      eth.ERC20.native
         .connect(spender)
         .transferFrom(approver.address, spender.address, TRANSFER_FROM_VALUE1),
     );
 
     // Assert balances after transferFrom
-    let approverBalance = await eth.nativeErc20.balanceOf(approver.address);
+    let approverBalance = await eth.ERC20.native.balanceOf(approver.address);
     expect(approverBalance).to.be.equal(
       APPROVER_BALANCE - TRANSFER_FROM_VALUE1 - approveTx.fee,
     );
 
-    let spenderBalance = await eth.nativeErc20.balanceOf(spender.address);
+    let spenderBalance = await eth.ERC20.native.balanceOf(spender.address);
     expect(spenderBalance).to.eq(
       SPENDER_BALANCE + TRANSFER_FROM_VALUE1 - transferFromTx.fee,
     );
 
     // Assert allowance decreased
-    const allowance = await eth.nativeErc20.allowance(
+    const allowance = await eth.ERC20.native.allowance(
       approver.address,
       spender.address,
     );
@@ -51,18 +51,18 @@ describe("Native token as ERC-20", () => {
     // Can transferFrom the remaining amount
 
     const transferFromRemainingsTx = await eth.signAndSend(
-      eth.nativeErc20
+      eth.ERC20.native
         .connect(spender)
         .transferFrom(approver.address, spender.address, TRANSFER_FROM_VALUE2),
     );
-    approverBalance = await eth.nativeErc20.balanceOf(approver.address);
+    approverBalance = await eth.ERC20.native.balanceOf(approver.address);
     expect(approverBalance).to.eq(
       APPROVER_BALANCE -
         TRANSFER_FROM_VALUE1 -
         TRANSFER_FROM_VALUE2 -
         approveTx.fee,
     );
-    spenderBalance = await eth.nativeErc20.balanceOf(spender.address);
+    spenderBalance = await eth.ERC20.native.balanceOf(spender.address);
     expect(spenderBalance).to.eq(
       SPENDER_BALANCE +
         TRANSFER_FROM_VALUE1 +
@@ -85,24 +85,26 @@ describe("Native token as ERC-20", () => {
     ]);
 
     const approveTx = await eth.signAndSend(
-      eth.nativeErc20
+      eth.ERC20.native
         .connect(approver)
         .approve(spender.address, APPROVED_VALUE),
     );
 
-    const transferFromTx = eth.nativeErc20
+    const transferFromTx = eth.ERC20.native
       .connect(spender)
       .transferFrom(approver.address, recipient.address, TRANSFER_VALUE);
 
     await expectWait(transferFromTx)
-      .to.emit(eth.nativeErc20, "Transfer")
+      .to.emit(eth.ERC20.native, "Transfer")
       .withArgs(approver.address, recipient.address, TRANSFER_VALUE);
 
     const transferFromReceipt = await eth.signAndSend(transferFromTx);
 
-    const approverBalance = await eth.nativeErc20.balanceOf(approver.address);
-    const spenderBalance = await eth.nativeErc20.balanceOf(spender.address);
-    const recipientBalance = await eth.nativeErc20.balanceOf(recipient.address);
+    const approverBalance = await eth.ERC20.native.balanceOf(approver.address);
+    const spenderBalance = await eth.ERC20.native.balanceOf(spender.address);
+    const recipientBalance = await eth.ERC20.native.balanceOf(
+      recipient.address,
+    );
 
     expect(approverBalance).to.eq(
       ACCOUNT_BALANCE - approveTx.fee - TRANSFER_VALUE,
@@ -111,7 +113,7 @@ describe("Native token as ERC-20", () => {
     expect(recipientBalance).to.eq(ACCOUNT_BALANCE + TRANSFER_VALUE);
 
     // Allowance decreased
-    const allowance = await eth.nativeErc20.allowance(approver, spender);
+    const allowance = await eth.ERC20.native.allowance(approver, spender);
     expect(allowance).to.eq(APPROVED_VALUE - TRANSFER_VALUE);
   });
 
@@ -122,21 +124,21 @@ describe("Native token as ERC-20", () => {
     const spender = await eth.accounts.generate(BAX(10));
 
     await eth.signAndSend(
-      eth.nativeErc20
+      eth.ERC20.native
         .connect(approver)
         .approve(spender.address, APPROVED_VALUE),
     );
 
     await expectWait(
-      eth.nativeErc20
+      eth.ERC20.native
         .connect(spender)
         .transferFrom(approver.address, spender.address, APPROVED_VALUE),
     )
-      .to.emit(eth.nativeErc20, "Transfer")
+      .to.emit(eth.ERC20.native, "Transfer")
       .withArgs(approver.address, spender.address, APPROVED_VALUE);
 
     // FIXME: also should emit Approval event
-    // .to.emit(eth.nativeErc20, "Approval")
+    // .to.emit(eth.ERC20.native, "Approval")
     // .withArgs(approver, spender, 0);
   });
 
@@ -147,25 +149,25 @@ describe("Native token as ERC-20", () => {
     const spender = await eth.accounts.generate(BAX(1));
 
     await eth.signAndSend(
-      eth.nativeErc20.connect(approver).approve(spender.address, BAX(8)),
+      eth.ERC20.native.connect(approver).approve(spender.address, BAX(8)),
     );
 
     // Assert - cannot transfer more than initially approved
     await expectWait(
-      eth.nativeErc20
+      eth.ERC20.native
         .connect(spender)
         .transferFrom(approver.address, spender.address, BAX(9), {}),
     ).revertedWith("ERC20InsufficientAllowance"); // FIXME: custom error?
 
     // Assert - cannot transfer more than left after transfer
     await eth.signAndSend(
-      eth.nativeErc20
+      eth.ERC20.native
         .connect(spender)
         .transferFrom(approver.address, spender.address, BAX(6)),
     );
 
     await expectWait(
-      eth.nativeErc20
+      eth.ERC20.native
         .connect(spender)
         .transferFrom(approver.address, spender.address, BAX(2.00000001), {}),
     ).revertedWith("ERC20InsufficientAllowance");
@@ -181,24 +183,24 @@ describe("Native token as ERC-20", () => {
 
       // Approve unlimited
       await eth.signAndSend(
-        eth.nativeErc20
+        eth.ERC20.native
           .connect(approver)
           .approve(spender.address, ethers.MaxUint256),
       );
 
-      const allowanceBefore = await eth.nativeErc20.allowance(
+      const allowanceBefore = await eth.ERC20.native.allowance(
         approver.address,
         spender.address,
       );
 
       expect(allowanceBefore).to.eq(ethers.MaxUint256);
       await eth.signAndSend(
-        eth.nativeErc20
+        eth.ERC20.native
           .connect(spender)
           .transferFrom(approver.address, spender.address, BAX(5)),
       );
 
-      const allowanceAfter = await eth.nativeErc20.allowance(
+      const allowanceAfter = await eth.ERC20.native.allowance(
         approver.address,
         spender.address,
       );
@@ -214,16 +216,16 @@ describe("Native token as ERC-20", () => {
 
       // Approve unlimited
       await eth.signAndSend(
-        eth.nativeErc20
+        eth.ERC20.native
           .connect(approver)
           .approve(spender.address, ethers.MaxUint256),
       );
 
       await expectWait(
-        eth.nativeErc20
+        eth.ERC20.native
           .connect(spender)
           .transferFrom(approver.address, spender.address, BAX(5)),
-      ).to.not.emit(eth.nativeErc20, "Approval");
+      ).to.not.emit(eth.ERC20.native, "Approval");
     });
   });
 });

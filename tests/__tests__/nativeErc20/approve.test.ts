@@ -7,7 +7,7 @@ describe("Native token as ERC-20 allowance", () => {
     const randomAccount1 = await eth.accounts.generate();
     const randomAccount2 = await eth.accounts.generate();
 
-    const allowance = await eth.nativeErc20.allowance(
+    const allowance = await eth.ERC20.native.allowance(
       randomAccount1.address,
       randomAccount2.address,
     );
@@ -21,11 +21,11 @@ describe("Native token as ERC-20 allowance", () => {
     const spender = await eth.accounts.generate(BAX(0.3));
 
     await eth.signAndSend(
-      eth.nativeErc20.connect(approver).approve(spender.address, APPROVED),
+      eth.ERC20.native.connect(approver).approve(spender.address, APPROVED),
     );
 
     // Increase approve value
-    const allowance = await eth.nativeErc20.allowance(
+    const allowance = await eth.ERC20.native.allowance(
       approver.address,
       spender.address,
     );
@@ -34,10 +34,10 @@ describe("Native token as ERC-20 allowance", () => {
 
     // Decrease approve value
     await eth.signAndSend(
-      eth.nativeErc20.connect(approver).approve(spender.address, 0),
+      eth.ERC20.native.connect(approver).approve(spender.address, 0),
     );
 
-    const allowanceAfter = await eth.nativeErc20.allowance(
+    const allowanceAfter = await eth.ERC20.native.allowance(
       approver.address,
       spender.address,
     );
