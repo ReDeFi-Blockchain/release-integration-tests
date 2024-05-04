@@ -1,6 +1,6 @@
 import { ApiPromise } from "@polkadot/api";
 import { IKeyringPair } from "@polkadot/types/types";
-import { evmToAddress } from "@polkadot/util-crypto";
+import { evmToAddress, addressToEvm } from "@polkadot/util-crypto";
 import { SubBase } from "./base";
 import { SubUtils } from "./utils";
 import { SignerOptions } from "@polkadot/api/types";
@@ -21,32 +21,47 @@ export class SubAccount extends SubBase {
     return BigInt(data.free);
   }
 
-  async transfer(
+  async transferAsset(
+    params: { to: string; value: bigint; erc20: `0x${string}` },
+    signer: IKeyringPair,
+    options?: Partial<SignerOptions>,
+  ) {
+    return this.utils.signAndSend(
+      signer,
+      this.makeTransferAssetTx({ ...params, from: signer.address }),
+      options,
+    );
+  }
+
+  async transferNative(
     params: { to: string; value: bigint },
     signer: IKeyringPair,
     options?: Partial<SignerOptions>,
   ) {
-    if (params.to.startsWith("0x")) params.to = evmToAddress(params.to);
-
-    const result = await this.utils.signAndSend(
+    return this.utils.signAndSend(
       signer,
-      this.api.tx.balances.transferKeepAlive(params.to, params.value),
+      this.makeTransferNativeTx(params),
       options,
     );
-
-    return result;
   }
 
-  async batchTransfer(
+  async batchTransferAsset(
+    params: { to: string; value: bigint; erc20: `0x${string}` }[],
+    signer: IKeyringPair,
+  ) {
+    const txs = [];
+    for (const p of params)
+      txs.push(this.makeTransferAssetTx({ ...p, from: signer.address }));
+
+    await this.utils.batch(signer, txs);
+  }
+
+  async batchTransferNative(
     params: { to: string; value: bigint }[],
     signer: IKeyringPair,
   ) {
     const txs = [];
-
-    for (const p of params) {
-      if (p.to.startsWith("0x")) p.to = evmToAddress(p.to);
-      txs.push(this.api.tx.balances.transferKeepAlive(p.to, p.value));
-    }
+    for (const p of params) txs.push(this.makeTransferNativeTx(p));
 
     await this.utils.batch(signer, txs);
   }
@@ -55,5 +70,34 @@ export class SubAccount extends SubBase {
     const account = await this.api.query.system.account(address);
     const { nonce } = account.toJSON() as { nonce: number };
     return nonce;
+  }
+
+  private makeTransferNativeTx(params: { to: string; value: bigint }) {
+    if (params.to.startsWith("0x")) params.to = evmToAddress(params.to);
+    return this.api.tx.balances.transferKeepAlive(params.to, params.value);
+  }
+
+  private makeTransferAssetTx(params: {
+    erc20: `0x${string}`;
+    from: string;
+    to: string;
+    value: bigint;
+  }) {
+    const transferSignature = "0xa9059cbb"; // Signature for "transfer(address,uint256)"
+    const encodedTo = params.to.substring(2).padStart(64, "0"); // hex recipient padded with zeros
+    const encodedAmount = params.value.toString(16).padStart(64, "0"); // hex amount padded with zeros
+    const payload = transferSignature + encodedTo + encodedAmount;
+
+    return this.api.tx.evm.call(
+      addressToEvm(params.from),
+      params.erc20,
+      payload,
+      0,
+      1000000n,
+      1000000000000000,
+      null,
+      null,
+      null,
+    );
   }
 }

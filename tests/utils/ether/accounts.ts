@@ -1,30 +1,86 @@
 import { HDNodeWallet, ethers } from "ethers";
+import { ERC20 } from "../../typechain-types";
+import { AccountAssetType, AccountBalance } from "../types";
 
 export class EthAccount {
   protected readonly provider: ethers.WebSocketProvider;
   protected readonly donor: HDNodeWallet;
+  protected readonly ERC20: Record<AccountAssetType, ERC20>;
 
-  constructor(provider: ethers.WebSocketProvider, donor: HDNodeWallet) {
+  constructor(
+    provider: ethers.WebSocketProvider,
+    erc20: Record<AccountAssetType, ERC20>,
+    donor: HDNodeWallet,
+  ) {
     this.provider = provider;
+    this.ERC20 = erc20;
     this.donor = donor;
   }
 
-  async transfer(
-    params: { to: string; value: ethers.BigNumberish; nonce?: number },
+  async transferNative(
+    params: { to: string; value: bigint },
     signer: HDNodeWallet,
+    nonce?: number,
   ) {
     const tx = await signer.sendTransaction({
       to: params.to,
       value: params.value,
-      nonce: params.nonce,
+      nonce,
     });
     return tx.wait();
   }
 
-  async generate(balance?: ethers.BigNumberish, donor = this.donor) {
+  async transferAsset(params: {
+    to: string;
+    value: bigint;
+    assetType: AccountAssetType;
+  }) {
+    const asset = this.ERC20[params.assetType];
+
+    const receipt = await asset
+      .transfer(params.to, params.value)
+      .then((tx) => tx.wait());
+    if (!receipt) throw Error("Cannot get receipt");
+    return receipt;
+  }
+
+  async generateV2(balances: AccountBalance[], donor = this.donor) {
+    let nonce = await this.donor.getNonce();
+    const transfers = [];
+    const wallets = [];
+
+    for (const balance of balances) {
+      const wallet = ethers.HDNodeWallet.createRandom().connect(this.provider);
+      wallets.push(wallet);
+
+      for (const key in balance) {
+        const assetType = key as keyof AccountBalance;
+        const value = balance[assetType];
+        if (!value) continue;
+        if (assetType === "NATIVE") {
+          transfers.push(
+            this.transferNative({ to: wallet.address, value }, donor, nonce),
+          );
+        } else {
+          transfers.push(
+            this.transferAsset({
+              to: wallet.address,
+              value,
+              assetType,
+            }),
+          );
+        }
+        nonce++;
+      }
+    }
+    await Promise.all(transfers);
+    return wallets;
+  }
+
+  async generate(balance?: bigint, donor = this.donor) {
     const wallet = ethers.HDNodeWallet.createRandom().connect(this.provider);
     if (balance) {
-      await this.transfer({ to: wallet.address, value: balance }, donor);
+      await this.transferNative({ to: wallet.address, value: balance }, donor);
     }
     return wallet;
   }
@@ -38,7 +94,11 @@ export class EthAccount {
       wallets.push(wallet);
       if (balance) {
         transfers.push(
-          this.transfer({ to: wallet.address, value: balance, nonce }, donor),
+          this.transferNative(
+            { to: wallet.address, value: balance },
+            donor,
+            nonce,
+          ),
         );
         nonce++;
       }

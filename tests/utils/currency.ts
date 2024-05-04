@@ -7,6 +7,16 @@ const floatPowerTenToBigInt = (float: number | string, power: number) => {
   return BigInt(newInteger);
 };
 
-export const BAX = (float: number | string) => {
-  return floatPowerTenToBigInt(float, 18);
-};
+/**
+ * Native token - BAX or RED, 18 decimals
+ * @param float
+ * @returns
+ */
+export const NAT = (float: number | string) => floatPowerTenToBigInt(float, 18);
+
+/**
+ * GBP Asset, 6 decimals
+ * @param float
+ * @returns
+ */
+export const GBP = (float: number | string) => floatPowerTenToBigInt(float, 6);

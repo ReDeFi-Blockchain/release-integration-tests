@@ -5,18 +5,16 @@ import {
   ethers,
 } from "ethers";
 import { ERC20, ERC20__factory } from "../../typechain-types";
-import { NETWORK_CONSTANTS, NetworkConstants } from "../constants";
-import { EthAccount } from "./accounts";
+import { NETWORK_CONSTANTS } from "../constants";
 import { getFilenameWallet } from "../filename-wallet";
+import { AccountAssetType, NetworkConstants } from "../types";
+import { EthAccount } from "./accounts";
 
 export default class EtherHelper {
   readonly provider: WebSocketProvider;
-  readonly ERC20: {
-    readonly native: ERC20;
-    readonly GBP: ERC20;
-  };
-  readonly donor: HDNodeWallet;
   readonly accounts: EthAccount;
+  readonly assets: Record<AccountAssetType, ERC20>;
+  readonly donor: HDNodeWallet;
   readonly CONSTANTS: NetworkConstants;
 
   private constructor(
@@ -26,9 +24,10 @@ export default class EtherHelper {
   ) {
     this.provider = provider;
     this.CONSTANTS = constants;
-    this.ERC20 = {
-      native: ERC20__factory.connect(constants.NAME, this.provider),
-      GBP: ERC20__factory.connect(constants.GBP, this.provider),
+    this.assets = {
+      NATIVE: ERC20__factory.connect(constants.NATIVE.ADDRESS, this.provider),
+      SIBLING: ERC20__factory.connect(constants.SIBLING.ADDRESS, this.provider),
+      GBP: ERC20__factory.connect(constants.GBP.ADDRESS, this.provider),
     };
 
     if (typeof filenameOrWallet === "string") {
@@ -37,7 +36,7 @@ export default class EtherHelper {
       this.donor = filenameOrWallet.connect(this.provider);
     }
 
-    this.accounts = new EthAccount(this.provider, this.donor);
+    this.accounts = new EthAccount(this.provider, this.assets, this.donor);
   }
 
   static async init(

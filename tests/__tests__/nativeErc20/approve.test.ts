@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { BAX } from "../../utils/currency";
+import { NAT } from "../../utils/currency";
 import { it } from "../../fixtures/general-fixture";
 
 describe("Native token as ERC-20 allowance", () => {
@@ -7,7 +7,7 @@ describe("Native token as ERC-20 allowance", () => {
     const randomAccount1 = await eth.accounts.generate();
     const randomAccount2 = await eth.accounts.generate();
 
-    const allowance = await eth.ERC20.native.allowance(
+    const allowance = await eth.assets.NATIVE.allowance(
       randomAccount1.address,
       randomAccount2.address,
     );
@@ -16,16 +16,16 @@ describe("Native token as ERC-20 allowance", () => {
   });
 
   it("can be changed by approve", async ({ eth }) => {
-    const APPROVED = BAX(0.8);
-    const approver = await eth.accounts.generate(BAX(1.5));
-    const spender = await eth.accounts.generate(BAX(0.3));
+    const APPROVED = NAT(0.8);
+    const approver = await eth.accounts.generate(NAT(1.5));
+    const spender = await eth.accounts.generate(NAT(0.3));
 
     await eth.signAndSend(
-      eth.ERC20.native.connect(approver).approve(spender.address, APPROVED),
+      eth.assets.NATIVE.connect(approver).approve(spender.address, APPROVED),
     );
 
     // Increase approve value
-    const allowance = await eth.ERC20.native.allowance(
+    const allowance = await eth.assets.NATIVE.allowance(
       approver.address,
       spender.address,
     );
@@ -34,10 +34,10 @@ describe("Native token as ERC-20 allowance", () => {
 
     // Decrease approve value
     await eth.signAndSend(
-      eth.ERC20.native.connect(approver).approve(spender.address, 0),
+      eth.assets.NATIVE.connect(approver).approve(spender.address, 0),
     );
 
-    const allowanceAfter = await eth.ERC20.native.allowance(
+    const allowanceAfter = await eth.assets.NATIVE.allowance(
       approver.address,
       spender.address,
     );
