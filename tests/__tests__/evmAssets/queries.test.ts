@@ -61,7 +61,9 @@ for (const TEST_CASE of CASES) {
           TEST_CASE.ACCOUNT_BALANCE,
         ]);
 
-        const balance = await eth.assets.NATIVE.balanceOf(ethAccount.address);
+        const balance = await eth.assets[TEST_CASE.ASSET].balanceOf(
+          ethAccount.address,
+        );
         expect(balance).to.eq(TEST_CASE.EXPECTED_BALANCE);
       });
     });

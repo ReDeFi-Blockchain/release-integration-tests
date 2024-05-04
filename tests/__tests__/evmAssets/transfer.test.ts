@@ -66,7 +66,7 @@ for (const TEST_CASE of CASES) {
           .connect(sender)
           .transfer(receiver.address, TEST_CASE.TRANSFER_VALUE),
       )
-        .to.emit(eth.assets.NATIVE, "Transfer")
+        .to.emit(eth.assets[TEST_CASE.ASSET], "Transfer")
         .withArgs(sender.address, receiver.address, TEST_CASE.TRANSFER_VALUE);
     });
 
@@ -75,22 +75,26 @@ for (const TEST_CASE of CASES) {
         eth.assets[TEST_CASE.ASSET]
           .connect(sender)
           .transfer(receiver.address, TEST_CASE.SENDER_BALANCE + 1n),
-      ).to.be.revertedWithCustomError(
-        eth.assets.NATIVE,
-        "ERC20InsufficientBalance",
-      );
+      ).to.be.revertedWith("ERC20InsufficientBalance");
+      // TODO: revertedWithCustomError
     });
 
     it("can transfer full balance", async ({ eth }) => {
-      await expectWait(
+      await eth.signAndSend(
         eth.assets[TEST_CASE.ASSET]
           .connect(sender)
           .transfer(receiver.address, TEST_CASE.SENDER_BALANCE),
-      ).to.changeTokenBalances(
-        TEST_CASE.ASSET,
-        [sender, receiver],
-        [-TEST_CASE.SENDER_BALANCE, TEST_CASE.SENDER_BALANCE],
       );
+
+      const senderBalance = await eth.assets[TEST_CASE.ASSET].balanceOf(
+        sender.address,
+      );
+      const receiverBalance = await eth.assets[TEST_CASE.ASSET].balanceOf(
+        receiver.address,
+      );
+
+      expect(senderBalance).to.eq(0);
+      expect(receiverBalance).to.eq(TEST_CASE.SENDER_BALANCE);
     });
 
     it("cannot transfer to zero address", async ({ eth }) => {

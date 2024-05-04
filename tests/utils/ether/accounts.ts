@@ -30,15 +30,20 @@ export class EthAccount {
     return tx.wait();
   }
 
-  async transferAsset(params: {
-    to: string;
-    value: bigint;
-    assetType: AccountAssetType;
-  }) {
+  async transferAsset(
+    params: {
+      to: string;
+      value: bigint;
+      assetType: AccountAssetType;
+    },
+    signer: HDNodeWallet,
+    nonce?: number,
+  ) {
     const asset = this.ERC20[params.assetType];
 
     const receipt = await asset
-      .transfer(params.to, params.value)
+      .connect(signer)
+      .transfer(params.to, params.value, { nonce })
       .then((tx) => tx.wait());
     if (!receipt) throw Error("Cannot get receipt");
     return receipt;
@@ -63,11 +68,15 @@ export class EthAccount {
           );
         } else {
           transfers.push(
-            this.transferAsset({
-              to: wallet.address,
-              value,
-              assetType,
-            }),
+            this.transferAsset(
+              {
+                to: wallet.address,
+                value,
+                assetType,
+              },
+              donor,
+              nonce,
+            ),
           );
         }
         nonce++;
