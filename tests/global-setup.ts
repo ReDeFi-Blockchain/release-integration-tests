@@ -28,12 +28,12 @@ export async function mochaGlobalSetup() {
     transferParamsNative.push({ to: wallet.address, value: NAT(10000) });
     transferParamsGBP.push({
       to: wallet.address,
-      value: GBP(300),
+      value: GBP(100),
       erc20: ASSETS.GBP.ADDRESS,
     });
     transferParamsBAXorRED.push({
       to: wallet.address,
-      value: NAT(300),
+      value: NAT(100),
       erc20: baxOrRedAddress,
     });
   }

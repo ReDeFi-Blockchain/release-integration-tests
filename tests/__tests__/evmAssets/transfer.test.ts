@@ -4,6 +4,7 @@ import { ethers } from "hardhat";
 import { it } from "../../fixtures/general-fixture";
 import { expectWait } from "../../utils/matchers/expectWait";
 import { AccountAssetType, AccountBalance } from "../../utils/types";
+import { HDNodeWallet } from "ethers";
 
 type TestCase = {
   ASSET: AccountAssetType;
@@ -29,12 +30,17 @@ const CASES: TestCase[] = [
 
 for (const TEST_CASE of CASES) {
   describe(`${TEST_CASE.ASSET} asset`, () => {
-    it("can be sent by transfer", async ({ eth }) => {
-      const [sender, receiver] = await eth.accounts.generateV2([
+    let sender: HDNodeWallet;
+    let receiver: HDNodeWallet;
+
+    it.beforeEach(async ({ eth }) => {
+      [sender, receiver] = await eth.accounts.generateV2([
         TEST_CASE.ACCOUNT_BALANCE,
         {},
       ]);
+    });
 
+    it("can be sent by transfer", async ({ eth }) => {
       await eth.signAndSend(
         eth.assets[TEST_CASE.ASSET]
           .connect(sender)
@@ -55,28 +61,20 @@ for (const TEST_CASE of CASES) {
     });
 
     it("transfer emits Transfer event", async ({ eth }) => {
-      const [sender] = await eth.accounts.generateV2([
-        TEST_CASE.ACCOUNT_BALANCE,
-      ]);
-
       await expectWait(
         eth.assets[TEST_CASE.ASSET]
           .connect(sender)
-          .transfer(eth.donor.address, TEST_CASE.TRANSFER_VALUE),
+          .transfer(receiver.address, TEST_CASE.TRANSFER_VALUE),
       )
         .to.emit(eth.assets.NATIVE, "Transfer")
-        .withArgs(sender.address, eth.donor.address, TEST_CASE.TRANSFER_VALUE);
+        .withArgs(sender.address, receiver.address, TEST_CASE.TRANSFER_VALUE);
     });
 
     it("cannot transfer more than balance", async ({ eth }) => {
-      const [sender] = await eth.accounts.generateV2([
-        TEST_CASE.ACCOUNT_BALANCE,
-      ]);
-
       await expectWait(
         eth.assets[TEST_CASE.ASSET]
           .connect(sender)
-          .transfer(eth.donor.address, TEST_CASE.SENDER_BALANCE + 1n),
+          .transfer(receiver.address, TEST_CASE.SENDER_BALANCE + 1n),
       ).to.be.revertedWithCustomError(
         eth.assets.NATIVE,
         "ERC20InsufficientBalance",
@@ -84,26 +82,18 @@ for (const TEST_CASE of CASES) {
     });
 
     it("can transfer full balance", async ({ eth }) => {
-      const [sender] = await eth.accounts.generateV2([
-        TEST_CASE.ACCOUNT_BALANCE,
-      ]);
-
       await expectWait(
         eth.assets[TEST_CASE.ASSET]
           .connect(sender)
-          .transfer(eth.donor.address, TEST_CASE.SENDER_BALANCE),
+          .transfer(receiver.address, TEST_CASE.SENDER_BALANCE),
       ).to.changeTokenBalances(
         TEST_CASE.ASSET,
-        [sender, eth.donor],
+        [sender, receiver],
         [-TEST_CASE.SENDER_BALANCE, TEST_CASE.SENDER_BALANCE],
       );
     });
 
     it("cannot transfer to zero address", async ({ eth }) => {
-      const [sender] = await eth.accounts.generateV2([
-        TEST_CASE.ACCOUNT_BALANCE,
-      ]);
-
       await expectWait(
         eth.assets[TEST_CASE.ASSET]
           .connect(sender)

@@ -43,12 +43,6 @@ export function createTestSuite<T extends {}>(fixtures: {
     }
   }
 
-  const wrappedBefore = (
-    fn: (fixtures: FixtureInstances<T>) => Promise<void>,
-  ) => {
-    before(() => withFixtures(fn, false));
-  };
-
   const wrappedIt = (
     title: string,
     testFn: (fixtures: FixtureInstances<T>) => Promise<void>,
@@ -70,7 +64,15 @@ export function createTestSuite<T extends {}>(fixtures: {
     it.skip(title, () => withFixtures(testFn));
   };
 
-  wrappedIt.before = wrappedBefore;
+  wrappedIt.before = (fn: (fixtures: FixtureInstances<T>) => Promise<void>) => {
+    before(() => withFixtures(fn, false));
+  };
+
+  wrappedIt.beforeEach = (
+    fn: (fixtures: FixtureInstances<T>) => Promise<void>,
+  ) => {
+    beforeEach(() => withFixtures(fn, false));
+  };
 
   return wrappedIt;
 }
