@@ -1,14 +1,14 @@
-import { HDNodeWallet, ethers } from "ethers";
+import { HDNodeWallet, JsonRpcProvider, ethers } from "ethers";
 import { ERC20 } from "../../typechain-types";
 import { AccountAssetType, AccountBalance } from "../types";
 
 export class EthAccount {
-  protected readonly provider: ethers.WebSocketProvider;
+  protected readonly provider: JsonRpcProvider;
   protected readonly donor: HDNodeWallet;
   protected readonly ERC20: Record<AccountAssetType, ERC20>;
 
   constructor(
-    provider: ethers.WebSocketProvider,
+    provider: JsonRpcProvider,
     erc20: Record<AccountAssetType, ERC20>,
     donor: HDNodeWallet,
   ) {

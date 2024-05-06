@@ -17,16 +17,16 @@ describe("Native token as ERC-20 allowance", () => {
 
   it("can be changed by approve", async ({ eth }) => {
     const APPROVED = NAT(0.8);
-    const approver = await eth.accounts.generate(NAT(1.5));
+    const owner = await eth.accounts.generate(NAT(1.5));
     const spender = await eth.accounts.generate(NAT(0.3));
 
     await eth.signAndSend(
-      eth.assets.NATIVE.connect(approver).approve(spender.address, APPROVED),
+      eth.assets.NATIVE.connect(owner).approve(spender.address, APPROVED),
     );
 
     // Increase approve value
     const allowance = await eth.assets.NATIVE.allowance(
-      approver.address,
+      owner.address,
       spender.address,
     );
 
@@ -34,11 +34,11 @@ describe("Native token as ERC-20 allowance", () => {
 
     // Decrease approve value
     await eth.signAndSend(
-      eth.assets.NATIVE.connect(approver).approve(spender.address, 0),
+      eth.assets.NATIVE.connect(owner).approve(spender.address, 0),
     );
 
     const allowanceAfter = await eth.assets.NATIVE.allowance(
-      approver.address,
+      owner.address,
       spender.address,
     );
     expect(allowanceAfter).to.eq(0);

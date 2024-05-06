@@ -1,7 +1,7 @@
 import {
   ContractTransactionResponse,
   HDNodeWallet,
-  WebSocketProvider,
+  JsonRpcProvider,
   ethers,
 } from "ethers";
 import { ERC20, ERC20__factory } from "../../typechain-types";
@@ -11,7 +11,7 @@ import { AccountAssetType, NetworkConstants } from "../types";
 import { EthAccount } from "./accounts";
 
 export default class EtherHelper {
-  readonly provider: WebSocketProvider;
+  readonly provider: JsonRpcProvider;
   readonly accounts: EthAccount;
   readonly assets: Record<AccountAssetType, ERC20>;
   readonly donor: HDNodeWallet;
@@ -19,7 +19,7 @@ export default class EtherHelper {
 
   private constructor(
     filenameOrWallet: HDNodeWallet | string,
-    provider: WebSocketProvider,
+    provider: JsonRpcProvider,
     constants: NetworkConstants,
   ) {
     this.provider = provider;
@@ -41,9 +41,9 @@ export default class EtherHelper {
 
   static async init(
     filenameOrWallet: HDNodeWallet | string,
-    wsEndpoint: string,
+    rpcEndpoint: string,
   ) {
-    const provider = new ethers.WebSocketProvider(wsEndpoint);
+    const provider = new ethers.JsonRpcProvider(rpcEndpoint);
     const { chainId } = await provider.getNetwork();
     const constants =
       chainId === NETWORK_CONSTANTS.PARACHAIN.CHAIN_ID
@@ -53,6 +53,7 @@ export default class EtherHelper {
     return new EtherHelper(filenameOrWallet, provider, constants);
   }
 
+  // TODO rename
   async signAndSend(tx: Promise<ContractTransactionResponse>) {
     const transaction = await tx;
     const receipt = await transaction.wait();
