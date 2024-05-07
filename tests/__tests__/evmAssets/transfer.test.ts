@@ -34,7 +34,7 @@ for (const TEST_CASE of CASES) {
     let receiver: HDNodeWallet;
 
     it.beforeEach(async ({ eth }) => {
-      [sender, receiver] = await eth.accounts.generateV2([
+      [sender, receiver] = await eth.accounts.generate([
         TEST_CASE.ACCOUNT_BALANCE,
         {},
       ]);

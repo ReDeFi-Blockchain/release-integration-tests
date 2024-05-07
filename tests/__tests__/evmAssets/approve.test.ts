@@ -28,7 +28,7 @@ const CASES: TestCase[] = [
 for (const TEST_CASE of CASES) {
   describe(`${TEST_CASE.ASSET} asset allowance`, () => {
     it("zero for new account", async ({ eth }) => {
-      const [randomAccount1, randomAccount2] = await eth.accounts.generateV2([
+      const [randomAccount1, randomAccount2] = await eth.accounts.generate([
         {},
         {},
       ]);
@@ -42,7 +42,7 @@ for (const TEST_CASE of CASES) {
     });
 
     it("can be changed by approve", async ({ eth }) => {
-      const [owner, spender] = await eth.accounts.generateV2([
+      const [owner, spender] = await eth.accounts.generate([
         TEST_CASE.OWNER_BALANCE,
         TEST_CASE.SPENDER_BALANCE,
       ]);

@@ -4,8 +4,10 @@ import { it } from "../../fixtures/general-fixture";
 
 describe("Native token as ERC-20 allowance", () => {
   it("zero for new account", async ({ eth }) => {
-    const randomAccount1 = await eth.accounts.generate();
-    const randomAccount2 = await eth.accounts.generate();
+    const [randomAccount1, randomAccount2] = await eth.accounts.generate([
+      {},
+      {},
+    ]);
 
     const allowance = await eth.assets.NATIVE.allowance(
       randomAccount1.address,
@@ -17,8 +19,10 @@ describe("Native token as ERC-20 allowance", () => {
 
   it("can be changed by approve", async ({ eth }) => {
     const APPROVED = NAT(0.8);
-    const owner = await eth.accounts.generate(NAT(1.5));
-    const spender = await eth.accounts.generate(NAT(0.3));
+    const [owner, spender] = await eth.accounts.generate([
+      { NATIVE: NAT(1.5) },
+      { NATIVE: NAT(0.3) },
+    ]);
 
     await eth.signAndSend(
       eth.assets.NATIVE.connect(owner).approve(spender.address, APPROVED),

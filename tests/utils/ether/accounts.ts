@@ -49,7 +49,7 @@ export class EthAccount {
     return receipt;
   }
 
-  async generateV2(balances: AccountBalance[], donor = this.donor) {
+  async generate(balances: AccountBalance[], donor = this.donor) {
     let nonce = await this.donor.getNonce();
     const transfers = [];
     const wallets = [];
@@ -79,36 +79,6 @@ export class EthAccount {
             ),
           );
         }
-        nonce++;
-      }
-    }
-    await Promise.all(transfers);
-    return wallets;
-  }
-
-  async generate(balance?: bigint, donor = this.donor) {
-    const wallet = ethers.HDNodeWallet.createRandom().connect(this.provider);
-    if (balance) {
-      await this.transferNative({ to: wallet.address, value: balance }, donor);
-    }
-    return wallet;
-  }
-
-  async generateMany(balances: bigint[], donor = this.donor) {
-    let nonce = await this.donor.getNonce();
-    const transfers = [];
-    const wallets = [];
-    for (const balance of balances) {
-      const wallet = ethers.HDNodeWallet.createRandom().connect(this.provider);
-      wallets.push(wallet);
-      if (balance) {
-        transfers.push(
-          this.transferNative(
-            { to: wallet.address, value: balance },
-            donor,
-            nonce,
-          ),
-        );
         nonce++;
       }
     }

@@ -27,7 +27,7 @@ describe("Native token as ERC-20", () => {
 
   describe("should return balanceOf", () => {
     it("for non-existent account", async ({ eth }) => {
-      const newEthAccount = await eth.accounts.generate();
+      const [newEthAccount] = await eth.accounts.generate([{}]);
       const balanceOfEmpty = await eth.assets.NATIVE.balanceOf(
         newEthAccount.address,
       );
@@ -36,7 +36,7 @@ describe("Native token as ERC-20", () => {
 
     it("for account with balance", async ({ eth }) => {
       const BALANCE = NAT(0.5890002);
-      const ethAccount = await eth.accounts.generate(BALANCE);
+      const [ethAccount] = await eth.accounts.generate([{ NATIVE: BALANCE }]);
 
       const balance = await eth.assets.NATIVE.balanceOf(ethAccount.address);
       expect(balance).to.eq(BALANCE);

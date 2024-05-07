@@ -49,7 +49,7 @@ for (const TEST_CASE of CASES) {
 
     describe("should return balanceOf", () => {
       it("for non-existent account", async ({ eth }) => {
-        const [newEthAccount] = await eth.accounts.generateV2([{}]);
+        const [newEthAccount] = await eth.accounts.generate([{}]);
         const balanceOfEmpty = await eth.assets[TEST_CASE.ASSET].balanceOf(
           newEthAccount.address,
         );
@@ -57,7 +57,7 @@ for (const TEST_CASE of CASES) {
       });
 
       it("for account with balance", async ({ eth }) => {
-        const [ethAccount] = await eth.accounts.generateV2([
+        const [ethAccount] = await eth.accounts.generate([
           TEST_CASE.ACCOUNT_BALANCE,
         ]);
 

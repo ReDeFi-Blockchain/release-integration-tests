@@ -10,7 +10,7 @@ describe("Redefi EVM Tests", () => {
   let ERC20Factory: TestERC20__factory;
 
   it.before(async ({ eth }) => {
-    ethReceiver = await eth.accounts.generate();
+    [ethReceiver] = await eth.accounts.generate([{}]);
     ERC20Factory = await ethers.getContractFactory("TestERC20");
   });
 

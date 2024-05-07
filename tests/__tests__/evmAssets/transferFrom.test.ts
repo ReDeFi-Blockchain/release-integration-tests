@@ -31,7 +31,7 @@ for (const { ASSET, TKN } of CASES) {
       const TRANSFER_FROM_VALUE1 = TKN(1.2);
       const TRANSFER_FROM_VALUE2 = TKN(0.3);
 
-      const [owner, spender] = await eth.accounts.generateV2([
+      const [owner, spender] = await eth.accounts.generate([
         { NATIVE: NAT(2), [ASSET]: OWNER_BALANCE },
         { NATIVE: NAT(2), [ASSET]: SPENDER_BALANCE },
       ]);
@@ -88,7 +88,7 @@ for (const { ASSET, TKN } of CASES) {
       const ACCOUNT_BALANCE = TKN(1);
       const APPROVED_VALUE = TKN(0.8);
 
-      const [owner, spender, recipient] = await eth.accounts.generateV2([
+      const [owner, spender, recipient] = await eth.accounts.generate([
         { NATIVE: NAT(1), [ASSET]: ACCOUNT_BALANCE },
         { NATIVE: NAT(1), [ASSET]: ACCOUNT_BALANCE },
         { NATIVE: NAT(1), [ASSET]: ACCOUNT_BALANCE },
@@ -136,7 +136,7 @@ for (const { ASSET, TKN } of CASES) {
     it("transferFrom emits Transfer and Approval events", async ({ eth }) => {
       const APPROVED_VALUE = TKN(1);
 
-      const [owner, spender] = await eth.accounts.generateV2([
+      const [owner, spender] = await eth.accounts.generate([
         { NATIVE: NAT(1), [ASSET]: TKN(1) },
         { NATIVE: NAT(1) },
       ]);
@@ -169,7 +169,7 @@ for (const { ASSET, TKN } of CASES) {
       const TRANSFER_FROM_VALUE_1 = TKN(0.6);
       const TRANSFER_FROM_VALUE_2 = APPROVE_VALUE - TRANSFER_FROM_VALUE_1 + 1n;
 
-      const [owner, spender] = await eth.accounts.generateV2([
+      const [owner, spender] = await eth.accounts.generate([
         { NATIVE: NAT(1), [ASSET]: TKN(1) },
         { NATIVE: NAT(1) },
       ]);
@@ -220,7 +220,7 @@ for (const { ASSET, TKN } of CASES) {
       it("does not decrease the spender allowance", async ({ eth }) => {
         const TRANSFER_FROM_VALUE = TKN(0.8);
 
-        const [owner, spender] = await eth.accounts.generateV2([
+        const [owner, spender] = await eth.accounts.generate([
           { NATIVE: NAT(1), [ASSET]: TKN(1) },
           { NATIVE: NAT(1) },
         ]);
@@ -255,7 +255,7 @@ for (const { ASSET, TKN } of CASES) {
       it("does not emit an approval event", async ({ eth }) => {
         const TRANSFER_FROM_VALUE = TKN(0.8);
 
-        const [owner, spender] = await eth.accounts.generateV2([
+        const [owner, spender] = await eth.accounts.generate([
           { NATIVE: NAT(1), [ASSET]: TKN(1) },
           { NATIVE: NAT(1) },
         ]);

@@ -13,7 +13,7 @@ describe("Native token as ERC-20", () => {
   const TRANSFER_VALUE = NAT("14.1234567891012345678");
 
   it.beforeEach(async ({ eth }) => {
-    [sender, receiver] = await eth.accounts.generateV2([
+    [sender, receiver] = await eth.accounts.generate([
       { NATIVE: SENDER_BALANCE },
       {},
     ]);
