@@ -192,7 +192,9 @@ describe("Native token as ERC-20", () => {
     ).revertedWith("ERC20InsufficientAllowance");
   });
 
-  // FIXME: wait for uin256 support
+  // NOTE: @openzeppelin uses u256.max for unlimited allowance
+  // but Substrate can only work with u128 out of the box
+  // TODO: use u128.max for unlimited allowance
   describe.skip("when unlimited allowance", () => {
     it("does not decrease the spender allowance", async ({ eth }) => {
       const [approver, spender] = await eth.accounts.generateMany([

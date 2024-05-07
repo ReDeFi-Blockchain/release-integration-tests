@@ -1,7 +1,6 @@
 import { CurrencyConverter, GBP, NAT } from "../../utils/currency";
 import { expect } from "chai";
 import { expectWait } from "../../utils/matchers/expectWait";
-import { ethers } from "ethers";
 import { it } from "../../fixtures/general-fixture";
 import { AccountAssetType } from "../../utils/types";
 
@@ -213,8 +212,11 @@ for (const { ASSET, TKN } of CASES) {
       ).revertedWith("ERC20InsufficientAllowance");
     });
 
-    // FIXME: wait for uin256 support
-    describe.skip("when unlimited allowance", () => {
+    // NOTE: @openzeppelin uses u256.max for unlimited allowance
+    // but Substrate can only work with u128 out of the box
+    describe("when unlimited allowance", () => {
+      const maxUint128 = 2n ** 128n - 1n;
+
       it("does not decrease the spender allowance", async ({ eth }) => {
         const TRANSFER_FROM_VALUE = TKN(0.8);
 
@@ -225,17 +227,14 @@ for (const { ASSET, TKN } of CASES) {
 
         // Approve unlimited
         await eth.signAndSend(
-          eth.assets[ASSET].connect(owner).approve(
-            spender.address,
-            ethers.MaxUint256,
-          ),
+          eth.assets[ASSET].connect(owner).approve(spender.address, maxUint128),
         );
 
         const allowanceBefore = await eth.assets[ASSET].allowance(
           owner.address,
           spender.address,
         );
-        expect(allowanceBefore).to.eq(ethers.MaxUint256);
+        expect(allowanceBefore).to.eq(maxUint128);
 
         await eth.signAndSend(
           eth.assets[ASSET].connect(spender).transferFrom(
@@ -250,7 +249,7 @@ for (const { ASSET, TKN } of CASES) {
           spender.address,
         );
         // Allowance does not decreased
-        expect(allowanceAfter).to.eq(ethers.MaxUint256);
+        expect(allowanceAfter).to.eq(maxUint128);
       });
 
       it("does not emit an approval event", async ({ eth }) => {
@@ -263,10 +262,7 @@ for (const { ASSET, TKN } of CASES) {
 
         // Approve unlimited
         await eth.signAndSend(
-          eth.assets[ASSET].connect(owner).approve(
-            spender.address,
-            ethers.MaxUint256,
-          ),
+          eth.assets[ASSET].connect(owner).approve(spender.address, maxUint128),
         );
 
         await expectWait(
