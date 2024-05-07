@@ -8,14 +8,13 @@ export const it = createTestSuite({
     setup: async () => {
       const testFileName = module.parent?.filename;
       if (!testFileName) throw Error("Cannot determine test name");
-      return EtherHelper.init(testFileName, config.wsEndpoint);
+      return EtherHelper.init(testFileName, config.rpcEndpoint);
     },
     teardown: async () => {},
   },
   sub: {
     setup: async () => {
-      const sub = await SubHelper.init(config.wsEndpoint);
-      return sub;
+      return SubHelper.init(config.wsEndpoint);
     },
     teardown: async () => {},
   },

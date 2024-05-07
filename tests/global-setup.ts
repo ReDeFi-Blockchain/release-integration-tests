@@ -3,19 +3,44 @@ import path from "path";
 import SubHelper from "./utils/substrate";
 import { getFilenameWallet } from "./utils/filename-wallet";
 import config from "./utils/config";
+import { NAT, GBP } from "./utils/currency";
+import { ASSETS, NETWORK_CONSTANTS } from "./utils/constants";
 
 export async function mochaGlobalSetup() {
   console.log("💰 depositing funds into the sponsors' accounts...");
   const testFiles = await findTestFiles("__tests__");
   const sub = await SubHelper.init(config.wsEndpoint);
 
-  const transferParams = [];
+  // Get existing Asset on chain (opposite one to the native token)
+  // RED for Relay, BAX for Parachain
+  const baxOrRedAddress =
+    (await sub.system.getChainId()) === NETWORK_CONSTANTS.RELAY.CHAIN_ID
+      ? ASSETS.RED.ADDRESS
+      : ASSETS.BAX.ADDRESS;
+
+  // Transfer Native tokens and Assets to "Filename accounts"
+  const transferParamsNative = [];
+  const transferParamsGBP = [];
+  const transferParamsBAXorRED = [];
+
   for (const file of testFiles) {
     const wallet = getFilenameWallet(file);
-    transferParams.push({ to: wallet.address, value: 10000n * 10n ** 18n });
+    transferParamsNative.push({ to: wallet.address, value: NAT(10000) });
+    transferParamsGBP.push({
+      to: wallet.address,
+      value: GBP(100),
+      erc20: ASSETS.GBP.ADDRESS,
+    });
+    transferParamsBAXorRED.push({
+      to: wallet.address,
+      value: NAT(100),
+      erc20: baxOrRedAddress,
+    });
   }
 
-  await sub.account.batchTransfer(transferParams, sub.donor);
+  await sub.account.batchTransferNative(transferParamsNative, sub.donor);
+  await sub.account.batchTransferAsset(transferParamsGBP, sub.donor);
+  await sub.account.batchTransferAsset(transferParamsBAXorRED, sub.donor);
 
   console.log("The sponsors' balance has been topped up!");
 

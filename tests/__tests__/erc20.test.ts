@@ -1,5 +1,5 @@
 import { HDNodeWallet } from "ethers";
-import { BAX } from "../utils/currency";
+import { NAT } from "../utils/currency";
 import { ethers } from "hardhat";
 import { TestERC20__factory } from "../typechain-types";
 import { expect } from "chai";
@@ -10,7 +10,7 @@ describe("Redefi EVM Tests", () => {
   let ERC20Factory: TestERC20__factory;
 
   it.before(async ({ eth }) => {
-    ethReceiver = await eth.accounts.generate();
+    [ethReceiver] = await eth.accounts.generate([{}]);
     ERC20Factory = await ethers.getContractFactory("TestERC20");
   });
 
@@ -29,11 +29,9 @@ describe("Redefi EVM Tests", () => {
         .then((c) => c.waitForDeployment());
 
       expect(await erc20Contract.decimals()).to.be.equal(18);
-      const mintTx = await erc20Contract.mint(eth.donor.address, BAX(1));
+      const mintTx = await erc20Contract.mint(eth.donor.address, NAT(1));
       await mintTx.wait();
-      expect(await erc20Contract.balanceOf(eth.donor.address)).to.deep.equal(
-        BAX(1),
-      );
+      expect(await erc20Contract.balanceOf(eth.donor.address)).to.equal(NAT(1));
 
       const mintToWalletEventFilter = erc20Contract.filters.Transfer(
         undefined,
@@ -46,7 +44,7 @@ describe("Redefi EVM Tests", () => {
       expect(events.length).to.not.equal(0);
 
       const transferTx = await eth.signAndSend(
-        erc20Contract.transfer(ethReceiver.address, BAX(0.5), {
+        erc20Contract.transfer(ethReceiver.address, NAT(0.5), {
           from: eth.donor.address,
         }),
       );
@@ -56,12 +54,12 @@ describe("Redefi EVM Tests", () => {
       const walletBalanceAfterTransfer = await erc20Contract.balanceOf(
         eth.donor.address,
       );
-      expect(walletBalanceAfterTransfer).to.deep.equal(BAX(0.5));
+      expect(walletBalanceAfterTransfer).to.equal(NAT(0.5));
 
       const receiverBalanceAfterTransfer = await erc20Contract.balanceOf(
         ethReceiver.address,
       );
-      expect(receiverBalanceAfterTransfer).to.deep.equal(BAX(0.5));
+      expect(receiverBalanceAfterTransfer).to.equal(NAT(0.5));
     });
   });
 });

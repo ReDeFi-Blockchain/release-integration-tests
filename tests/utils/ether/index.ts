@@ -1,45 +1,51 @@
 import {
   ContractTransactionResponse,
   HDNodeWallet,
-  WebSocketProvider,
+  JsonRpcProvider,
   ethers,
 } from "ethers";
-import { TestERC20, TestERC20__factory } from "../../typechain-types";
-import { NETWORK_CONSTANTS, NetworkConstants } from "../constants";
-import { EthAccount } from "./accounts";
+import { ERC20, ERC20__factory } from "../../typechain-types";
+import { NETWORK_CONSTANTS } from "../constants";
 import { getFilenameWallet } from "../filename-wallet";
+import { AccountAssetType, NetworkConstants } from "../types";
+import { EthAccount } from "./accounts";
 
 export default class EtherHelper {
-  readonly provider: ethers.WebSocketProvider;
-  readonly nativeErc20: TestERC20;
-  readonly donor: HDNodeWallet;
+  // NOTE: Use JsonRpcProvider instead of WebSocketProvider.
+  // Ethers contains a bug where the nonce may not increment on time on fast nodes.
+  readonly provider: JsonRpcProvider;
   readonly accounts: EthAccount;
+  readonly assets: Record<AccountAssetType, ERC20>;
+  readonly donor: HDNodeWallet;
   readonly CONSTANTS: NetworkConstants;
 
   private constructor(
     filenameOrWallet: HDNodeWallet | string,
-    provider: WebSocketProvider,
+    provider: JsonRpcProvider,
     constants: NetworkConstants,
   ) {
     this.provider = provider;
     this.CONSTANTS = constants;
-    this.nativeErc20 = TestERC20__factory.connect(
-      constants.NATIVE_ERC20,
-      this.provider,
-    );
+    this.assets = {
+      NATIVE: ERC20__factory.connect(constants.NATIVE.ADDRESS, this.provider),
+      SIBLING: ERC20__factory.connect(constants.SIBLING.ADDRESS, this.provider),
+      GBP: ERC20__factory.connect(constants.GBP.ADDRESS, this.provider),
+    };
 
     if (typeof filenameOrWallet === "string") {
       this.donor = getFilenameWallet(filenameOrWallet).connect(this.provider);
-    } else this.donor = filenameOrWallet.connect(this.provider);
+    } else {
+      this.donor = filenameOrWallet.connect(this.provider);
+    }
 
-    this.accounts = new EthAccount(this.provider, this.donor);
+    this.accounts = new EthAccount(this.provider, this.assets, this.donor);
   }
 
   static async init(
     filenameOrWallet: HDNodeWallet | string,
-    wsEndpoint: string,
+    rpcEndpoint: string,
   ) {
-    const provider = new ethers.WebSocketProvider(wsEndpoint);
+    const provider = new ethers.JsonRpcProvider(rpcEndpoint);
     const { chainId } = await provider.getNetwork();
     const constants =
       chainId === NETWORK_CONSTANTS.PARACHAIN.CHAIN_ID
@@ -49,6 +55,7 @@ export default class EtherHelper {
     return new EtherHelper(filenameOrWallet, provider, constants);
   }
 
+  // TODO rename
   async signAndSend(tx: Promise<ContractTransactionResponse>) {
     const transaction = await tx;
     const receipt = await transaction.wait();
