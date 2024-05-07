@@ -11,6 +11,8 @@ import { AccountAssetType, NetworkConstants } from "../types";
 import { EthAccount } from "./accounts";
 
 export default class EtherHelper {
+  // NOTE: Use JsonRpcProvider instead of WebSocketProvider.
+  // Ethers contains a bug where the nonce may not increment on time on fast nodes.
   readonly provider: JsonRpcProvider;
   readonly accounts: EthAccount;
   readonly assets: Record<AccountAssetType, ERC20>;
