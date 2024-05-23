@@ -1,0 +1,41 @@
+name: test reusable vars
+
+# Triger: only call from main workflow(re-usable workflows)
+on:
+  workflow_call:
+    inputs:
+      relay-node-branch:
+        type: string
+        description: branch to build
+        default: main
+
+
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  test-reusable-vars:
+
+    runs-on: [ self-hosted ]
+    timeout-minutes: 2880           # 48 hours for execution jobs.
+
+    name: test-reusable-vars
+
+    steps:
+      - name: Clean Workspace
+        if: always()
+        uses: AutoModality/action-clean@v1.1.0
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3.1.0
+        with:
+          ref: ${{ github.head_ref }}  #Checking out head commit
+
+      # # Prepare SHA  
+      # - name: Prepare SHA
+      #   uses: ./.github/actions/prepare
+
+      - name: Test reusable vars
+        id: test-reusable-vars
+        run: |
+          echo "Relay node branch: ${{ inputs.relay-node-branch }}"

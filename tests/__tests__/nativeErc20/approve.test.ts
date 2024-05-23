@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { NAT } from "../../utils/currency";
-import { it } from "../../fixtures/general-fixture";
+import { it } from "../../fixtures/standalone";
 
 describe("Native token as ERC-20 allowance", () => {
   it("zero for new account", async ({ eth }) => {
@@ -24,7 +24,7 @@ describe("Native token as ERC-20 allowance", () => {
       { NATIVE: NAT(0.3) },
     ]);
 
-    await eth.signAndSend(
+    await eth.waitForResult(
       eth.assets.NATIVE.connect(owner).approve(spender.address, APPROVED),
     );
 
@@ -37,7 +37,7 @@ describe("Native token as ERC-20 allowance", () => {
     expect(allowance).to.eq(APPROVED);
 
     // Decrease approve value
-    await eth.signAndSend(
+    await eth.waitForResult(
       eth.assets.NATIVE.connect(owner).approve(spender.address, 0),
     );
 

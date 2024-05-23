@@ -3,7 +3,7 @@ import { NAT } from "../utils/currency";
 import { ethers } from "hardhat";
 import { TestERC20__factory } from "../typechain-types";
 import { expect } from "chai";
-import { it } from "../fixtures/general-fixture";
+import { it } from "../fixtures/standalone";
 
 describe("Redefi EVM Tests", () => {
   let ethReceiver: HDNodeWallet;
@@ -43,7 +43,7 @@ describe("Redefi EVM Tests", () => {
       );
       expect(events.length).to.not.equal(0);
 
-      const transferTx = await eth.signAndSend(
+      const transferTx = await eth.waitForResult(
         erc20Contract.transfer(ethReceiver.address, NAT(0.5), {
           from: eth.donor.address,
         }),

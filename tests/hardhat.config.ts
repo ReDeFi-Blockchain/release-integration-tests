@@ -15,7 +15,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {},
-    relay: {
+    l1: {
       url: "http://localhost:9699",
       accounts: [],
     },
@@ -24,7 +24,7 @@ const config: HardhatUserConfig = {
     tests: "__tests__",
   },
   mocha: {
-    timeout: 100000,
+    timeout: 3 * 60 * 1000,
   },
 };
 

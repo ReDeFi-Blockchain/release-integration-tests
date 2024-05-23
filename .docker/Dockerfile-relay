@@ -25,17 +25,25 @@ RUN echo "Using Rust $RUST_TOOLCHAIN" && \
 
 
 # ===== BUILD =====
-FROM rust-builder as builder-runtime-wasm
+FROM rust-builder as builder-relay-bin
 
-RUN git clone -b main --depth 1 https://github.com/ReDeFi-Blockchain/redefi-relay-runtime.git /redefi-relay-runtime-src && \
-    cd /redefi-relay-runtime-src && \
-    CARGO_INCREMENTAL=0 cargo build --profile=production --locked
+RUN mkdir /redefi
+
+ARG REDEFI_RELAY
+
+RUN git clone -b $REDEFI_RELAY --depth 1 https://github.com/ReDeFi-Blockchain/redefi-relay-node.git /redefi-relay-node-src && \
+    cd /redefi-relay-node-src && \
+    CARGO_INCREMENTAL=0 cargo build --profile=release --locked && \
+    mv ./target/release/polkadot /redefi/ && \
+    mv ./target/release/polkadot-execute-worker /redefi/ && \
+    mv ./target/release/polkadot-prepare-worker /redefi/
 
 #===== BIN ======
 
 FROM ubuntu:22.04
 
-RUN mkdir /redefi
+COPY --from=builder-relay-bin /redefi/polkadot /bin/polkadot
+COPY --from=builder-relay-bin /redefi/polkadot-execute-worker /bin/polkadot-execute-worker
+COPY --from=builder-relay-bin /redefi/polkadot-prepare-worker /bin/polkadot-prepare-worker
 
-COPY --from=builder-runtime-wasm /redefi-relay-runtime-src/target/production/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm /redefi/redefi_runtime.compact.compressed.wasm
-
+ENTRYPOINT ["/bin/polkadot"]
