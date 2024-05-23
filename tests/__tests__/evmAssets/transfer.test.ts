@@ -1,7 +1,7 @@
 import { GBP, NAT } from "../../utils/currency";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { it } from "../../fixtures/general-fixture";
+import { it } from "../../fixtures/standalone";
 import { expectWait } from "../../utils/matchers/expectWait";
 import { AccountAssetType, AccountBalance } from "../../utils/types";
 import { HDNodeWallet } from "ethers";
@@ -41,7 +41,7 @@ for (const TEST_CASE of CASES) {
     });
 
     it("can be sent by transfer", async ({ eth }) => {
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets[TEST_CASE.ASSET]
           .connect(sender)
           .transfer(receiver.address, TEST_CASE.TRANSFER_VALUE),
@@ -80,7 +80,7 @@ for (const TEST_CASE of CASES) {
     });
 
     it("can transfer full balance", async ({ eth }) => {
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets[TEST_CASE.ASSET]
           .connect(sender)
           .transfer(receiver.address, TEST_CASE.SENDER_BALANCE),

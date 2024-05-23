@@ -1,7 +1,7 @@
 import { CurrencyConverter, GBP, NAT } from "../../utils/currency";
 import { expect } from "chai";
 import { expectWait } from "../../utils/matchers/expectWait";
-import { it } from "../../fixtures/general-fixture";
+import { it } from "../../fixtures/standalone";
 import { AccountAssetType } from "../../utils/types";
 
 type TestCase = {
@@ -36,14 +36,14 @@ for (const { ASSET, TKN } of CASES) {
         { NATIVE: NAT(2), [ASSET]: SPENDER_BALANCE },
       ]);
 
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets[ASSET].connect(owner).approve(
           spender.address,
           APPROVE_VALUE,
         ),
       );
 
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets[ASSET].connect(spender).transferFrom(
           owner.address,
           spender.address,
@@ -67,7 +67,7 @@ for (const { ASSET, TKN } of CASES) {
 
       // Can transferFrom the remaining amount
 
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets[ASSET].connect(spender).transferFrom(
           owner.address,
           spender.address,
@@ -95,7 +95,7 @@ for (const { ASSET, TKN } of CASES) {
       ]);
 
       // approve
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets[ASSET].connect(owner).approve(
           spender.address,
           APPROVED_VALUE,
@@ -141,7 +141,7 @@ for (const { ASSET, TKN } of CASES) {
         { NATIVE: NAT(1) },
       ]);
 
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets[ASSET].connect(owner).approve(
           spender.address,
           APPROVED_VALUE,
@@ -174,7 +174,7 @@ for (const { ASSET, TKN } of CASES) {
         { NATIVE: NAT(1) },
       ]);
 
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets[ASSET].connect(owner).approve(
           spender.address,
           APPROVE_VALUE,
@@ -193,7 +193,7 @@ for (const { ASSET, TKN } of CASES) {
       ).revertedWith("ERC20InsufficientAllowance");
 
       // Assert - cannot transfer more than left after transfer
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets[ASSET].connect(spender).transferFrom(
           owner.address,
           spender.address,
@@ -226,7 +226,7 @@ for (const { ASSET, TKN } of CASES) {
         ]);
 
         // Approve unlimited
-        await eth.signAndSend(
+        await eth.waitForResult(
           eth.assets[ASSET].connect(owner).approve(spender.address, maxUint128),
         );
 
@@ -236,7 +236,7 @@ for (const { ASSET, TKN } of CASES) {
         );
         expect(allowanceBefore).to.eq(maxUint128);
 
-        await eth.signAndSend(
+        await eth.waitForResult(
           eth.assets[ASSET].connect(spender).transferFrom(
             owner.address,
             spender.address,
@@ -261,7 +261,7 @@ for (const { ASSET, TKN } of CASES) {
         ]);
 
         // Approve unlimited
-        await eth.signAndSend(
+        await eth.waitForResult(
           eth.assets[ASSET].connect(owner).approve(spender.address, maxUint128),
         );
 

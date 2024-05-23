@@ -1,0 +1,36 @@
+name: Build or pull container
+description: ''
+inputs:
+  container:
+    description: Which name to fetch/push
+    required: true
+  tag:
+    description: Which tag to fetch/push
+    required: true
+  context:
+    description: Container context
+    required: true
+    default: "."
+  dockerfile:
+    description: Path to dockerfile (relative to context)
+    required: true
+  args:
+    description: Docker build extra args
+    default: ''
+outputs:
+  name:
+    description: Full container name
+    value: ${{ steps.build.outputs.name }}
+runs:
+  using: "composite"
+  steps:
+    - name: Build ${{ inputs.container }}:${{ inputs.tag }}
+      id: build
+      run: |
+        cd "${{ inputs.context }}" && docker build --file "${{ inputs.dockerfile }}" \
+          $BUILD_ARGS --tag ${{ inputs.container }}:${{ inputs.tag }} \
+          .
+        echo "name=${{ inputs.container }}:${{ inputs.tag }}" >> $GITHUB_OUTPUT
+      env:
+        BUILD_ARGS: ${{ inputs.args }}
+      shell: bash

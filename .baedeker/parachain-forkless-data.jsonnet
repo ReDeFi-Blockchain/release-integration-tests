@@ -1,8 +1,9 @@
 local
 m = import 'baedeker-library/mixin/spec.libsonnet',
+rm = import 'baedeker-library/mixin/raw-spec.libsonnet',
 ;
 
-function(relay_spec)
+function(relay_spec, forked_spec, fork_source)
 
 local relay = {
 	name: 'redefi-relay',
@@ -17,15 +18,36 @@ local relay = {
 		{
 			name: 'redefi',
 			id: 'redefi',
-			properties: {
-				tokenDecimals: 18,
-				tokenSymbol: "BAX"
-			},
 			_code: cql.toHex(importbin '../redefi_runtime.compact.compressed.wasm'),
 		},
 		m.unsimplifyGenesisName(),
 		]),
-	}},
+	}
+		Raw:{
+		local modifyRaw = bdk.mixer([
+			rm.resetNetworking($),
+			rm.decodeSpec(),
+			rm.polkaLaunchPara($),
+			rm.reencodeSpec(),
+		]),
+		raw_spec: modifyRaw({
+			name: "Unused",
+			id: "%s_local" % forked_spec,
+			bootNodes: error "override me",
+			chainType: error "override me",
+			telemetryEndpoints: error "override me",
+			codeSubstitutes: error "override me",
+			relay_chain: "unused",
+			genesis: {
+				raw: {
+					top: cql.chain(fork_source).latest._preloadKeys._raw,
+					childrenDefault: {},
+				},
+			},
+		}),
+	}	
+	
+	},
 	nodes: {
 		[name]: {
 			bin: 'bin/redefi-relay',
@@ -42,7 +64,7 @@ local relay = {
 local parachain = {
 	name: 'redefi-parachain',
 	bin: 'bin/redefi-collator',
-	paraId: 2001,
+	paraId: 1001,
 	spec: {Genesis:{
 		modify:: m.genericPara($),
 	}},
