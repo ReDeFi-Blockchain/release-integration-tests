@@ -1,6 +1,6 @@
 #===== Rust builder =====
 FROM ubuntu:22.04 as rust-builder
-LABEL maintainer="Unique.Network"
+LABEL maintainer="ReDeFi"
 
 ENV CARGO_HOME="/cargo-home"
 ENV PATH="/cargo-home/bin:$PATH"

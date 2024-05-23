@@ -2,7 +2,7 @@
   "name": "redefi_deploy_test",
   "version": "0.0.1",
   "main": "index.js",
-  "author": "Unique Network",
+  "author": "ReDeFi",
   "license": "Apache-2.0",
   "scripts": {
     "test": "yarn test:setup && npx hardhat test --parallel",
