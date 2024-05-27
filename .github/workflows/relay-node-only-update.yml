@@ -47,7 +47,7 @@ jobs:
         id: redefi-relay-runtime
         with:
           container: redefi-relay-runtime
-          tag: redefi-relay-runtime
+          tag: latest
           context: .docker
           dockerfile: Dockerfile-redefi-relay-runtime.yml
           args: |
@@ -56,14 +56,14 @@ jobs:
 
       - name: Copy runtime wasm file to host
         run: |
-          docker run -v $PWD:/infra --rm --entrypoint cp redefi-relay-runtime /redefi/redefi_runtime.compact.compressed.wasm /infra/
+          docker run -v $PWD:/infra --rm --entrypoint cp redefi-relay-runtime:latest /redefi/redefi_runtime.compact.compressed.wasm /infra/
    
       - name: Prepare redefi-relay mainnet container
         uses: ./.github/actions/buildContainer
         id: redefi-relay-mainnet
         with:
           container: redefi-relay
-          tag: redefi-relay-mainnet
+          tag: mainnet
           context: .docker
           dockerfile: Dockerfile-redefi-relay.yml
           args: |
@@ -75,7 +75,7 @@ jobs:
         id: redefi-relay-latest
         with:
           container: redefi-relay
-          tag: redefi-relay-latest
+          tag: latest
           context: .docker
           dockerfile: Dockerfile-redefi-relay.yml
           args: |
