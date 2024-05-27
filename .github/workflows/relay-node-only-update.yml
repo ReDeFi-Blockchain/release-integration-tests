@@ -1,0 +1,196 @@
+name: nodes-only update
+
+# Triger: only call from main workflow(re-usable workflows)
+on:
+  workflow_call:
+
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  node-only-update:
+
+    runs-on: [ redefi-03 ]
+
+    timeout-minutes: 2880           # 48 hours for execution jobs.
+
+    name: node-only-update
+   
+    steps:
+
+      - name: Skip if pull request is in Draft
+        if: github.event.pull_request.draft == true
+        run: exit 1
+
+      - name: Clean Workspace
+        uses: AutoModality/action-clean@v1.1.0
+
+      # # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # - uses: actions/checkout@v3.1.0
+      #   with:
+      #     ref: ${{ github.head_ref }}  #Checking out head commit
+
+      # # Prepare SHA  
+      # - name: Prepare SHA
+      #   uses: ./.github/actions/prepare
+
+      - name: Read .env file
+        uses: xom9ikk/dotenv@v2
+
+      - name: Pull polkadot image from official repository
+        run: |
+          docker pull parity/polkadot:v1.7.0
+
+      - name: Generate ENV related extend Dockerfile file for redefi-relay-runtime
+        uses: cuchi/jinja2-action@v1.2.0
+        with:
+          template: .docker/Dockerfile-redefi-relay-runtime.j2
+          output_file: .docker/Dockerfile-redefi-relay-runtime.yml
+          variables: |
+            RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
+            REDEFI_RELAY_RUNTIME=${{ env.REDEFI_RELAY_RUNTIME_VERSION }}
+
+      - name: Prepare redefi-relay-runtime container
+        uses: ./.github/actions/buildContainer
+        id: redefi-relay-runtime
+        with:
+          container: redefi-relay-runtime
+          tag: redefi-relay-runtime
+          context: .docker
+          dockerfile: Dockerfile-redefi-relay-runtime.yml
+
+      - name: Copy runtime wasm file to host
+        run: |
+          docker run -v $PWD:/infra --rm --entrypoint cp redefi-relay-runtime /redefi/redefi_runtime.compact.compressed.wasm /infra/
+
+   
+      - name: Generate ENV related extend Dockerfile file for redefi-relay-mainnet
+        uses: cuchi/jinja2-action@v1.2.0
+        with:
+          template: .docker/Dockerfile-redefi-relay.j2
+          output_file: .docker/Dockerfile-redefi-relay-mainnet.yml
+          variables: |
+            RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
+            REDEFI_RELAY=${{ env.REDEFI_RELAY_MAINNET_VERSION }}
+
+      - name: Prepare node-redefi-relay mainnet container
+        uses: ./.github/actions/buildContainer
+        id: redefi-relay-mainnet
+        with:
+          container: redefi-relay
+          tag: redefi-relay-mainnet
+          context: .docker
+          dockerfile: Dockerfile-redefi-relay-mainnet.yml
+
+
+      - name: Generate ENV related extend Dockerfile file for redefi-relay-latest
+        uses: cuchi/jinja2-action@v1.2.0
+        with:
+          template: .docker/Dockerfile-redefi-relay.j2
+          output_file: .docker/Dockerfile-redefi-relay-latest.yml
+          variables: |
+            RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
+            REDEFI_RELAY=${{ env.REDEFI_RELAY_LATEST_VERSION }}
+
+      - name: Prepare node-redefi-relay latest container
+        uses: ./.github/actions/buildContainer
+        id: redefi-relay-latest
+        with:
+          container: redefi-relay
+          tag: redefi-relay-latest
+          context: .docker
+          dockerfile: Dockerfile-redefi-relay.yml
+
+      - uses: actions/setup-node@v3.5.1
+        with:
+          node-version: 20
+
+      - name: Install baedeker
+        uses: UniqueNetwork/baedeker-action/setup@built
+
+      - name: Setup library
+        run: mkdir -p .baedeker/vendor/ && git clone https://github.com/UniqueNetwork/baedeker-library .baedeker/vendor/baedeker-library
+
+      - name: Start network
+        uses: UniqueNetwork/baedeker-action@built
+        id: bdk
+        with:
+          jpath: |
+            .baedeker/vendor
+          tla-str: |
+            relay_spec=redefi-local
+          inputs: |
+            .baedeker/redefi.jsonnet
+            ephemeral:snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}})
+
+      - name: Run Parallel tests before Node upgrade
+        working-directory: /tests
+        if: success()
+        run: |
+          yarn
+          yarn add mochawesome
+          ./scripts/wait_for_first_block.sh
+          echo "Ready to start tests"
+          NOW=$(date +%s) && yarn testParallel --reporter mochawesome --reporter-options reportFilename=test-parallel-${NOW}
+        env:
+          RPC_URL: ${{ env.RELAY_HTTP_URL }}
+
+      - name: Run Sequential tests before Node Parachain upgrade
+        if: success() || failure()
+        working-directory: /tests
+        run: NOW=$(date +%s) && yarn testSequential --reporter mochawesome --reporter-options reportFilename=test-sequential-${NOW}
+        env:
+          RPC_URL: ${{ env.RELAY_HTTP_URL }}
+
+      - name: "Reconcile: only one old node"
+        if: success() || failure()
+        uses: UniqueNetwork/baedeker-action/reconcile@built
+        with:
+          baedeker: ${{ steps.bdk.outputs.baedeker }}
+          # Chain should always be built with the mainnet spec, this we first set binary for all nodes expect one, then set mainnet binary for the last node, and then force chainspec to be still generated from mainnet
+          inputs: |
+            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-latest.outputs.name }}'}}, leave = 1, for_chain = false)
+            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}}, for_chain = false)
+            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}})
+
+      - name: Ensure network is alive
+        working-directory: /tests
+        if: success()
+        run: |
+          ./scripts/wait_for_first_block.sh
+        env:
+          RPC_URL: ${{ env.RELAY_HTTP_URL }}
+
+      - name: "Reconcile: all nodes are updated"
+        if: success() || failure()
+        uses: UniqueNetwork/baedeker-action/reconcile@built
+        with:
+          baedeker: ${{ steps.bdk.outputs.baedeker }}
+          # Chain should always be built with the mainnet spec, this we first set binary for all nodes, and then force chainspec to be still generated from mainnet
+          inputs: |
+            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/unique':{dockerImage:'${{ steps.redefi-relay-latest.outputs.name }}'}}, for_chain = false)
+            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/unique':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}})
+
+      - name: Run Parallel tests after Node Parachain upgrade
+        working-directory: /tests
+        if: success() || failure()    # run this step even if previous step failed
+        run: |
+          yarn install
+          yarn add mochawesome
+          ./scripts/wait_for_first_block.sh
+          echo "Ready to start tests"
+          NOW=$(date +%s) && yarn testParallel --reporter mochawesome --reporter-options reportFilename=test-parallel-${NOW}
+        env:
+          RPC_URL: ${{ env.RELAY_HTTP_URL }}
+
+      - name: Run Sequential tests after Node Parachain upgrade
+        if: success() || failure()
+        working-directory: /tests
+        run: NOW=$(date +%s) && yarn testSequential --reporter mochawesome --reporter-options reportFilename=test-sequential-${NOW}
+        env:
+          RPC_URL: ${{ env.RELAY_HTTP_URL }}
+
+      - name: Remove builder cache
+        if: always()                   # run this step always
+        run: |
+          docker system prune -f

@@ -1,0 +1,29 @@
+# .github/actions/prepare/action.yml
+name: 'Preparation'
+description: ''
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Environment (PR)  
+      if: ${{ github.event_name == 'pull_request' }}  
+      shell: bash  
+      run: |  
+        echo "LAST_COMMIT_SHA=${{ github.event.pull_request.head.sha }}" >> ${GITHUB_ENV}  
+    - name: Setup Environment (Push)  
+      if: ${{ github.event_name == 'push' }}  
+      shell: bash  
+      run: |  
+        echo "LAST_COMMIT_SHA=${GITHUB_SHA}" >> ${GITHUB_ENV}
+    - name: Run find-and-replace to remove slashes from branch name
+      uses: mad9000/actions-find-and-replace-string@4
+      id: ref_slug
+      with:
+        source: ${{ github.head_ref }}
+        find: '/'
+        replace: '-'
+    - name: Set BUILD_SHA, REF_SLUG
+      shell: bash
+      run: |
+        echo "BUILD_SHA=${LAST_COMMIT_SHA:0:8}" >> $GITHUB_ENV
+        echo "REF_SLUG=${{ steps.ref_slug.outputs.value }}" >> $GITHUB_ENV
+
