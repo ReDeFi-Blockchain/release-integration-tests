@@ -98,13 +98,15 @@ jobs:
         with:
           jpath: |
             .baedeker/vendor
+          tla-str: |
+            relay_spec=${{ env.RELAY_CHAIN_TYPE }}-local            
           inputs: |
             .baedeker/redefi.jsonnet
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/polkadot':{dockerImage:'parity/polkadot:v1.7.0'}})
             ephemeral:snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}})
 
       - name: Run Parallel tests before Node upgrade
-        working-directory: /tests
+        working-directory: ./tests
         if: success()
         run: |
           yarn
@@ -117,7 +119,7 @@ jobs:
 
       - name: Run Sequential tests before Node Parachain upgrade
         if: success() || failure()
-        working-directory: /tests
+        working-directory: ./tests
         run: NOW=$(date +%s) && yarn testSequential --reporter mochawesome --reporter-options reportFilename=test-sequential-${NOW}
         env:
           RPC_URL: ${{ env.RELAY_HTTP_URL }}
@@ -134,7 +136,7 @@ jobs:
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}})
 
       - name: Ensure network is alive
-        working-directory: /tests
+        working-directory: ./tests
         if: success()
         run: |
           ./scripts/wait_for_first_block.sh
@@ -152,7 +154,7 @@ jobs:
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/unique':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}})
 
       - name: Run Parallel tests after Node Parachain upgrade
-        working-directory: /tests
+        working-directory: ./tests
         if: success() || failure()    # run this step even if previous step failed
         run: |
           yarn install
@@ -165,7 +167,7 @@ jobs:
 
       - name: Run Sequential tests after Node Parachain upgrade
         if: success() || failure()
-        working-directory: /tests
+        working-directory: ./tests
         run: NOW=$(date +%s) && yarn testSequential --reporter mochawesome --reporter-options reportFilename=test-sequential-${NOW}
         env:
           RPC_URL: ${{ env.RELAY_HTTP_URL }}
