@@ -23,6 +23,7 @@ jobs:
         run: exit 1
 
       - name: Clean Workspace
+        if: always()
         uses: AutoModality/action-clean@v1.1.0
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
