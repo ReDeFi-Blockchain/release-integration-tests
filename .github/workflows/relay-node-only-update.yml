@@ -56,7 +56,7 @@ jobs:
 
       - name: Copy runtime wasm file to host
         run: |
-          docker run -v $PWD:/infra --rm --entrypoint cp redefi-relay-runtime:latest /redefi/redefi_runtime.compact.compressed.wasm /infra/
+          docker run -v $PWD:/infra --rm --entrypoint cp ${{ steps.redefi-relay-runtime.outputs.name }} /redefi/redefi_runtime.compact.compressed.wasm /infra/
    
       - name: Prepare redefi-relay mainnet container
         uses: ./.github/actions/buildContainer
@@ -98,8 +98,6 @@ jobs:
         with:
           jpath: |
             .baedeker/vendor
-          tla-str: |
-            relay_spec=redefi-local
           inputs: |
             .baedeker/redefi.jsonnet
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/polkadot':{dockerImage:'parity/polkadot:v1.7.0'}})
