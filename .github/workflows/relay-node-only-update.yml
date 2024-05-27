@@ -41,15 +41,6 @@ jobs:
         run: |
           docker pull parity/polkadot:v1.7.0
 
-      - name: Generate ENV related extend Dockerfile file for redefi-relay-runtime
-        uses: cuchi/jinja2-action@v1.2.0
-        with:
-          template: .docker/Dockerfile-redefi-relay-runtime.j2
-          output_file: .docker/Dockerfile-redefi-relay-runtime.yml
-          variables: |
-            RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
-            REDEFI_RELAY_RUNTIME=${{ env.REDEFI_RELAY_RUNTIME_VERSION }}
-
       - name: Prepare redefi-relay-runtime container
         uses: ./.github/actions/buildContainer
         id: redefi-relay-runtime
@@ -58,39 +49,25 @@ jobs:
           tag: redefi-relay-runtime
           context: .docker
           dockerfile: Dockerfile-redefi-relay-runtime.yml
+          args: |
+            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
+            --build-arg REDEFI_RELAY_RUNTIME=${{ env.REDEFI_RELAY_RUNTIME }}          
 
       - name: Copy runtime wasm file to host
         run: |
           docker run -v $PWD:/infra --rm --entrypoint cp redefi-relay-runtime /redefi/redefi_runtime.compact.compressed.wasm /infra/
-
    
-      - name: Generate ENV related extend Dockerfile file for redefi-relay-mainnet
-        uses: cuchi/jinja2-action@v1.2.0
-        with:
-          template: .docker/Dockerfile-redefi-relay.j2
-          output_file: .docker/Dockerfile-redefi-relay-mainnet.yml
-          variables: |
-            RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
-            REDEFI_RELAY=${{ env.REDEFI_RELAY_MAINNET_VERSION }}
-
-      - name: Prepare node-redefi-relay mainnet container
+      - name: Prepare redefi-relay mainnet container
         uses: ./.github/actions/buildContainer
         id: redefi-relay-mainnet
         with:
           container: redefi-relay
           tag: redefi-relay-mainnet
           context: .docker
-          dockerfile: Dockerfile-redefi-relay-mainnet.yml
-
-
-      - name: Generate ENV related extend Dockerfile file for redefi-relay-latest
-        uses: cuchi/jinja2-action@v1.2.0
-        with:
-          template: .docker/Dockerfile-redefi-relay.j2
-          output_file: .docker/Dockerfile-redefi-relay-latest.yml
-          variables: |
-            RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
-            REDEFI_RELAY=${{ env.REDEFI_RELAY_LATEST_VERSION }}
+          dockerfile: Dockerfile-redefi-relay.yml
+          args: |
+            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
+            --build-arg REDEFI_RELAY=${{ env.REDEFI_RELAY_MAINNET_VERSION }}     
 
       - name: Prepare node-redefi-relay latest container
         uses: ./.github/actions/buildContainer
@@ -100,6 +77,9 @@ jobs:
           tag: redefi-relay-latest
           context: .docker
           dockerfile: Dockerfile-redefi-relay.yml
+          args: |
+            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
+            --build-arg REDEFI_RELAY=${{ env.REDEFI_RELAY_LATEST_VERSION }}     
 
       - uses: actions/setup-node@v3.5.1
         with:
