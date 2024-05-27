@@ -17,10 +17,6 @@ inputs:
   args:
     description: Docker build extra args
     default: ''
-  dockerhub_username:
-    description: Secret
-  dockerhub_token:
-    description: Secret
 outputs:
   name:
     description: Full container name
@@ -31,7 +27,7 @@ runs:
     - name: Build ${{ inputs.container }}:${{ inputs.tag }}
       id: build
       run: |
-          cd "${{ inputs.context }}" && docker build --file "${{ inputs.dockerfile }}" \
+        cd "${{ inputs.context }}" && docker build --file "${{ inputs.dockerfile }}" \
           $BUILD_ARGS --tag ${{ inputs.container }}:${{ inputs.tag }} \
           .
         echo "name=${{ inputs.container }}:${{ inputs.tag }}" >> $GITHUB_OUTPUT
