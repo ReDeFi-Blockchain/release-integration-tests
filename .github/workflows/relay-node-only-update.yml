@@ -50,7 +50,7 @@ jobs:
           context: .docker
           dockerfile: Dockerfile-redefi-relay-runtime.yml
           args: |
-            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
+            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
             --build-arg REDEFI_RELAY_RUNTIME=${{ env.REDEFI_RELAY_RUNTIME_VERSION }}          
 
       - name: Copy runtime wasm file to host
