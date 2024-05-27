@@ -6,7 +6,7 @@ function(relay_spec)
 
 local relay = {
 	name: 'redefi-relay',
-	bin: 'bin/polkadot-1.7',
+	bin: 'bin/polkadot',
 	validatorIdAssignment: 'staking',
 	spec: {Genesis:{
 		chain: relay_spec,
