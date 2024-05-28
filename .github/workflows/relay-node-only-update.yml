@@ -4,6 +4,13 @@ name: nodes-only update
 on:
   workflow_call:
   workflow_dispatch:
+    inputs:
+      relay-node-branch:
+        type: string
+        description: branch to build
+        default: main
+
+
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
