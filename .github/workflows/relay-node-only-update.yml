@@ -4,27 +4,15 @@ name: nodes-only update
 on:
   workflow_call:
   workflow_dispatch:
-    inputs:
-      relay-node-branch:
-        type: string
-        description: branch to build
-        default: main
-
-
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-
   node-only-update:
-
     runs-on: [ redefi-03 ]
-
     timeout-minutes: 2880           # 48 hours for execution jobs.
-
     name: node-only-update
-   
-    steps:
 
+    steps:
       - name: Skip if pull request is in Draft
         if: github.event.pull_request.draft == true
         run: exit 1
@@ -56,7 +44,7 @@ jobs:
           container: redefi-relay-runtime
           tag: latest
           context: .docker
-          dockerfile: Dockerfile-redefi-relay-runtime.yml
+          dockerfile: Dockerfile-redefi-relay-runtime
           args: |
             --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
             --build-arg REDEFI_RELAY_RUNTIME=${{ env.REDEFI_RELAY_RUNTIME_VERSION }}          
@@ -72,7 +60,7 @@ jobs:
           container: redefi-relay
           tag: mainnet
           context: .docker
-          dockerfile: Dockerfile-redefi-relay.yml
+          dockerfile: Dockerfile-redefi-relay
           args: |
             --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
             --build-arg REDEFI_RELAY=${{ env.REDEFI_RELAY_MAINNET_VERSION }}     
@@ -84,10 +72,22 @@ jobs:
           container: redefi-relay
           tag: latest
           context: .docker
-          dockerfile: Dockerfile-redefi-relay.yml
+          dockerfile: Dockerfile-redefi-relay
           args: |
             --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
             --build-arg REDEFI_RELAY=${{ env.REDEFI_RELAY_LATEST_VERSION }}     
+
+      - name: Prepare redefi-parachain mainnet container
+        uses: ./.github/actions/buildContainer
+        id: redefi-parachain-mainnet
+        with:
+          container: redefi-parachain
+          tag: mainnet
+          context: .docker
+          dockerfile: Dockerfile-redefi-parachain
+          args: |
+            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
+            --build-arg REDEFI_PARACHAIN=${{ env.REDEFI_PARACHAIN_MAINNET_VERSION }}     
 
       - uses: actions/setup-node@v3.5.1
         with:
@@ -113,6 +113,7 @@ jobs:
             .baedeker/redefi.jsonnet
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/polkadot':{dockerImage:'parity/polkadot:v1.7.0'}})
             ephemeral:snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}})
+            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-parachain':{dockerImage:'${{ steps.redefi-parachain-mainnet.outputs.name }}'}})
 
       - name: Run tests before Node upgrade
         working-directory: ./tests
