@@ -32,8 +32,8 @@ ARG REDEFI_PARACHAIN
 
 RUN git clone -b $REDEFI_PARACHAIN --depth 1 https://github.com/ReDeFi-Blockchain/redefi-parachain.git /redefi-parachain-src && \
     cd /redefi-parachain-src && \
-    CARGO_INCREMENTAL=0 cargo build --profile=production --locked && \
-    mv ./target/production/redefi-collator /redefi/ 
+    CARGO_INCREMENTAL=0 cargo build --profile=release --locked && \
+    mv ./target/release/redefi-collator /redefi/ 
 
 #===== BIN ======
 FROM ubuntu:22.04

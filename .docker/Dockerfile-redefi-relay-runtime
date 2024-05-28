@@ -31,7 +31,7 @@ ARG REDEFI_RELAY_RUNTIME
 
 RUN git clone -b $REDEFI_RELAY_RUNTIME --depth 1 https://github.com/ReDeFi-Blockchain/redefi-relay-runtime.git /redefi-relay-runtime-src && \
     cd /redefi-relay-runtime-src && \
-    CARGO_INCREMENTAL=0 cargo build --profile=production --locked
+    CARGO_INCREMENTAL=0 cargo build --profile=release --locked
 
 #===== BIN ======
 
@@ -39,5 +39,5 @@ FROM ubuntu:22.04
 
 RUN mkdir /redefi
 
-COPY --from=builder-runtime-wasm /redefi-relay-runtime-src/target/production/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm /redefi/redefi_runtime.compact.compressed.wasm
+COPY --from=builder-runtime-wasm /redefi-relay-runtime-src/target/release/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm /redefi/redefi_runtime.compact.compressed.wasm
 
