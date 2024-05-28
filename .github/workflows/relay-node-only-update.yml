@@ -123,7 +123,7 @@ jobs:
           echo "Ready to start tests"
           yarn test 
         env:
-          RPC_URL: ${{ env.RELAY_HTTP_URL }}
+          RPC_URL: ${{ env.REDEFI_RELAY_HTTP_URL }}
 
       - name: "Reconcile: only one old node"
         if: success() || failure()
@@ -142,7 +142,7 @@ jobs:
         run: |
           ./scripts/wait_for_first_block.sh
         env:
-          RPC_URL: ${{ env.RELAY_HTTP_URL }}
+          RPC_URL: ${{ env.REDEFI_RELAY_HTTP_URL }}
 
       - name: "Reconcile: all nodes are updated"
         if: success() || failure()
@@ -163,7 +163,7 @@ jobs:
           echo "Ready to start tests"
           yarn test
         env:
-          RPC_URL: ${{ env.RELAY_HTTP_URL }}
+          RPC_URL: ${{ env.REDEFI_RELAY_HTTP_URL }}
 
       - name: Remove builder cache
         if: always()                   # run this step always
