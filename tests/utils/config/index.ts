@@ -2,8 +2,13 @@ import { Mnemonic } from "ethers";
 import { env } from "./env";
 
 const getConfig = () => {
-  const wsEndpoint = `ws://${env.RPC_URL}`;
-  const rpcEndpoint = `http://${env.RPC_URL}`;
+  const rpcUrl = env.RPC_URL.replace("https://", "")
+    .replace("http://", "")
+    .replace("wss://", "")
+    .replace("ws://", "");
+
+  const wsEndpoint = `ws://${rpcUrl}`;
+  const rpcEndpoint = `http://${rpcUrl}`;
 
   return {
     wsEndpoint,
