@@ -2,13 +2,12 @@ import { Mnemonic } from "ethers";
 import { env } from "./env";
 
 const getConfig = () => {
+  const wsEndpoint = `ws://${env.RPC_URL}`;
+  const rpcEndpoint = `http://${env.RPC_URL}`;
+
   return {
-    wsEndpoint: env.WS_URL,
-    rpcEndpoint: env.HTTP_URL,
-    appHost: env.HTTP_URL,
-    aliceSeed: "//Alice",
-    bobSeed: "//Bob",
-    charlieSeed: "//Charlie",
+    wsEndpoint,
+    rpcEndpoint,
     ethSeed: Mnemonic.fromPhrase(
       "test test test test test test test test test test test junk",
     ),
