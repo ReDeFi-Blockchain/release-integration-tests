@@ -18,7 +18,6 @@ local relay = {
 			name: 'redefi',
 			id: 'redefi',
 			_code: cql.toHex(importbin '../redefi_runtime.compact.compressed.wasm'),
-			//_genesis+:{sudo::{}},
 		},
 		m.unsimplifyGenesisName(),
 	]),
