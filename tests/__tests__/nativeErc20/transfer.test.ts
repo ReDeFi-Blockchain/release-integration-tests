@@ -20,7 +20,7 @@ describe("Native token as ERC-20", () => {
   });
 
   it("can be sent by transfer", async ({ eth, sub }) => {
-    const { fee } = await eth.signAndSend(
+    const { fee } = await eth.waitForResult(
       eth.assets.NATIVE.connect(sender).transfer(
         receiver.address,
         TRANSFER_VALUE,

@@ -24,7 +24,7 @@ describe("Native token as ERC-20 allowance", () => {
       { NATIVE: NAT(0.3) },
     ]);
 
-    await eth.signAndSend(
+    await eth.waitForResult(
       eth.assets.NATIVE.connect(owner).approve(spender.address, APPROVED),
     );
 
@@ -37,7 +37,7 @@ describe("Native token as ERC-20 allowance", () => {
     expect(allowance).to.eq(APPROVED);
 
     // Decrease approve value
-    await eth.signAndSend(
+    await eth.waitForResult(
       eth.assets.NATIVE.connect(owner).approve(spender.address, 0),
     );
 

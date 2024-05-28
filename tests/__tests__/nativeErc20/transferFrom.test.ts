@@ -20,11 +20,11 @@ describe("Native token as ERC-20", () => {
       { NATIVE: SPENDER_BALANCE },
     ]);
 
-    const approveTx = await eth.signAndSend(
+    const approveTx = await eth.waitForResult(
       eth.assets.NATIVE.connect(owner).approve(spender.address, APPROVED_VALUE),
     );
 
-    const transferFromTx = await eth.signAndSend(
+    const transferFromTx = await eth.waitForResult(
       eth.assets.NATIVE.connect(spender).transferFrom(
         owner.address,
         spender.address,
@@ -52,7 +52,7 @@ describe("Native token as ERC-20", () => {
 
     // Can transferFrom the remaining amount
 
-    const transferFromRemainingsTx = await eth.signAndSend(
+    const transferFromRemainingsTx = await eth.waitForResult(
       eth.assets.NATIVE.connect(spender).transferFrom(
         owner.address,
         spender.address,
@@ -88,7 +88,7 @@ describe("Native token as ERC-20", () => {
       { NATIVE: ACCOUNT_BALANCE },
     ]);
 
-    const approveTx = await eth.signAndSend(
+    const approveTx = await eth.waitForResult(
       eth.assets.NATIVE.connect(owner).approve(spender.address, APPROVED_VALUE),
     );
 
@@ -102,7 +102,7 @@ describe("Native token as ERC-20", () => {
       .to.emit(eth.assets.NATIVE, "Transfer")
       .withArgs(owner.address, recipient.address, TRANSFER_VALUE);
 
-    const transferFromReceipt = await eth.signAndSend(transferFromTx);
+    const transferFromReceipt = await eth.waitForResult(transferFromTx);
 
     const ownerBalance = await eth.assets.NATIVE.balanceOf(owner.address);
     const spenderBalance = await eth.assets.NATIVE.balanceOf(spender.address);
@@ -129,7 +129,7 @@ describe("Native token as ERC-20", () => {
       { NATIVE: NAT(10) },
     ]);
 
-    await eth.signAndSend(
+    await eth.waitForResult(
       eth.assets.NATIVE.connect(owner).approve(spender.address, APPROVED_VALUE),
     );
 
@@ -159,7 +159,7 @@ describe("Native token as ERC-20", () => {
       { NATIVE: NAT(10) },
     ]);
 
-    await eth.signAndSend(
+    await eth.waitForResult(
       eth.assets.NATIVE.connect(owner).approve(spender.address, APPROVED_VALUE),
     );
 
@@ -174,7 +174,7 @@ describe("Native token as ERC-20", () => {
     ).revertedWith("ERC20InsufficientAllowance"); // FIXME: custom error?
 
     // Assert - cannot transfer more than left after transfer
-    await eth.signAndSend(
+    await eth.waitForResult(
       eth.assets.NATIVE.connect(spender).transferFrom(
         owner.address,
         spender.address,
@@ -203,7 +203,7 @@ describe("Native token as ERC-20", () => {
       ]);
 
       // Approve unlimited
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets.NATIVE.connect(owner).approve(
           spender.address,
           ethers.MaxUint256,
@@ -216,7 +216,7 @@ describe("Native token as ERC-20", () => {
       );
 
       expect(allowanceBefore).to.eq(ethers.MaxUint256);
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets.NATIVE.connect(spender).transferFrom(
           owner.address,
           spender.address,
@@ -239,7 +239,7 @@ describe("Native token as ERC-20", () => {
       ]);
 
       // Approve unlimited
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets.NATIVE.connect(owner).approve(
           spender.address,
           ethers.MaxUint256,

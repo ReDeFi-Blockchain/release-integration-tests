@@ -3,13 +3,13 @@ import { ERC20Asset, NetworkConstants } from "./types";
 export const ASSETS: Record<string, ERC20Asset> = {
   BAX: {
     ADDRESS: "0xFFFFFFFF0000000000000000000000000000BABB",
-    NAME: "redefi",
+    NAME: "ReDeFi BAX",
     SYMBOL: "BAX",
     DECIMALS: 18,
   },
   RED: {
     ADDRESS: "0xFFFFFFFFBABB0000000000000000000000000000",
-    NAME: "redefi",
+    NAME: "ReDeFi RED",
     SYMBOL: "RED",
     DECIMALS: 18,
   },
@@ -22,13 +22,13 @@ export const ASSETS: Record<string, ERC20Asset> = {
 } as const;
 
 export const NETWORK_CONSTANTS: Record<string, NetworkConstants> = {
-  RELAY: {
+  L1: {
     CHAIN_ID: 47803n,
     NATIVE: ASSETS.BAX,
     SIBLING: ASSETS.RED,
     GBP: ASSETS.GBP,
   },
-  PARACHAIN: {
+  L2: {
     CHAIN_ID: 1899n,
     NATIVE: ASSETS.RED,
     SIBLING: ASSETS.BAX,

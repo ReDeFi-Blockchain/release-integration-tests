@@ -11,12 +11,15 @@ export async function mochaGlobalSetup() {
   const testFiles = await findTestFiles("__tests__");
   const sub = await SubHelper.init(config.wsEndpoint);
 
-  // Get existing Asset on chain (opposite one to the native token)
-  // RED for Relay, BAX for Parachain
-  const baxOrRedAddress =
-    (await sub.system.getChainId()) === NETWORK_CONSTANTS.RELAY.CHAIN_ID
-      ? ASSETS.RED.ADDRESS
-      : ASSETS.BAX.ADDRESS;
+  // Get an existing Asset on chain (opposite one to the native token)
+  // RED for L1, BAX for L2
+  const chainId = await sub.system.getChainId();
+  let baxOrRedAddress: `0x${string}`;
+  if (chainId === NETWORK_CONSTANTS.L1.CHAIN_ID)
+    baxOrRedAddress = ASSETS.RED.ADDRESS;
+  else if (chainId === NETWORK_CONSTANTS.L2.CHAIN_ID)
+    baxOrRedAddress = ASSETS.BAX.ADDRESS;
+  else throw Error("Unknown Chain ID");
 
   // Transfer Native tokens and Assets to "Filename accounts"
   const transferParamsNative = [];

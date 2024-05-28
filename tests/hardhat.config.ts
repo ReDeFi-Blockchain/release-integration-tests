@@ -15,7 +15,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {},
-    relay: {
+    l1: {
       url: "http://localhost:9699",
       accounts: [],
     },

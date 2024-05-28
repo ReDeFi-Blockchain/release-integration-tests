@@ -43,7 +43,7 @@ describe("Redefi EVM Tests", () => {
       );
       expect(events.length).to.not.equal(0);
 
-      const transferTx = await eth.signAndSend(
+      const transferTx = await eth.waitForResult(
         erc20Contract.transfer(ethReceiver.address, NAT(0.5), {
           from: eth.donor.address,
         }),

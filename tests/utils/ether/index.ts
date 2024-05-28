@@ -47,16 +47,20 @@ export default class EtherHelper {
   ) {
     const provider = new ethers.JsonRpcProvider(rpcEndpoint);
     const { chainId } = await provider.getNetwork();
-    const constants =
-      chainId === NETWORK_CONSTANTS.PARACHAIN.CHAIN_ID
-        ? NETWORK_CONSTANTS.PARACHAIN
-        : NETWORK_CONSTANTS.RELAY;
+
+    let constants: NetworkConstants;
+
+    if (chainId === NETWORK_CONSTANTS.L1.CHAIN_ID)
+      constants = NETWORK_CONSTANTS.L1;
+    else if (chainId === NETWORK_CONSTANTS.L2.CHAIN_ID)
+      constants = NETWORK_CONSTANTS.L2;
+    else throw Error("Unknown Chain Id");
 
     return new EtherHelper(filenameOrWallet, provider, constants);
   }
 
   // TODO rename
-  async signAndSend(tx: Promise<ContractTransactionResponse>) {
+  async waitForResult(tx: Promise<ContractTransactionResponse>) {
     const transaction = await tx;
     const receipt = await transaction.wait();
     if (!receipt) throw Error("Cannot get receipt");
