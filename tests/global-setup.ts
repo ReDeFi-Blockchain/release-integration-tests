@@ -9,12 +9,16 @@ import { ASSETS, NETWORK_CONSTANTS } from "./utils/constants";
 export async function mochaGlobalSetup() {
   console.log("💰 depositing funds into the sponsors' accounts...");
   const testFiles = await findTestFiles("__tests__");
+  console.log(">>> Found test files:", testFiles.length);
   const sub = await SubHelper.init(config.wsEndpoint);
 
   // Get existing Asset on chain (opposite one to the native token)
   // RED for Relay, BAX for Parachain
+  const chainId = await sub.system.getChainId();
+
+  console.log(">>> Chain ID:", chainId);
   const baxOrRedAddress =
-    (await sub.system.getChainId()) === NETWORK_CONSTANTS.RELAY.CHAIN_ID
+    chainId === NETWORK_CONSTANTS.RELAY.CHAIN_ID
       ? ASSETS.RED.ADDRESS
       : ASSETS.BAX.ADDRESS;
 
@@ -38,11 +42,12 @@ export async function mochaGlobalSetup() {
     });
   }
 
+  console.log(">>> Top Up sponsors' balances...", chainId);
   await sub.account.batchTransferNative(transferParamsNative, sub.donor);
   await sub.account.batchTransferAsset(transferParamsGBP, sub.donor);
   await sub.account.batchTransferAsset(transferParamsBAXorRED, sub.donor);
 
-  console.log("The sponsors' balance has been topped up!");
+  console.log("The balances have been topped up!");
 
   process.exit(0);
 }
