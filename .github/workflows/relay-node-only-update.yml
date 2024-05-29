@@ -107,8 +107,6 @@ jobs:
         with:
           jpath: |
             .baedeker/vendor
-          tla-str: |
-            relay_spec=${{ env.RELAY_CHAIN_TYPE }}-local            
           inputs: |
             .baedeker/redefi.jsonnet
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/polkadot':{dockerImage:'parity/polkadot:v1.7.0'}})
