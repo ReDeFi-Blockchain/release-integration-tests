@@ -96,7 +96,7 @@ jobs:
       - name: Install baedeker
         uses: UniqueNetwork/baedeker-action/setup@built
         with:
-          version: v0.1.0-rc1
+          version: v0.1.0
 
       - name: Setup library
         run: mkdir -p .baedeker/vendor/ && git clone https://github.com/UniqueNetwork/baedeker-library .baedeker/vendor/baedeker-library
@@ -113,7 +113,7 @@ jobs:
             .baedeker/redefi.jsonnet
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/polkadot':{dockerImage:'parity/polkadot:v1.7.0'}})
             ephemeral:snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}})
-            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-parachain':{dockerImage:'${{ steps.redefi-parachain-mainnet.outputs.name }}'}})
+            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-collator':{dockerImage:'${{ steps.redefi-parachain-mainnet.outputs.name }}'}})
 
       - name: Run tests before Node upgrade
         working-directory: ./tests
