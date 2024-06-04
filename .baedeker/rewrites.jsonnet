@@ -7,7 +7,7 @@ local dotenv = {
 
 function(prev, repoDir)
   (import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({
-    'bin/redefi-parachain': { dockerImage: 'redefi-parachain:latest' },
+    'bin/redefi-collator': { dockerImage: 'redefi-parachain:latest' },
     'bin/redefi-relay': { dockerImage: 'redefi-relay:latest' },
     'bin/polkadot': { dockerImage: 'parity/polkadot:v1.7.0' },
   }, extra_node_mixin={

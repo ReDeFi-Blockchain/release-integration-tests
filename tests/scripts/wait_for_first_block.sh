@@ -6,6 +6,7 @@ DIR=$(dirname "$0")
 
 last_block_id=0
 block_id=0
+counter=0
 function get_block {
     block_id_hex=$(do_rpc chain_getHeader | jq -r .result.number)
     block_id=$((block_id_hex))
@@ -24,12 +25,15 @@ function had_new_block {
 function reset_check {
     last_block_id=0
     block_id=0
+    counter=0
 }
 
-while ! had_new_block; do
+while [ ! had_new_block ] && [ $counter -lt 100 ]; do
     echo "Waiting for next block..."
+    counter=$((counter+1))
     sleep 12
 done
+
 reset_check
 
 echo "Chain is running, but lets wait for another block after a minute, to avoid startup flakiness."
