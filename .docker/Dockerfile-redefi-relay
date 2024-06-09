@@ -29,12 +29,14 @@ FROM rust-builder as builder-relay-bin
 
 RUN mkdir /redefi
 
-RUN git clone -b main --depth 1 https://github.com/ReDeFi-Blockchain/redefi-relay-node.git /redefi-relay-node-src && \
+ARG REDEFI_RELAY
+
+RUN git clone -b $REDEFI_RELAY --depth 1 https://github.com/ReDeFi-Blockchain/redefi-relay-node.git /redefi-relay-node-src && \
     cd /redefi-relay-node-src && \
-    CARGO_INCREMENTAL=0 cargo build --profile=production --locked && \
-    mv ./target/production/polkadot /redefi/ && \
-    mv ./target/production/polkadot-execute-worker /redefi/ && \
-    mv ./target/production/polkadot-prepare-worker /redefi/
+    CARGO_INCREMENTAL=0 cargo build --profile=release --locked && \
+    mv ./target/release/polkadot /redefi/ && \
+    mv ./target/release/polkadot-execute-worker /redefi/ && \
+    mv ./target/release/polkadot-prepare-worker /redefi/
 
 #===== BIN ======
 
