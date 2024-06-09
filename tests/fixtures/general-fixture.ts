@@ -1,5 +1,5 @@
 import config from "../utils/config";
-import EtherHelper from "../utils/ether";
+import EtherHelper from "../utils/evm";
 import { createTestSuite } from "../utils/fixtureManager";
 import SubHelper from "../utils/substrate";
 

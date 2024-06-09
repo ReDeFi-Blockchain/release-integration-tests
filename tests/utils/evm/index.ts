@@ -59,13 +59,11 @@ export default class EtherHelper {
     return new EtherHelper(filenameOrWallet, provider, constants);
   }
 
-  // TODO rename
   async waitForResult(tx: Promise<ContractTransactionResponse>) {
     const transaction = await tx;
     const receipt = await transaction.wait();
     if (!receipt) throw Error("Cannot get receipt");
-    const fee = receipt.gasPrice * receipt.gasUsed;
 
-    return { receipt, fee };
+    return { receipt, fee: receipt.fee };
   }
 }
