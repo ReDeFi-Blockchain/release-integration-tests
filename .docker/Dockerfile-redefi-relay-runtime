@@ -31,7 +31,7 @@ ARG REDEFI_RELAY_RUNTIME
 
 RUN git clone -b $REDEFI_RELAY_RUNTIME --depth 1 https://github.com/ReDeFi-Blockchain/redefi-relay-runtime.git /redefi-relay-runtime-src && \
     cd /redefi-relay-runtime-src && \
-    CARGO_INCREMENTAL=0 cargo build --profile=release --locked
+    CARGO_INCREMENTAL=0 cargo build --profile=release --features=fast-runtime --locked
 
 #===== BIN ======
 
