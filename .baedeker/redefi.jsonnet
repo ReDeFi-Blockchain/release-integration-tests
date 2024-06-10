@@ -17,7 +17,7 @@ local relay = {
 		{
 			name: 'redefi',
 			id: 'redefi',
-			_code: cql.toHex(importbin '../compiles/redefi_runtime.compact.compressed.wasm'),
+			_code: cql.toHex(importbin '../redefi_runtime.compact.compressed.wasm'),
 			_genesis+:{sudo::{}},
 		},
 		m.unsimplifyGenesisName(),
@@ -25,7 +25,7 @@ local relay = {
 	}},
 	nodes: {
 		[name]: {
-			bin: 'bin/redefi-1.3',
+			bin: 'bin/redefi-relay',
 			wantedKeys: 'relay',
 			extraArgs: [
       			'--blocks-pruning=archive',
