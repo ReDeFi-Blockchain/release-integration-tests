@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { NAT } from "../../utils/currency";
-import { it } from "../../fixtures/general-fixture";
+import { it } from "../../fixtures/standalone";
 
 describe("Native token as ERC-20 allowance", () => {
   it("zero for new account", async ({ eth }) => {

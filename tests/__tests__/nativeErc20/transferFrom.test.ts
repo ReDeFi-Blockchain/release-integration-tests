@@ -2,7 +2,7 @@ import { NAT } from "../../utils/currency";
 import { expect } from "chai";
 import { expectWait } from "../../utils/matchers/expectWait";
 import { ethers } from "ethers";
-import { it } from "../../fixtures/general-fixture";
+import { it } from "../../fixtures/standalone";
 
 describe("Native token as ERC-20", () => {
   it("spender can transferFrom an amount within the approved limit", async ({

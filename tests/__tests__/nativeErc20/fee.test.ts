@@ -1,6 +1,6 @@
 import { NAT } from "../../utils/currency";
 import { expect } from "chai";
-import { it } from "../../fixtures/general-fixture";
+import { it } from "../../fixtures/standalone";
 
 // TODO extract to common tests for all type of assets (NATIVE, SIBLING, GBP...)
 describe("Native token as ERC-20 should withdraw reasonable fee", () => {

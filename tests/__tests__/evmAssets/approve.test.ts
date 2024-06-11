@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { GBP, NAT } from "../../utils/currency";
-import { it } from "../../fixtures/general-fixture";
+import { it } from "../../fixtures/standalone";
 import { AccountAssetType, AccountBalance } from "../../utils/types";
 
 type TestCase = {

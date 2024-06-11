@@ -1,7 +1,7 @@
 import { NAT } from "../../utils/currency";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { it } from "../../fixtures/general-fixture";
+import { it } from "../../fixtures/standalone";
 import { expectWait } from "../../utils/matchers/expectWait";
 import { HDNodeWallet } from "ethers";
 

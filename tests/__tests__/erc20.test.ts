@@ -3,7 +3,7 @@ import { NAT } from "../utils/currency";
 import { ethers } from "hardhat";
 import { TestERC20__factory } from "../typechain-types";
 import { expect } from "chai";
-import { it } from "../fixtures/general-fixture";
+import { it } from "../fixtures/standalone";
 
 describe("Redefi EVM Tests", () => {
   let ethReceiver: HDNodeWallet;

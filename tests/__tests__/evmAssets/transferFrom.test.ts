@@ -1,7 +1,7 @@
 import { CurrencyConverter, GBP, NAT } from "../../utils/currency";
 import { expect } from "chai";
 import { expectWait } from "../../utils/matchers/expectWait";
-import { it } from "../../fixtures/general-fixture";
+import { it } from "../../fixtures/standalone";
 import { AccountAssetType } from "../../utils/types";
 
 type TestCase = {
