@@ -17,6 +17,10 @@ local relay = {
 		{
 			name: 'redefi',
 			id: 'redefi',
+			properties: {
+				tokenDecimals: 18,
+				tokenSymbol: "BAX"
+			},
 			_code: cql.toHex(importbin '../redefi_runtime.compact.compressed.wasm'),
 		},
 		m.unsimplifyGenesisName(),
