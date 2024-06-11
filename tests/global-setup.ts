@@ -10,7 +10,7 @@ const testDirectory = "__tests__";
 const testName = ".test.ts";
 
 export async function globalSetup() {
-  console.log("💰 depositing funds into the sponsors' accounts...");
+  console.log(">>> 💰 Depositing funds into the sponsors' accounts...");
   const testFiles = await findTestFiles(testDirectory);
   console.log(">>> Found test files:", testFiles.length);
 
@@ -54,12 +54,12 @@ export async function globalSetup() {
       });
     }
 
-    console.log(`>>> ${chainId}: Top Up sponsors' balances...`);
+    console.log(`>>> ${chainId}: Topping up sponsors' balances...`);
     await sub.account.batchTransferNative(transferParamsNative, sub.donor);
     await sub.account.batchTransferAsset(transferParamsGBP, sub.donor);
     await sub.account.batchTransferAsset(transferParamsBAXorRED, sub.donor);
 
-    console.log("The balances have been topped up!");
+    console.log(">>> The balances have been topped up!");
 
     if (testConfig.isCrosschain && chainId === NETWORK_CONSTANTS.L2.CHAIN_ID) {
       console.log(">>> Configuring XCM...");
@@ -75,7 +75,7 @@ export async function globalSetup() {
       );
 
       await sub.utils.signAndSend(sub.donor, setXcmV3tx);
-      console.log(">>> XCM V3 set");
+      console.log(">>> XCM V3 configured");
     }
   }
 
