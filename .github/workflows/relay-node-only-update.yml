@@ -125,7 +125,7 @@ jobs:
           yarn test 
         env:
           RPC_URL_MAIN: ${{ env.REDEFI_RELAY_HTTP_URL }}
-          RPC_URL_SIBLING: ${{ env.REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
           CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
       - name: "Reconcile: only one old node"
@@ -146,7 +146,7 @@ jobs:
           ./scripts/wait_for_first_block.sh
         env:
           RPC_URL_MAIN: ${{ env.REDEFI_RELAY_HTTP_URL }}
-          RPC_URL_SIBLING: ${{ env.REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
           CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
       - name: "Reconcile: all nodes are updated"
@@ -169,7 +169,7 @@ jobs:
           yarn test
         env:
           RPC_URL_MAIN: ${{ env.REDEFI_RELAY_HTTP_URL }}
-          RPC_URL_SIBLING: ${{ env.REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
           CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
       - name: Remove builder cache
