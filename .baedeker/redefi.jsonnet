@@ -42,7 +42,7 @@ local relay = {
 local parachain = {
 	name: 'redefi-parachain',
 	bin: 'bin/redefi-collator',
-	paraId: 1001,
+	paraId: 2001,
 	spec: {Genesis:{
 		modify:: m.genericPara($),
 	}},
