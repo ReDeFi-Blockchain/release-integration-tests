@@ -9,7 +9,9 @@ export const it = createTestSuite({
       if (!testFileName) throw Error("Cannot determine test name");
       return EvmHelper.init(testFileName, config.rpcEndpointMain);
     },
-    teardown: async () => {},
+    teardown: (evmHelper) => {
+      evmHelper.provider.destroy();
+    },
   },
   ethSibling: {
     setup: async () => {
@@ -17,6 +19,8 @@ export const it = createTestSuite({
       if (!testFileName) throw Error("Cannot determine test name");
       return EvmHelper.init(testFileName, config.rpcEndpointSibling);
     },
-    teardown: async () => {},
+    teardown: (evmHelper) => {
+      evmHelper.provider.destroy();
+    },
   },
 });

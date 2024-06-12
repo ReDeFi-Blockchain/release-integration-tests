@@ -8,6 +8,7 @@ import { ASSETS, NETWORK_CONSTANTS } from "./utils/constants";
 
 const testDirectory = "__tests__";
 const testName = ".test.ts";
+const donorBalance = 100_000;
 
 export async function globalSetup() {
   console.log(">>> 💰 Depositing funds into the sponsors' accounts...");
@@ -41,15 +42,18 @@ export async function globalSetup() {
 
     for (const file of testFiles) {
       const wallet = getFilenameWallet(file);
-      transferParamsNative.push({ to: wallet.address, value: NAT(10000) });
+      transferParamsNative.push({
+        to: wallet.address,
+        value: NAT(donorBalance),
+      });
       transferParamsGBP.push({
         to: wallet.address,
-        value: GBP(100),
+        value: GBP(donorBalance),
         erc20: ASSETS.GBP.ADDRESS,
       });
       transferParamsBAXorRED.push({
         to: wallet.address,
-        value: NAT(100),
+        value: NAT(donorBalance),
         erc20: baxOrRedAddress,
       });
     }
