@@ -17,6 +17,7 @@ export default class SubHelper {
     this.utils = new SubUtils(api);
     this.account = new SubAccount(api, this.utils);
     this.system = new SubSystem(api);
+    // TODO change to filename account
     this.donor = this.utils.fromSeed("//Alice");
   }
 

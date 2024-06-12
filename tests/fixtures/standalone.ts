@@ -1,5 +1,5 @@
 import config from "../utils/config";
-import EtherHelper from "../utils/ether";
+import EvmHelper from "../utils/evm";
 import { createTestSuite } from "../utils/fixtureManager";
 import SubHelper from "../utils/substrate";
 
@@ -8,14 +8,18 @@ export const it = createTestSuite({
     setup: async () => {
       const testFileName = module.parent?.filename;
       if (!testFileName) throw Error("Cannot determine test name");
-      return EtherHelper.init(testFileName, config.rpcEndpoint);
+      return EvmHelper.init(testFileName, config.rpcEndpointMain);
     },
-    teardown: async () => {},
+    teardown: (evmHelper) => {
+      evmHelper.provider.destroy();
+    },
   },
   sub: {
     setup: async () => {
-      return SubHelper.init(config.wsEndpoint);
+      return SubHelper.init(config.wsEndpointMain);
     },
-    teardown: async () => {},
+    teardown: async (subHelper) => {
+      await subHelper.api.disconnect();
+    },
   },
 });

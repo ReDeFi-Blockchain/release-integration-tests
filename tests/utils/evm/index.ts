@@ -4,18 +4,22 @@ import {
   JsonRpcProvider,
   ethers,
 } from "ethers";
-import { ERC20, ERC20__factory } from "../../typechain-types";
+import {
+  NativeFungibleAssets,
+  NativeFungibleAssets__factory,
+} from "../../typechain-types";
 import { NETWORK_CONSTANTS } from "../constants";
 import { getFilenameWallet } from "../filename-wallet";
 import { AccountAssetType, NetworkConstants } from "../types";
 import { EthAccount } from "./accounts";
+import { Retry } from "../retry";
 
-export default class EtherHelper {
+export default class EvmHelper {
   // NOTE: Use JsonRpcProvider instead of WebSocketProvider.
-  // Ethers contains a bug where the nonce may not increment on time on fast nodes.
+  // Ethers has a bug where the nonce may not increment on time on fast nodes.
   readonly provider: JsonRpcProvider;
   readonly accounts: EthAccount;
-  readonly assets: Record<AccountAssetType, ERC20>;
+  readonly assets: Record<AccountAssetType, NativeFungibleAssets>;
   readonly donor: HDNodeWallet;
   readonly CONSTANTS: NetworkConstants;
 
@@ -27,9 +31,18 @@ export default class EtherHelper {
     this.provider = provider;
     this.CONSTANTS = constants;
     this.assets = {
-      NATIVE: ERC20__factory.connect(constants.NATIVE.ADDRESS, this.provider),
-      SIBLING: ERC20__factory.connect(constants.SIBLING.ADDRESS, this.provider),
-      GBP: ERC20__factory.connect(constants.GBP.ADDRESS, this.provider),
+      NATIVE: NativeFungibleAssets__factory.connect(
+        constants.NATIVE.ADDRESS,
+        this.provider,
+      ),
+      SIBLING: NativeFungibleAssets__factory.connect(
+        constants.SIBLING.ADDRESS,
+        this.provider,
+      ),
+      GBP: NativeFungibleAssets__factory.connect(
+        constants.GBP.ADDRESS,
+        this.provider,
+      ),
     };
 
     if (typeof filenameOrWallet === "string") {
@@ -47,21 +60,33 @@ export default class EtherHelper {
   ) {
     const provider = new ethers.JsonRpcProvider(rpcEndpoint);
     const { chainId } = await provider.getNetwork();
-    const constants =
-      chainId === NETWORK_CONSTANTS.PARACHAIN.CHAIN_ID
-        ? NETWORK_CONSTANTS.PARACHAIN
-        : NETWORK_CONSTANTS.RELAY;
 
-    return new EtherHelper(filenameOrWallet, provider, constants);
+    let constants: NetworkConstants;
+
+    if (chainId === NETWORK_CONSTANTS.L1.CHAIN_ID)
+      constants = NETWORK_CONSTANTS.L1;
+    else if (chainId === NETWORK_CONSTANTS.L2.CHAIN_ID)
+      constants = NETWORK_CONSTANTS.L2;
+    else throw Error("Unknown Chain Id");
+
+    return new EvmHelper(filenameOrWallet, provider, constants);
   }
 
-  // TODO rename
-  async signAndSend(tx: Promise<ContractTransactionResponse>) {
+  async waitForResult(tx: Promise<ContractTransactionResponse>) {
     const transaction = await tx;
     const receipt = await transaction.wait();
     if (!receipt) throw Error("Cannot get receipt");
-    const fee = receipt.gasPrice * receipt.gasUsed;
 
-    return { receipt, fee };
+    return { receipt, fee: receipt.fee };
+  }
+
+  async waitForBlock(blocks: number) {
+    const currentBlock = await this.provider.getBlockNumber();
+
+    await Retry.until(
+      () => this.provider.getBlockNumber(),
+      (blockNumber) => blockNumber >= currentBlock + blocks,
+      blocks * 12500,
+    );
   }
 }

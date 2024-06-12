@@ -1,6 +1,6 @@
 import { GBP, NAT } from "../../utils/currency";
 import { expect } from "chai";
-import { it } from "../../fixtures/general-fixture";
+import { it } from "../../fixtures/standalone";
 import { AccountAssetType, AccountBalance } from "../../utils/types";
 
 type TestCase = {
@@ -15,13 +15,13 @@ const CASES: TestCase[] = [
     ASSET: "SIBLING",
     ACCOUNT_BALANCE: { NATIVE: NAT(2), SIBLING: NAT(1) },
     EXPECTED_BALANCE: NAT(1),
-    EXPECTED_SUPPLY: NAT(120_000),
+    EXPECTED_SUPPLY: NAT(100_000_000),
   },
   {
     ASSET: "GBP",
     ACCOUNT_BALANCE: { NATIVE: NAT(2), GBP: GBP(1) },
     EXPECTED_BALANCE: GBP(1),
-    EXPECTED_SUPPLY: GBP(120_000),
+    EXPECTED_SUPPLY: GBP(100_000_000),
   },
 ];
 
