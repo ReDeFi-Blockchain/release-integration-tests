@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { GBP, NAT } from "../../utils/currency";
-import { it } from "../../fixtures/general-fixture";
+import { it } from "../../fixtures/standalone";
 import { AccountAssetType, AccountBalance } from "../../utils/types";
 
 type TestCase = {
@@ -47,10 +47,10 @@ for (const TEST_CASE of CASES) {
         TEST_CASE.SPENDER_BALANCE,
       ]);
 
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets[TEST_CASE.ASSET]
           .connect(owner)
-          .approve(spender.address, TEST_CASE.APPROVE_VALUE),
+          .approve.send(spender.address, TEST_CASE.APPROVE_VALUE),
       );
 
       // Increase approve value
@@ -62,7 +62,7 @@ for (const TEST_CASE of CASES) {
       expect(allowance).to.eq(TEST_CASE.APPROVE_VALUE);
 
       // Decrease approve value
-      await eth.signAndSend(
+      await eth.waitForResult(
         eth.assets[TEST_CASE.ASSET].connect(owner).approve(spender.address, 0),
       );
 

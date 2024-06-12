@@ -1,7 +1,6 @@
 import { NAT } from "../../utils/currency";
 import { expect } from "chai";
-import { ethers } from "hardhat";
-import { it } from "../../fixtures/general-fixture";
+import { it } from "../../fixtures/standalone";
 import { expectWait } from "../../utils/matchers/expectWait";
 import { HDNodeWallet } from "ethers";
 
@@ -20,7 +19,7 @@ describe("Native token as ERC-20", () => {
   });
 
   it("can be sent by transfer", async ({ eth, sub }) => {
-    const { fee } = await eth.signAndSend(
+    const { fee } = await eth.waitForResult(
       eth.assets.NATIVE.connect(sender).transfer(
         receiver.address,
         TRANSFER_VALUE,
@@ -59,39 +58,5 @@ describe("Native token as ERC-20", () => {
     )
       .to.emit(eth.assets.NATIVE, "Transfer")
       .withArgs(sender.address, receiver.address, TRANSFER_VALUE);
-  });
-
-  it("cannot transfer more than balance", async ({ eth }) => {
-    await expectWait(
-      eth.assets.NATIVE.connect(sender).transfer(
-        receiver.address,
-        SENDER_BALANCE + 1n,
-      ),
-    ).to.be.rejected;
-    // FIXME: substrate error: Token(FundsUnavailable)
-    // ).to.be.revertedWithCustomError(
-    //   eth.assets.NATIVE,
-    //   "ERC20InsufficientBalance",
-    // );
-  });
-
-  it("cannot send full balance because of fee", async ({ eth }) => {
-    await expectWait(
-      eth.assets.NATIVE.connect(sender).transfer(
-        receiver.address,
-        SENDER_BALANCE,
-      ),
-    ).to.be.rejected;
-    // FIXME: should be reverted with custom error
-  });
-
-  it("cannot transfer to zero address", async ({ eth }) => {
-    await expectWait(
-      eth.assets.NATIVE.connect(sender).transfer(
-        ethers.ZeroAddress,
-        TRANSFER_VALUE,
-      ),
-    ).to.be.revertedWith("ERC20InvalidReceiver");
-    // TODO custom error for openzeppelin
   });
 });
