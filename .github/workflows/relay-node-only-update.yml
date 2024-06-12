@@ -124,7 +124,9 @@ jobs:
           echo "Ready to start tests"
           yarn test 
         env:
-          RPC_URL: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_PARACHAIN_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
       - name: "Reconcile: only one old node"
         if: success() || failure()
