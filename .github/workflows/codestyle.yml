@@ -17,7 +17,10 @@ jobs:
     runs-on: [ redefi-03 ]
     steps:
       - name: Clean Workspace
-        uses: AutoModality/action-clean@v1.1.0      
+        uses: AutoModality/action-clean@v1.1.0
+      - uses: actions/checkout@v3.1.0
+        with:
+          ref: ${{ github.head_ref }}              
       - name: Read .env file
         uses: xom9ikk/dotenv@v2          
       - name: Install toolchain version from .env
@@ -26,9 +29,6 @@ jobs:
             toolchain: ${{ env.RUST_TOOLCHAIN }}
             targets: wasm32-unknown-unknown
             components: rustfmt, clippy
-      - uses: actions/checkout@v3.1.0
-        with:
-          ref: ${{ github.head_ref }}
 
       - name: Checkout redefi-relay-runtime
         uses: actions/checkout@v3.1.0

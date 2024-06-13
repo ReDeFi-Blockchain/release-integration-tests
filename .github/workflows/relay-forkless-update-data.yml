@@ -4,10 +4,11 @@ on:
 
 
 jobs:
-  forkless-nodata:
+  forkless-data:
     runs-on: [ redefi-03 ]
     timeout-minutes: 1380
-    name: relay-forkless-nodata
+    name: relay-forkless-data
+
     continue-on-error: true         #Do not stop testing of matrix runs failed.  As it decided during PR review - it required 50/50& Let's check it with false.
 
     steps:
@@ -34,37 +35,33 @@ jobs:
         run: |
           docker pull parity/polkadot:v1.7.0
 
-      - name: Prepare redefi-relay-runtime container
+      - name: Prepare redefi-relay-runtime-mainnet container
         uses: ./.github/actions/buildContainer
-        id: redefi-relay-runtime
+        id: redefi-relay-runtime-mainnet
         with:
           container: redefi-relay-runtime
-          tag: latest
+          tag: mainnet
           context: .docker
-          dockerfile: Dockerfile-redefi-relay-runtime
+          dockerfile: Dockerfile-relay-runtime
           args: |
             --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
-            --build-arg REDEFI_RELAY_RUNTIME=${{ env.REDEFI_RELAY_RUNTIME_VERSION }}          
+            --build-arg REDEFI_RELAY_RUNTIME=${{ env.REDEFI_RELAY_RUNTIME_MAINNET_VERSION }}          
 
       - name: Copy runtime wasm file to host
         run: |
-          docker run -v $PWD:/infra --rm --entrypoint cp ${{ steps.redefi-relay-runtime.outputs.name }} /redefi/redefi_runtime.compact.compressed.wasm /infra/
+          docker run -v $PWD:/infra --rm --entrypoint cp ${{ steps.redefi-relay-runtime-mainnet.outputs.name }} /redefi/redefi_runtime.compact.compressed.wasm /infra/
 
-      - name: Prepare redefi-relay-runtime container
+      - name: Prepare redefi-relay-runtime-latest container
         uses: ./.github/actions/buildContainer
         id: redefi-relay-runtime-latest
         with:
           container: redefi-relay-runtime
           tag: latest
           context: .docker
-          dockerfile: Dockerfile-redefi-relay-runtime
+          dockerfile: Dockerfile-relay-runtime
           args: |
             --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
             --build-arg REDEFI_RELAY_RUNTIME=${{ env.REDEFI_RELAY_RUNTIME_LATEST_VERSION }}          
-
-      - name: Copy runtime wasm file to host
-        run: |
-          docker run -v $PWD:/infra --rm --entrypoint cp ${{ steps.redefi-relay-runtime-latest.outputs.name }} /redefi/redefi_runtime.compact.compressed.wasm /infra/latest-redefi_runtime.compact.compressed.wasm
 
       - name: Extract wasms
         uses: ./.github/actions/extractDocker
@@ -80,7 +77,7 @@ jobs:
           container: redefi-relay
           tag: mainnet
           context: .docker
-          dockerfile: Dockerfile-redefi-relay
+          dockerfile: Dockerfile-relay
           args: |
             --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
             --build-arg REDEFI_RELAY=${{ env.REDEFI_RELAY_MAINNET_VERSION }}     
@@ -92,7 +89,7 @@ jobs:
           container: redefi-parachain
           tag: mainnet
           context: .docker
-          dockerfile: Dockerfile-redefi-parachain
+          dockerfile: Dockerfile-parachain
           args: |
             --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
             --build-arg REDEFI_PARACHAIN=${{ env.REDEFI_PARACHAIN_MAINNET_VERSION }}     
@@ -102,24 +99,24 @@ jobs:
           node-version: 20
 
       - name: Install baedeker
-        uses: UniqueNetwork/baedeker-action/setup@built
+        uses: UniqueNetwork/baedeker-action/setup@v1-no-debug-output
         with:
-          version: v0.1.1
+          useCache: false
 
       - name: Setup library
         run: mkdir -p .baedeker/vendor/ && git clone https://github.com/UniqueNetwork/baedeker-library .baedeker/vendor/baedeker-library
 
       - name: Start network
-        uses: UniqueNetwork/baedeker-action@built
+        uses: UniqueNetwork/baedeker-action@v1-no-debug-output
         id: bdk
         with:
           jpath: |
             .baedeker/vendor
           tla-str: |
-            relay_spec=westend-local
-            fork_source=${{ env.relay_fork_source }}            
+            relay_spec=${{ env.RELAY_CHAIN_TYPE }}-local
+            fork_source=${{ env.RELAY_FORK_SOURCE }}            
           inputs: |
-            .baedeker/forkless-data.jsonnet
+            .baedeker/relay-forkless-data.jsonnet
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/polkadot':{dockerImage:'parity/polkadot:v1.7.0'}})
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}})
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-collator':{dockerImage:'${{ steps.redefi-parachain-mainnet.outputs.name }}'}})
@@ -131,17 +128,19 @@ jobs:
           yarn
           ./scripts/wait_for_first_block.sh
         env:
-          RPC_URL: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
       - name: "Reconcile: runtime is upgraded"
         working-directory: ./tests
         run: |
-          yarn
-          ./scripts/wait_for_first_block.sh
           echo "Executing upgrade"
-          yarn node --no-warnings=ExperimentalWarning --loader ts-node/esm util/authorizeEnactUpgrade.ts ${{ steps.wasm.outputs.dir }}/redefi_runtime.compact.compressed.wasm
+          yarn node --no-warnings=ExperimentalWarning --loader ts-node/esm scripts/relayAuthorizeEnactUpgrade.ts ${{ steps.wasm.outputs.dir }}/redefi_runtime.compact.compressed.wasm
         env:
-          RPC_URL: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
       - name: Ensure network is alive after upgrade
         working-directory: ./tests
@@ -150,7 +149,9 @@ jobs:
           yarn
           ./scripts/wait_for_first_block.sh
         env:
-          RPC_URL: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
       - name: Run tests after upgrade
         working-directory: ./tests
@@ -159,7 +160,9 @@ jobs:
           echo "Ready to start tests"
           yarn test
         env:
-          RPC_URL: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
       - name: Remove builder cache
         if: always()                   # run this step always

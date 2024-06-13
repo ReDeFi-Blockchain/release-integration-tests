@@ -24,7 +24,7 @@
 5. Build Relay Node Docker image:
 
     ```
-    docker build -f .docker/Dockerfile-redefi-relay -t redefi-relay --build-arg="RUST_TOOLCHAIN=nightly-2023-11-16" --build-arg="REDEFI_RELAY=main" .
+    docker build -f .docker/Dockerfile-relay -t redefi-relay --build-arg="RUST_TOOLCHAIN=nightly-2023-11-16" --build-arg="REDEFI_RELAY=main" .
     ```
 
 6. Pull polkadot image from official repository:
@@ -37,7 +37,7 @@
 7. Build Relay Runtime image:
    
     ```
-    docker build -f .docker/Dockerfile-redefi-relay-runtime -t redefi-relay-runtime --build-arg="RUST_TOOLCHAIN=nightly-2023-11-16" --build-arg="REDEFI_RELAY_RUNTIME=main" .
+    docker build -f .docker/Dockerfile-relay-runtime -t redefi-relay-runtime --build-arg="RUST_TOOLCHAIN=nightly-2023-11-16" --build-arg="REDEFI_RELAY_RUNTIME=main" .
     ```
     
 8. Copy runtime wasm file to host:
@@ -48,7 +48,7 @@
 9. Build Parachain Docker image:
 
     ```
-    docker build -f .docker/Dockerfile-redefi-parachain -t redefi-parachain --build-arg="RUST_TOOLCHAIN=nightly-2024-02-15" --build-arg="REDEFI_PARACHAIN=main" .
+    docker build -f .docker/Dockerfile-parachain -t redefi-parachain --build-arg="RUST_TOOLCHAIN=nightly-2024-02-15" --build-arg="REDEFI_PARACHAIN=main" .
     ```
 
 10. Run:

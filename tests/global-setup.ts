@@ -65,22 +65,23 @@ export async function globalSetup() {
 
     console.log(">>> The balances have been topped up!");
 
-    if (testConfig.isCrosschain && chainId === NETWORK_CONSTANTS.L2.CHAIN_ID) {
-      console.log(">>> Configuring XCM...");
+    // TODO: uncomment with XCM
+    // if (testConfig.isCrosschain && chainId === NETWORK_CONSTANTS.L2.CHAIN_ID) {
+    //   console.log(">>> Configuring XCM...");
 
-      const setXcmV3tx = sub.api.tx.sudo.sudo(
-        sub.api.tx.polkadotXcm.forceXcmVersion(
-          {
-            parents: 1,
-            interrior: "Here",
-          },
-          3,
-        ),
-      );
+    //   const setXcmV3tx = sub.api.tx.sudo.sudo(
+    //     sub.api.tx.polkadotXcm.forceXcmVersion(
+    //       {
+    //         parents: 1,
+    //         interrior: "Here",
+    //       },
+    //       3,
+    //     ),
+    //   );
 
-      await sub.utils.signAndSend(sub.donor, setXcmV3tx);
-      console.log(">>> XCM V3 configured");
-    }
+    //   await sub.utils.signAndSend(sub.donor, setXcmV3tx);
+    //   console.log(">>> XCM V3 configured");
+    // }
   }
 
   process.exit(0);

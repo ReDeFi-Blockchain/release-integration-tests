@@ -1,16 +1,14 @@
-name: nodes-only update
-
-# Triger: only call from main workflow(re-usable workflows)
 on:
   workflow_call:
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
 jobs:
-  node-only-update:
+  forkless-nodata:
     runs-on: [ redefi-03 ]
-    timeout-minutes: 2880           # 48 hours for execution jobs.
-    name: relay-node-only-update
+    timeout-minutes: 1380
+    name: parachain-forkless-nodata
+    continue-on-error: true         #Do not stop testing of matrix runs failed.  As it decided during PR review - it required 50/50& Let's check it with false.
 
     steps:
       - name: Skip if pull request is in Draft
@@ -18,7 +16,6 @@ jobs:
         run: exit 1
 
       - name: Clean Workspace
-        if: always()
         uses: AutoModality/action-clean@v1.1.0
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -39,10 +36,10 @@ jobs:
 
       - name: Prepare redefi-relay-runtime container
         uses: ./.github/actions/buildContainer
-        id: redefi-relay-runtime
+        id: redefi-relay-runtime-mainnet
         with:
           container: redefi-relay-runtime
-          tag: latest
+          tag: mainnet
           context: .docker
           dockerfile: Dockerfile-relay-runtime
           args: |
@@ -51,8 +48,8 @@ jobs:
 
       - name: Copy runtime wasm file to host
         run: |
-          docker run -v $PWD:/infra --rm --entrypoint cp ${{ steps.redefi-relay-runtime.outputs.name }} /redefi/redefi_runtime.compact.compressed.wasm /infra/
-   
+          docker run -v $PWD:/infra --rm --entrypoint cp ${{ steps.redefi-relay-runtime-mainnet.outputs.name }} /redefi/redefi_runtime.compact.compressed.wasm /infra/
+
       - name: Prepare redefi-relay mainnet container
         uses: ./.github/actions/buildContainer
         id: redefi-relay-mainnet
@@ -65,18 +62,6 @@ jobs:
             --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
             --build-arg REDEFI_RELAY=${{ env.REDEFI_RELAY_MAINNET_VERSION }}     
 
-      - name: Prepare node-redefi-relay latest container
-        uses: ./.github/actions/buildContainer
-        id: redefi-relay-latest
-        with:
-          container: redefi-relay
-          tag: latest
-          context: .docker
-          dockerfile: Dockerfile-relay
-          args: |
-            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
-            --build-arg REDEFI_RELAY=${{ env.REDEFI_RELAY_LATEST_VERSION }}     
-
       - name: Prepare redefi-parachain mainnet container
         uses: ./.github/actions/buildContainer
         id: redefi-parachain-mainnet
@@ -88,6 +73,25 @@ jobs:
           args: |
             --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
             --build-arg REDEFI_PARACHAIN=${{ env.REDEFI_PARACHAIN_MAINNET_VERSION }}     
+
+      - name: Prepare redefi-parachain latest container
+        uses: ./.github/actions/buildContainer
+        id: redefi-parachain-latest
+        with:
+          container: redefi-parachain
+          tag: latest
+          context: .docker
+          dockerfile: Dockerfile-parachain
+          args: |
+            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
+            --build-arg REDEFI_PARACHAIN=${{ env.REDEFI_PARACHAIN_MAINNET_VERSION }}     
+
+      - name: Extract wasms
+        uses: ./.github/actions/extractDocker
+        id: wasm
+        with:
+          image: ${{ steps.redefi-parachain-latest.outputs.name }}
+          directory: /redefi
 
       - uses: actions/setup-node@v3.5.1
         with:
@@ -115,61 +119,47 @@ jobs:
             ephemeral:snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}})
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-collator':{dockerImage:'${{ steps.redefi-parachain-mainnet.outputs.name }}'}})
 
-      - name: Run tests before Node upgrade
+      - name: Ensure network is alive before upgrade
         working-directory: ./tests
         if: success()
         run: |
           yarn
           ./scripts/wait_for_first_block.sh
-          echo "Ready to start tests"
-          yarn test 
         env:
-          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_HTTP_URL }}
-          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
           CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
-      - name: "Reconcile: only one old node"
-        if: success() || failure()
-        uses: UniqueNetwork/baedeker-action/reconcile@v1-no-debug-output
-        with:
-          baedeker: ${{ steps.bdk.outputs.baedeker }}
-          # Chain should always be built with the mainnet spec, this we first set binary for all nodes expect one, then set mainnet binary for the last node, and then force chainspec to be still generated from mainnet
-          inputs: |
-            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-latest.outputs.name }}'}}, leave = 1, for_chain = false)
-            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}}, for_chain = false)
-            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}})
+      - name: "Reconcile: runtime is upgraded"
+        working-directory: ./tests
+        run: |
+          echo "Executing upgrade"
+          yarn node --no-warnings=ExperimentalWarning --loader ts-node/esm scripts/parachainAuthorizeEnactUpgrade.ts ${{ steps.wasm.outputs.dir }}/redefi_runtime.compact.compressed.wasm
+        env:
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
-      - name: Ensure network is alive
+      - name: Ensure network is alive after upgrade
         working-directory: ./tests
         if: success()
         run: |
+          yarn
           ./scripts/wait_for_first_block.sh
         env:
-          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_HTTP_URL }}
-          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
           CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
-      - name: "Reconcile: all nodes are updated"
-        if: success() || failure()
-        uses: UniqueNetwork/baedeker-action/reconcile@v1-no-debug-output
-        with:
-          baedeker: ${{ steps.bdk.outputs.baedeker }}
-          # Chain should always be built with the mainnet spec, this we first set binary for all nodes, and then force chainspec to be still generated from mainnet
-          inputs: |
-            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-latest.outputs.name }}'}}, for_chain = false)
-            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}})
-
-      - name: Run tests after Node upgrade
+      - name: Run tests after upgrade
         working-directory: ./tests
         if: success() || failure()    # run this step even if previous step failed
         run: |
-          yarn
-          ./scripts/wait_for_first_block.sh
           echo "Ready to start tests"
           yarn test
         env:
-          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_HTTP_URL }}
-          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
           CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
       - name: Remove builder cache
