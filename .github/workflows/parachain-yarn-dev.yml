@@ -1,0 +1,68 @@
+# Integration test in --dev mode
+name: yarn dev
+
+# Triger: only call from main workflow(re-usable workflows)
+on:
+  workflow_call:
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  dev_build_int_tests:
+    # The type of runner that the job will run on
+    runs-on: [self-hosted]
+    timeout-minutes: 1380
+    continue-on-error: true         #Do not stop testing of matrix runs failed.  As it decided during PR review - it required 50/50& Let's check it with false.
+
+    steps:
+      - name: Clean Workspace
+        uses: AutoModality/action-clean@v1.1.0
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3.1.0
+        with:
+          ref: ${{ github.head_ref }}  #Checking out head commit
+
+      - name: Read .env file
+        uses: xom9ikk/dotenv@v2
+
+      - name: Prepare redefi-parachain container
+        uses: ./.github/actions/buildContainer
+        id: redefi-parachain
+        with:
+          container: redefi-parachain
+          tag: latest
+          context: .docker
+          dockerfile: Dockerfile-parachain
+          args: |
+            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
+            --build-arg REDEFI_PARACHAIN=${{ env.REDEFI_PARACHAIN_LATEST_VERSION }}
+
+      - name: Build the stack
+        run: docker-compose -f ".docker/docker-compose.parachain-dev-mode.yml" up -d --build --remove-orphans
+
+      - uses: actions/setup-node@v3.5.1
+        with:
+          node-version: 20
+
+      - name: Run tests
+        working-directory: tests/
+        run: |
+          yarn
+          ./scripts/wait_for_first_block.sh
+          echo "Ready to start tests"
+          yarn test
+        env:
+          RPC_URL_MAIN: ${{ env.RPC_URL_PARACHAIN }}
+          CROSSCHAIN: false
+
+      - name: Stop running containers
+        if: always()                   # run this step always
+        run: docker-compose -f ".docker/docker-compose.parachain-dev-mode.yml" down
+
+      - name: Remove builder cache
+        if: always()                   # run this step always
+        run: |
+          docker builder prune -f -a
+          docker system prune -f
+          docker image prune -f -a
