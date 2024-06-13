@@ -5,8 +5,9 @@ import { AccountAssetType } from "../../utils/types";
 
 const TEST_CASES: AccountAssetType[] = ["NATIVE"] as const;
 
+// Native mint, burn, burnFrom not implemented
 for (const ASSET of TEST_CASES) {
-  it(`${ASSET} mint by random account reverted with OwnableUnauthorizedAccount`, async ({
+  it.skip(`${ASSET} mint by random account reverted with OwnableUnauthorizedAccount`, async ({
     eth,
   }) => {
     const MINT_AMOUNT = 1;

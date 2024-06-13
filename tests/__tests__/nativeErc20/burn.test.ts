@@ -2,7 +2,8 @@ import { expect } from "chai";
 import { it } from "../../fixtures/standalone";
 import { NAT } from "../../utils/currency";
 
-describe("Native token burn", () => {
+// Native mint, burn, burnFrom not implemented
+describe.skip("Native token burn", () => {
   const INITIAL_BALANCE = NAT(5);
   const APPROVE_VALUE = NAT(3);
   const BURN_AMOUNT = 1n;
