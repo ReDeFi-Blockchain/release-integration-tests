@@ -12,7 +12,7 @@
 3. Download and add to path `baedeker` :
 
     ```
-    curl -L https://github.com/UniqueNetwork/baedeker/releases/download/v0.1.1/baedeker -o baedeker && chmod +x baedeker
+    curl -L https://github.com/UniqueNetwork/baedeker/releases/download/v0.1.2/baedeker -o baedeker && chmod +x baedeker
     ```
 
 4. Download baedeker library:
