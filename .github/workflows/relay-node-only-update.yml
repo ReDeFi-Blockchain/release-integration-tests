@@ -46,7 +46,6 @@ jobs:
           context: .docker
           dockerfile: Dockerfile-relay-runtime
           args: |
-            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
             --build-arg REDEFI_RELAY_RUNTIME=${{ env.REDEFI_RELAY_RUNTIME_MAINNET_VERSION }}          
 
       - name: Copy runtime wasm file to host
@@ -62,7 +61,6 @@ jobs:
           context: .docker
           dockerfile: Dockerfile-relay
           args: |
-            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
             --build-arg REDEFI_RELAY=${{ env.REDEFI_RELAY_MAINNET_VERSION }}     
 
       - name: Prepare node-redefi-relay latest container
@@ -74,7 +72,6 @@ jobs:
           context: .docker
           dockerfile: Dockerfile-relay
           args: |
-            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN_RELAY_NODE }}
             --build-arg REDEFI_RELAY=${{ env.REDEFI_RELAY_LATEST_VERSION }}     
 
       - name: Prepare redefi-parachain mainnet container
@@ -86,7 +83,6 @@ jobs:
           context: .docker
           dockerfile: Dockerfile-parachain
           args: |
-            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
             --build-arg REDEFI_PARACHAIN=${{ env.REDEFI_PARACHAIN_MAINNET_VERSION }}     
 
       - uses: actions/setup-node@v3.5.1

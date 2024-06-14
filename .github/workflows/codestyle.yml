@@ -20,15 +20,7 @@ jobs:
         uses: AutoModality/action-clean@v1.1.0
       - uses: actions/checkout@v3.1.0
         with:
-          ref: ${{ github.head_ref }}              
-      - name: Read .env file
-        uses: xom9ikk/dotenv@v2          
-      - name: Install toolchain version from .env
-        uses: dtolnay/rust-toolchain@master
-        with:
-            toolchain: ${{ env.RUST_TOOLCHAIN }}
-            targets: wasm32-unknown-unknown
-            components: rustfmt, clippy
+          ref: ${{ github.head_ref }}          
 
       - name: Checkout redefi-relay-runtime
         uses: actions/checkout@v3.1.0
@@ -44,4 +36,3 @@ jobs:
       - name: Cargo fmt state for redefi-relay-runtime
         if: success()
         run: echo "Nothing to do. Command 'cargo fmt -- --check' returned exit code 0."
-
