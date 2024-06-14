@@ -28,6 +28,10 @@ export class SubUtils extends SubBase {
     return this.signAndSend(sender, tx);
   }
 
+  delay = (ms: number) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
   async signAndSend(
     sender: IKeyringPair,
     transaction: SubmittableExtrinsic<"promise">,
@@ -50,8 +54,12 @@ export class SubUtils extends SubBase {
               resolve({ result, status: txStatus });
               if (unsub) unsub();
             } else if (txStatus === transactionStatus.RETRACTED) {
-              console.log("Retracted, resending...");
-              resolve(this.signAndSend(sender, transaction, options));
+              console.log("Retracted, resending after 15s ...");
+              resolve(
+                this.delay(15000).then(() =>
+                  this.signAndSend(sender, transaction, options),
+                ),
+              );
             } else if (txStatus === transactionStatus.FAIL) {
               console.error(result.toHuman());
               reject({ result, status: txStatus });
