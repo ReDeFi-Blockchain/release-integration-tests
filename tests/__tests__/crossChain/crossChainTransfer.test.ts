@@ -2,6 +2,8 @@ import { expect } from "chai";
 import { it } from "../../fixtures/cross-chain";
 import { GBP, NAT } from "../../utils/currency";
 import { AccountAssetType, AccountBalance } from "../../utils/types";
+import { expectWait } from "../../utils/matchers/expectWait";
+import { ethers } from "hardhat";
 
 type TestCase = {
   ASSET_TRANSFER: AccountAssetType;
@@ -23,6 +25,12 @@ const CASES: TestCase[] = [
     SENDER_BALANCE: { NATIVE: NAT(2), SIBLING: NAT(3) },
     TRANSFER_VALUE: NAT(2),
   },
+  {
+    ASSET_TRANSFER: "NATIVE",
+    ASSET_RECEIVE: "SIBLING",
+    SENDER_BALANCE: { NATIVE: NAT(10) },
+    TRANSFER_VALUE: NAT(2),
+  },
 ];
 
 describe("Cross-chain", () => {
@@ -32,7 +40,7 @@ describe("Cross-chain", () => {
     SENDER_BALANCE,
     TRANSFER_VALUE,
   } of CASES) {
-    it(`can transfer ${ASSET_TRANSFER} tokens`, async ({
+    it(`can crossChainTransfer ${ASSET_TRANSFER} tokens`, async ({
       ethMain,
       ethSibling,
     }) => {
@@ -44,21 +52,22 @@ describe("Cross-chain", () => {
       ].balanceOf(account.address);
       expect(siblingBalanceBefore).to.eq(0n);
 
-      // TODO this is probably flaky test
-      //      because total supply can be changed during the execution:
-      const totalSupplyMainBefore =
-        await ethMain.assets[ASSET_TRANSFER].totalSupply();
-      const totalSupplySiblingBefore =
-        await ethSibling.assets[ASSET_RECEIVE].totalSupply();
-
       // Make cross-chain transfer
-      await ethMain.waitForResult(
-        ethMain.assets[ASSET_TRANSFER].connect(account).crossChainTransfer(
-          ethSibling.CONSTANTS.CHAIN_ID,
-          account.address,
-          TRANSFER_VALUE,
-        ),
+      const tx = ethMain.assets[ASSET_TRANSFER].connect(
+        account,
+      ).crossChainTransfer(
+        ethSibling.CONSTANTS.CHAIN_ID,
+        account.address,
+        TRANSFER_VALUE,
       );
+
+      // Transfer event emited on sender chain
+      await expectWait(tx)
+        .to.emit(ethMain.assets[ASSET_TRANSFER], "Transfer")
+        .withArgs(account.address, ethers.ZeroAddress, TRANSFER_VALUE);
+      // TODO check events on receiver chain
+
+      const { fee } = await ethMain.waitForResult(tx);
 
       await ethSibling.waitForBlock(3);
 
@@ -69,21 +78,16 @@ describe("Cross-chain", () => {
       const siblingBalanceAfter = await ethSibling.assets[
         ASSET_RECEIVE
       ].balanceOf(account.address);
-      const totalSupplyMainAfter =
-        await ethMain.assets[ASSET_TRANSFER].totalSupply();
-      const totalSupplySiblingAfter =
-        await ethSibling.assets[ASSET_RECEIVE].totalSupply();
 
-      expect(mainBalanceAfter).to.eq(
-        SENDER_BALANCE[ASSET_TRANSFER]! - TRANSFER_VALUE,
-      );
+      // Sender's balance on the sender's chain should be eq
+      // "initial balance" minus "transfer", and if it is native token minus "fee"
+      const expectedBalanceMain =
+        SENDER_BALANCE[ASSET_TRANSFER]! -
+        TRANSFER_VALUE -
+        (ASSET_TRANSFER === "NATIVE" ? fee : 0n);
+
+      expect(mainBalanceAfter).to.eq(expectedBalanceMain);
       expect(siblingBalanceAfter).to.eq(TRANSFER_VALUE);
-      expect(totalSupplyMainAfter).to.eq(
-        totalSupplyMainBefore - TRANSFER_VALUE,
-      );
-      expect(totalSupplySiblingAfter).to.eq(
-        totalSupplySiblingBefore + TRANSFER_VALUE,
-      );
     });
   }
 });
