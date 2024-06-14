@@ -5,7 +5,7 @@ on:
 
 jobs:
   forkless-data:
-    runs-on: [ redefi-03 ]
+    runs-on: [ self-hosted ]
     timeout-minutes: 1380
     name: relay-forkless-data
 

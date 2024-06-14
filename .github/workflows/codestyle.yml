@@ -14,7 +14,7 @@ on:
 
 jobs:
   rustfmt:
-    runs-on: [ redefi-03 ]
+    runs-on: [ self-hosted ]
     steps:
       - name: Clean Workspace
         uses: AutoModality/action-clean@v1.1.0

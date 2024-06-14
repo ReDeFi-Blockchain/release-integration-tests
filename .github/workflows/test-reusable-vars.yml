@@ -16,7 +16,7 @@ jobs:
 
   test-reusable-vars:
 
-    runs-on: [ redefi-03 ]
+    runs-on: [ self-hosted ]
     timeout-minutes: 2880           # 48 hours for execution jobs.
 
     name: test-reusable-vars

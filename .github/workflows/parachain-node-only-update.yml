@@ -8,7 +8,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   node-only-update:
-    runs-on: [ redefi-03 ]
+    runs-on: [ self-hosted ]
     timeout-minutes: 2880           # 48 hours for execution jobs.
     name: parachain-node-only-update
 
