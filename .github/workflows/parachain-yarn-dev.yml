@@ -35,7 +35,6 @@ jobs:
           context: .docker
           dockerfile: Dockerfile-parachain
           args: |
-            --build-arg RUST_TOOLCHAIN=${{ env.RUST_TOOLCHAIN }}
             --build-arg REDEFI_PARACHAIN=${{ env.REDEFI_PARACHAIN_LATEST_VERSION }}
 
       - name: Build the stack
