@@ -8,6 +8,7 @@ import { SignerOptions } from "@polkadot/api/types";
 export const transactionStatus = {
   NOT_READY: "NotReady",
   FAIL: "Fail",
+  RETRACTED: "Retracted",
   SUCCESS: "Success",
 } as const;
 
@@ -23,42 +24,60 @@ export class SubUtils extends SubBase {
     sender: IKeyringPair,
     transactions: SubmittableExtrinsic<"promise">[],
   ) {
-    const tx = this.api.tx.utility.batch(transactions);
+    const tx = this.api.tx.utility.batchAll(transactions);
     return this.signAndSend(sender, tx);
   }
 
-  signAndSend(
+  delay = (ms: number) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
+  async signAndSend(
     sender: IKeyringPair,
     transaction: SubmittableExtrinsic<"promise">,
     options: Partial<SignerOptions> = {},
   ): Promise<{ result: ISubmittableResult; status: TransactionStatus }> {
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
-    return new Promise(async (resolve, reject) => {
-      try {
-        const unsub = await transaction.signAndSend(
-          sender,
-          options,
-          (result) => {
+    return new Promise((resolve, reject) => {
+      let unsub: () => void;
+
+      transaction
+        .signAndSend(sender, options, (result) => {
+          try {
             const txStatus = this.getTransactionStatus(
               result as unknown as {
                 events: EventRecord[];
                 status: ExtrinsicStatus;
               },
             );
+
             if (txStatus === transactionStatus.SUCCESS) {
               resolve({ result, status: txStatus });
-              unsub();
+              if (unsub) unsub();
+            } else if (txStatus === transactionStatus.RETRACTED) {
+              console.log("Retracted, resending after 15s ...");
+              resolve(
+                this.delay(15000).then(() =>
+                  this.signAndSend(sender, transaction, options),
+                ),
+              );
             } else if (txStatus === transactionStatus.FAIL) {
               console.error(result.toHuman());
               reject({ result, status: txStatus });
-              unsub();
+              if (unsub) unsub();
             }
-          },
-        );
-      } catch (e) {
-        console.error(e);
-        reject(e);
-      }
+          } catch (error) {
+            console.error(error);
+            reject(error);
+            if (unsub) unsub();
+          }
+        })
+        .then((_unsub) => {
+          unsub = _unsub;
+        })
+        .catch((error) => {
+          console.error(error);
+          reject(error);
+        });
     });
   }
 
@@ -67,13 +86,13 @@ export class SubUtils extends SubBase {
     status: ExtrinsicStatus;
   }): string {
     const { events, status } = submitableResult;
-    if (status.isReady) {
+    if (status.isReady || status.isInBlock) {
       return transactionStatus.NOT_READY;
     }
     if (status.isBroadcast) {
       return transactionStatus.NOT_READY;
     }
-    if (status.isInBlock || status.isFinalized) {
+    if (status.isFinalized) {
       const errors = events.filter(
         (e) => e.event.data.method === "ExtrinsicFailed",
       );
@@ -87,10 +106,11 @@ export class SubUtils extends SubBase {
         return transactionStatus.SUCCESS;
       }
     }
+    if (status.isRetracted) {
+      return transactionStatus.RETRACTED;
+    }
 
-    // TODO temp fix to SUCCESS, it should be FAIL,
-    // check possible status for batch asset call
-    return transactionStatus.SUCCESS;
+    return transactionStatus.FAIL;
   }
 
   fromSeed(seed: string, ss58Format = 42) {

@@ -42,7 +42,9 @@ for (const TEST_CASE of CASES) {
       expect(decimals).to.eq(eth.CONSTANTS[TEST_CASE.ASSET].DECIMALS);
     });
 
-    it("should return totalSupply", async ({ eth }) => {
+    it.skip("[SKIP: check it in the serial suite] should return totalSupply", async ({
+      eth,
+    }) => {
       const ethTotalSupply = await eth.assets[TEST_CASE.ASSET].totalSupply();
       expect(ethTotalSupply).to.eq(TEST_CASE.EXPECTED_SUPPLY);
     });

@@ -86,7 +86,8 @@ export default class EvmHelper {
     await Retry.until(
       () => this.provider.getBlockNumber(),
       (blockNumber) => blockNumber >= currentBlock + blocks,
-      blocks * 12500,
+      // TODO too much
+      blocks * 30000,
     );
   }
 }

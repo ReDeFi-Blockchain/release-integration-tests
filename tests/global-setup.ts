@@ -59,29 +59,31 @@ export async function globalSetup() {
     }
 
     console.log(`>>> ${chainId}: Topping up sponsors' balances...`);
+    console.log("batchTransferNative(transferParamsNative, sub.donor);");
     await sub.account.batchTransferNative(transferParamsNative, sub.donor);
+    console.log("batchTransferAsset(transferParamsGBP, sub.donor);");
     await sub.account.batchTransferAsset(transferParamsGBP, sub.donor);
+    console.log("batchTransferAsset(transferParamsBAXorRED, sub.donor);");
     await sub.account.batchTransferAsset(transferParamsBAXorRED, sub.donor);
 
     console.log(">>> The balances have been topped up!");
 
-    // TODO: uncomment with XCM
-    // if (testConfig.isCrosschain && chainId === NETWORK_CONSTANTS.L2.CHAIN_ID) {
-    //   console.log(">>> Configuring XCM...");
+    if (testConfig.isCrosschain && chainId === NETWORK_CONSTANTS.L2.CHAIN_ID) {
+      console.log(">>> Configuring XCM...");
 
-    //   const setXcmV3tx = sub.api.tx.sudo.sudo(
-    //     sub.api.tx.polkadotXcm.forceXcmVersion(
-    //       {
-    //         parents: 1,
-    //         interrior: "Here",
-    //       },
-    //       3,
-    //     ),
-    //   );
+      const setXcmV3tx = sub.api.tx.sudo.sudo(
+        sub.api.tx.polkadotXcm.forceXcmVersion(
+          {
+            parents: 1,
+            interrior: "Here",
+          },
+          3,
+        ),
+      );
 
-    //   await sub.utils.signAndSend(sub.donor, setXcmV3tx);
-    //   console.log(">>> XCM V3 configured");
-    // }
+      await sub.utils.signAndSend(sub.donor, setXcmV3tx);
+      console.log(">>> XCM V3 configured");
+    }
   }
 
   process.exit(0);

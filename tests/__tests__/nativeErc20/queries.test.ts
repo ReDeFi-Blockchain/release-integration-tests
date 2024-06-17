@@ -18,7 +18,10 @@ describe("Native token as ERC-20", () => {
     expect(decimals).to.eq(eth.CONSTANTS.NATIVE.DECIMALS);
   });
 
-  it("should return totalSupply", async ({ sub, eth }) => {
+  it.skip("[SKIP: check it in the serial suite] should return totalSupply", async ({
+    sub,
+    eth,
+  }) => {
     const subTotalSupply = await sub.system.getTotalIssuance();
     const ethTotalSupply = await eth.assets.NATIVE.totalSupply();
 

@@ -3,7 +3,7 @@ import { expectWait } from "../../utils/matchers/expectWait";
 import { it } from "../../fixtures/standalone";
 
 describe("Native token as ERC-20", () => {
-  it("spender cannot transfer an amount exceeding the approved limit", async ({
+  it("spender cannot transferFrom an amount exceeding the approved limit", async ({
     eth,
   }) => {
     const APPROVED_VALUE = NAT(8);

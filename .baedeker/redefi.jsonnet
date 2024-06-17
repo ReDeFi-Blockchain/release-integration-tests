@@ -29,7 +29,6 @@ local relay = {
 	nodes: {
 		[name]: {
 			bin: 'bin/redefi-relay',
-			bin: 'bin/redefi-relay',
 			wantedKeys: 'relay',
 			extraArgs: [
       			'--blocks-pruning=archive',
