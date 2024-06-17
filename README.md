@@ -24,7 +24,7 @@
 5. Build Relay Node Docker image:
 
     ```
-    docker build -f .docker/Dockerfile-relay -t redefi-relay --build-arg="RUST_TOOLCHAIN=nightly-2023-11-16" --build-arg="REDEFI_RELAY=main" .
+    docker build -f .docker/Dockerfile-relay -t redefi-relay --build-arg="REDEFI_RELAY=main" .
     ```
 
 6. Pull polkadot image from official repository:
@@ -32,15 +32,17 @@
     ```
     docker pull parity/polkadot:v1.7.0
     ```
+
     *This step is required until the node version reaches 1.7.0 or higher. After that you can make changes to redefi.jsonnet and rewrites.jsonnet files, and eliminate this step.* 
 
 7. Build Relay Runtime image:
    
     ```
-    docker build -f .docker/Dockerfile-relay-runtime -t redefi-relay-runtime --build-arg="RUST_TOOLCHAIN=nightly-2023-11-16" --build-arg="REDEFI_RELAY_RUNTIME=main" .
+    docker build -f .docker/Dockerfile-relay-runtime -t redefi-relay-runtime --build-arg="REDEFI_RELAY_RUNTIME=main" .
     ```
     
 8. Copy runtime wasm file to host:
+    
     ```
     docker run -v $PWD:/infra --rm --entrypoint cp redefi-relay-runtime /redefi/redefi_runtime.compact.compressed.wasm /infra/
     ```
@@ -48,7 +50,7 @@
 9. Build Parachain Docker image:
 
     ```
-    docker build -f .docker/Dockerfile-parachain -t redefi-parachain --build-arg="RUST_TOOLCHAIN=nightly-2024-02-15" --build-arg="REDEFI_PARACHAIN=main" .
+    docker build -f .docker/Dockerfile-parachain -t redefi-parachain --build-arg="REDEFI_PARACHAIN=main" .
     ```
 
 10. Run:
@@ -59,14 +61,14 @@
 
 Аfter that u should see in the terminal something like this:
 
-    ```
-    Baedeker env updated
-    Enjoy your baedeker networks at <http://127.0.0.1:9699/>
-    direnv: export +BDK_BALANCER +REDEFI_RELAY_HTTP_URL +REDEFI_RELAY_URL
-    ```
+```
+Baedeker env updated
+Enjoy your baedeker networks at <http://127.0.0.1:9699/>
+direnv: export +BDK_BALANCER +REDEFI_RELAY_HTTP_URL +REDEFI_RELAY_URL
+```
 
 To disable the infrastructure run:
 
-    ```
-    .baedeker/down.sh
-    ```
+```
+.baedeker/down.sh
+```

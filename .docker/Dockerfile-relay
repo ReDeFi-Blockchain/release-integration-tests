@@ -14,16 +14,6 @@ RUN apt-get update && \
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain none
 
-ARG RUST_TOOLCHAIN
-
-RUN echo "Using Rust $RUST_TOOLCHAIN" && \
-    rustup toolchain install $RUST_TOOLCHAIN && \
-    rustup target add wasm32-unknown-unknown --toolchain ${RUST_TOOLCHAIN} && \
-    rustup default $RUST_TOOLCHAIN && \
-    rustup target list --installed && \
-    rustup show
-
-
 # ===== BUILD =====
 FROM rust-builder as builder-relay-bin
 
