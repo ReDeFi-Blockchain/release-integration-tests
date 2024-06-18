@@ -19,11 +19,39 @@ export class SubAccounts extends SubBase {
   }
 
   async setPermissions(    
-      params: { account: string, permissions: AccountPermissions },
+      params: { account: string, permissions: AccountPermissions, erc20: `0x${string}` },
       signer: IKeyringPair,
       options?: Partial<SignerOptions>,
   ) {
-      // TODO
+    return this.utils.signAndSend(
+      signer,
+      this.makeSetPermissionTx({ ...params, owner: signer.address }),
+      options,
+    );
+  }
+
+  private makeSetPermissionTx(params: {
+    erc20: `0x${string}`
+    owner: string,
+    account: string;
+    permissions: AccountPermissions;
+  }) {
+    const transferSignature = "0xd901570d"; // Signature for "setAccountPermissions(address, permissions)"
+    const encodedAccount = params.account.substring(2).padStart(64, "0"); // hex account padded with zeros
+    const encodedPermissions = (params.permissions as number).toString(16).padStart(64, "0"); // hex permissions padded with zeros
+    const payload = transferSignature + encodedAccount + encodedPermissions;
+
+    return this.api.tx.evm.call(
+      addressToEvm(params.owner),
+      params.erc20,
+      payload,
+      0,
+      100_000n,
+      1_000_000_000_000_000,
+      null,
+      null,
+      null,
+    );
   }
 
   async getBalance(address: string) {
