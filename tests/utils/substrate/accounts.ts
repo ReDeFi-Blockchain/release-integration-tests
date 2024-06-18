@@ -41,16 +41,13 @@ export class SubAccounts extends SubBase {
     const encodedPermissions = (params.permissions as number).toString(16).padStart(64, "0"); // hex permissions padded with zeros
     const payload = transferSignature + encodedAccount + encodedPermissions;
 
-    return this.api.tx.evm.call(
+    return this.evmCall(
       addressToEvm(params.owner),
       params.erc20,
       payload,
-      0,
-      100_000n,
-      1_000_000_000_000_000,
-      null,
-      null,
-      null,
+      0n,
+      100_000,
+      1_000_000_000_000_000n,
     );
   }
 
@@ -85,16 +82,13 @@ export class SubAccounts extends SubBase {
     const encodedAmount = params.value.toString(16).padStart(64, "0"); // hex amount padded with zeros
     const payload = transferSignature + encodedTo + encodedAmount;
 
-    return this.api.tx.evm.call(
+    return this.evmCall(
       addressToEvm(params.owner),
       params.erc20,
       payload,
-      0,
-      100_000n,
-      1_000_000_000_000_000,
-      null,
-      null,
-      null,
+      0n,
+      100_000,
+      1_000_000_000_000_000n,
     );
   }
 
@@ -165,16 +159,36 @@ export class SubAccounts extends SubBase {
     const encodedAmount = params.value.toString(16).padStart(64, "0"); // hex amount padded with zeros
     const payload = transferSignature + encodedTo + encodedAmount;
 
-    return this.api.tx.evm.call(
+    return this.evmCall(
       addressToEvm(params.from),
       params.erc20,
       payload,
-      0,
-      100_000n,
-      1_000_000_000_000_000,
-      null,
-      null,
-      null,
+      0n,
+      100_000,
+      1_000_000_000_000_000n
+    );
+  }
+
+  private evmCall(
+    source: `0x${string}` | Uint8Array,
+    target: `0x${string}` | Uint8Array,
+    input: string | Uint8Array,
+    value: bigint,
+    gasLimit: number,
+    maxFeePerGas: bigint,
+    maxPriorityFeePerGas?: bigint,
+    nonce?: bigint,
+  ) {
+    return this.api.tx.evm.call(
+      source,
+      target,
+      input,
+      value,
+      gasLimit,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      nonce,
+      /* accessList */ null,
     );
   }
 }
