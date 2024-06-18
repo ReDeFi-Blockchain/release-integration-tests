@@ -1,7 +1,7 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { IKeyringPair } from "@polkadot/types/types";
 import { SubUtils } from "./utils";
-import { SubBalance } from "./balance";
+import { SubAccounts } from "./accounts";
 import { SubSystem } from "./system";
 
 export default class SubHelper {
@@ -9,13 +9,13 @@ export default class SubHelper {
   readonly sudo: IKeyringPair;
 
   readonly utils: SubUtils;
-  readonly balance: SubBalance;
+  readonly accounts: SubAccounts;
   readonly system: SubSystem;
 
   private constructor(api: ApiPromise) {
     this.api = api;
     this.utils = new SubUtils(api);
-    this.balance = new SubBalance(api, this.utils);
+    this.accounts = new SubAccounts(api, this.utils);
     this.system = new SubSystem(api);
     // TODO change to filename account
     this.sudo = this.utils.fromSeed("//Alice");

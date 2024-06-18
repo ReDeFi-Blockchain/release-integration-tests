@@ -60,11 +60,11 @@ export async function globalSetup() {
 
     console.log(`>>> ${chainId}: Topping up sponsors' balances...`);
     console.log("batchTransferNative(transferParamsNative, sub.donor);");
-    await sub.balance.batchTransferNative(transferParamsNative, sub.sudo);
+    await sub.accounts.batchTransferNative(transferParamsNative, sub.sudo);
     console.log("batchTransferAsset(transferParamsGBP, sub.donor);");
-    await sub.balance.batchTransferAsset(transferParamsGBP, sub.sudo);
+    await sub.accounts.batchTransferAsset(transferParamsGBP, sub.sudo);
     console.log("batchTransferAsset(transferParamsBAXorRED, sub.donor);");
-    await sub.balance.batchTransferAsset(transferParamsBAXorRED, sub.sudo);
+    await sub.accounts.batchTransferAsset(transferParamsBAXorRED, sub.sudo);
 
     console.log(">>> The balances have been topped up!");
 

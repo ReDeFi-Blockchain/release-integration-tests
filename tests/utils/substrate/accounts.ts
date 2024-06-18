@@ -4,13 +4,27 @@ import { evmToAddress, addressToEvm } from "@polkadot/util-crypto";
 import { SubBase } from "./base";
 import { SubUtils } from "./utils";
 import { SignerOptions } from "@polkadot/api/types";
+import { AbiCoder } from "ethers";
 
-export class SubBalance extends SubBase {
+export enum AccountPermissions {
+  Empty = 0,
+  Mint = 1 << 0,
+}
+
+export class SubAccounts extends SubBase {
   private utils: SubUtils;
 
   constructor(api: ApiPromise, utils: SubUtils) {
     super(api);
     this.utils = utils;
+  }
+
+  async setPermissions(    
+      params: { account: string, permissions: AccountPermissions },
+      signer: IKeyringPair,
+      options?: Partial<SignerOptions>,
+  ) {
+      // TODO
   }
 
   async getBalance(address: string) {
@@ -19,6 +33,42 @@ export class SubBalance extends SubBase {
     const { data } = balance.toJSON() as { data: { free: string } };
 
     return BigInt(data.free);
+  }
+
+  async mint(
+    params: { to: string; value: bigint; erc20: `0x${string}` },
+    signer: IKeyringPair,
+    options?: Partial<SignerOptions>,
+  ) {
+    return this.utils.signAndSend(
+      signer,
+      this.makeMintAssetTx({ ...params, owner: signer.address }),
+      options,
+    );
+  }
+  
+  private makeMintAssetTx(params: {
+    erc20: `0x${string}`
+    owner: string,
+    to: string;
+    value: bigint;
+  }) {
+    const transferSignature = "0x40c10f19"; // Signature for "mint(address, uint256)"
+    const encodedTo = params.to.substring(2).padStart(64, "0"); // hex recipient padded with zeros
+    const encodedAmount = params.value.toString(16).padStart(64, "0"); // hex amount padded with zeros
+    const payload = transferSignature + encodedTo + encodedAmount;
+
+    return this.api.tx.evm.call(
+      addressToEvm(params.owner),
+      params.erc20,
+      payload,
+      0,
+      100_000n,
+      1_000_000_000_000_000,
+      null,
+      null,
+      null,
+    );
   }
 
   async transferAsset(
@@ -87,6 +137,12 @@ export class SubBalance extends SubBase {
     const encodedTo = params.to.substring(2).padStart(64, "0"); // hex recipient padded with zeros
     const encodedAmount = params.value.toString(16).padStart(64, "0"); // hex amount padded with zeros
     const payload = transferSignature + encodedTo + encodedAmount;
+
+    // const abiCoder = AbiCoder.defaultAbiCoder();
+    // const payload = abiCoder.encode(
+    //   [ "string",          "address",  "uint256" ],
+    //   [ transferSignature,  params.to,  params.value ],
+    // );
 
     return this.api.tx.evm.call(
       addressToEvm(params.from),
