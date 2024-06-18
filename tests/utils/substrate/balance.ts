@@ -5,7 +5,7 @@ import { SubBase } from "./base";
 import { SubUtils } from "./utils";
 import { SignerOptions } from "@polkadot/api/types";
 
-export class SubAccount extends SubBase {
+export class SubBalance extends SubBase {
   private utils: SubUtils;
 
   constructor(api: ApiPromise, utils: SubUtils) {
