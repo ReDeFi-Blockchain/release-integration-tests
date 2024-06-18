@@ -4,7 +4,6 @@ import { evmToAddress, addressToEvm } from "@polkadot/util-crypto";
 import { SubBase } from "./base";
 import { SubUtils } from "./utils";
 import { SignerOptions } from "@polkadot/api/types";
-import { AbiCoder } from "ethers";
 
 export enum AccountPermissions {
   Empty = 0,
@@ -137,12 +136,6 @@ export class SubAccounts extends SubBase {
     const encodedTo = params.to.substring(2).padStart(64, "0"); // hex recipient padded with zeros
     const encodedAmount = params.value.toString(16).padStart(64, "0"); // hex amount padded with zeros
     const payload = transferSignature + encodedTo + encodedAmount;
-
-    // const abiCoder = AbiCoder.defaultAbiCoder();
-    // const payload = abiCoder.encode(
-    //   [ "string",          "address",  "uint256" ],
-    //   [ transferSignature,  params.to,  params.value ],
-    // );
 
     return this.api.tx.evm.call(
       addressToEvm(params.from),

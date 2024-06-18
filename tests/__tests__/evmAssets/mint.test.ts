@@ -13,9 +13,9 @@ for (const ASSET of TEST_CASES) {
     const [account] = await eth.accounts.generate([{ NATIVE: NAT(5) }]);
     
     const assetValue = BigInt(1000);
-    const assetAddress = await ASSETS[ASSET].ADDRESS;
+    const assetAddress = ASSETS[ASSET].ADDRESS;
 
-    sub.accounts.mint(
+    await sub.accounts.mint(
       { to: account.address, value: assetValue, erc20: assetAddress },
       sub.sudo,
     )
