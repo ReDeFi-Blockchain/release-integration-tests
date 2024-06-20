@@ -4,11 +4,7 @@ import { evmToAddress, addressToEvm } from "@polkadot/util-crypto";
 import { SubBase } from "./base";
 import { SubUtils } from "./utils";
 import { SignerOptions } from "@polkadot/api/types";
-
-export enum AccountPermissions {
-  Empty = 0,
-  Mint = 1 << 0,
-}
+import { AccountPermissions } from "../types";
 
 export class SubAccounts extends SubBase {
   private utils: SubUtils;
@@ -45,9 +41,6 @@ export class SubAccounts extends SubBase {
       addressToEvm(params.owner),
       params.erc20,
       payload,
-      0n,
-      100_000,
-      1_000_000_000_000_000n,
     );
   }
 
@@ -86,9 +79,6 @@ export class SubAccounts extends SubBase {
       addressToEvm(params.owner),
       params.erc20,
       payload,
-      0n,
-      100_000,
-      1_000_000_000_000_000n,
     );
   }
 
@@ -163,9 +153,6 @@ export class SubAccounts extends SubBase {
       addressToEvm(params.from),
       params.erc20,
       payload,
-      0n,
-      100_000,
-      1_000_000_000_000_000n
     );
   }
 
@@ -173,9 +160,9 @@ export class SubAccounts extends SubBase {
     source: `0x${string}` | Uint8Array,
     target: `0x${string}` | Uint8Array,
     input: string | Uint8Array,
-    value: bigint,
-    gasLimit: number,
-    maxFeePerGas: bigint,
+    value: bigint = 0n,
+    gasLimit: number = 100_000,
+    maxFeePerGas: bigint = 1_000_000_000_000_000n,
     maxPriorityFeePerGas?: bigint,
     nonce?: bigint,
   ) {
