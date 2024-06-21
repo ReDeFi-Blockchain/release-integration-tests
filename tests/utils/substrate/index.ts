@@ -1,24 +1,24 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { IKeyringPair } from "@polkadot/types/types";
 import { SubUtils } from "./utils";
-import { SubAccount } from "./account";
+import { SubAccounts } from "./accounts";
 import { SubSystem } from "./system";
 
 export default class SubHelper {
   readonly api: ApiPromise;
-  readonly donor: IKeyringPair;
+  readonly sudo: IKeyringPair;
 
   readonly utils: SubUtils;
-  readonly account: SubAccount;
+  readonly accounts: SubAccounts;
   readonly system: SubSystem;
 
   private constructor(api: ApiPromise) {
     this.api = api;
     this.utils = new SubUtils(api);
-    this.account = new SubAccount(api, this.utils);
+    this.accounts = new SubAccounts(api, this.utils);
     this.system = new SubSystem(api);
     // TODO change to filename account
-    this.donor = this.utils.fromSeed("//Alice");
+    this.sudo = this.utils.fromSeed("//Alice");
   }
 
   static async init(wsEndpoint: string) {

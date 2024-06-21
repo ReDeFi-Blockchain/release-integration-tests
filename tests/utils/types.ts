@@ -20,3 +20,8 @@ type AccountAsset = {
 export type NetworkConstants = Required<AccountAsset> & {
   CHAIN_ID: bigint;
 };
+
+export enum AccountPermissions {
+  Empty = 0,
+  Mint = 1 << 0,
+}

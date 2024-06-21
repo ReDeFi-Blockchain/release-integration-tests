@@ -60,11 +60,11 @@ export async function globalSetup() {
 
     console.log(`>>> ${chainId}: Topping up sponsors' balances...`);
     console.log("batchTransferNative(transferParamsNative, sub.donor);");
-    await sub.account.batchTransferNative(transferParamsNative, sub.donor);
+    await sub.accounts.batchTransferNative(transferParamsNative, sub.sudo);
     console.log("batchTransferAsset(transferParamsGBP, sub.donor);");
-    await sub.account.batchTransferAsset(transferParamsGBP, sub.donor);
+    await sub.accounts.batchTransferAsset(transferParamsGBP, sub.sudo);
     console.log("batchTransferAsset(transferParamsBAXorRED, sub.donor);");
-    await sub.account.batchTransferAsset(transferParamsBAXorRED, sub.donor);
+    await sub.accounts.batchTransferAsset(transferParamsBAXorRED, sub.sudo);
 
     console.log(">>> The balances have been topped up!");
 
@@ -81,7 +81,7 @@ export async function globalSetup() {
         ),
       );
 
-      await sub.utils.signAndSend(sub.donor, setXcmV3tx);
+      await sub.utils.signAndSend(sub.sudo, setXcmV3tx);
       console.log(">>> XCM V3 configured");
     }
   }

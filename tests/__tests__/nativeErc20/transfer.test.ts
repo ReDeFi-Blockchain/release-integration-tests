@@ -26,7 +26,7 @@ describe("Native token as ERC-20", () => {
       ),
     );
 
-    const receiverSubBalance = await sub.account.getBalance(receiver.address);
+    const receiverSubBalance = await sub.accounts.getBalance(receiver.address);
     const receiverEthBalance = await eth.provider.getBalance(receiver.address);
     const receiverErc20Balance = await eth.assets.NATIVE.balanceOf(
       receiver.address,
@@ -37,7 +37,7 @@ describe("Native token as ERC-20", () => {
       .to.eq(receiverErc20Balance)
       .to.eq(TRANSFER_VALUE);
 
-    const senderSubBalance = await sub.account.getBalance(sender.address);
+    const senderSubBalance = await sub.accounts.getBalance(sender.address);
     const senderEthBalance = await eth.provider.getBalance(sender.address);
     const senderErc20Balance = await eth.assets.NATIVE.balanceOf(
       sender.address,
