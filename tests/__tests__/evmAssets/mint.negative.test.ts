@@ -18,11 +18,12 @@ for (const ASSET of TEST_CASES) {
         eth.assets[ASSET].connect(account).mint(account, MINT_AMOUNT),
       ),
     ).revertedWith(
-      // FIXME(vklachkov): Behaviour of relay chain and parachain is different 
+      // FIXME(vklachkov): Behaviour of relay chain and parachain is different
       // after PR https://github.com/ReDeFi-Blockchain/redefi-parachain/pull/9.
-      eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID ?
-        "OwnableUnauthorizedAccount"
-        : "UnauthorizedAccount");
+      eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID
+        ? "OwnableUnauthorizedAccount"
+        : "UnauthorizedAccount",
+    );
 
     const balance = await eth.assets[ASSET].balanceOf(account);
     expect(balance).to.eq(0);

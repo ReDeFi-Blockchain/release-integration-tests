@@ -21,5 +21,4 @@ export const NAT = (float: number | string) => floatPowerTenToBigInt(float, 18);
  */
 export const GBP = (float: number | string) => floatPowerTenToBigInt(float, 6);
 
-
 export type CurrencyConverter = (float: number | string) => bigint;

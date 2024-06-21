@@ -14,10 +14,14 @@ export class SubAccounts extends SubBase {
     this.utils = utils;
   }
 
-  async setPermissions(    
-      params: { account: string, permissions: AccountPermissions, erc20: `0x${string}` },
-      signer: IKeyringPair,
-      options?: Partial<SignerOptions>,
+  async setPermissions(
+    params: {
+      account: string;
+      permissions: AccountPermissions;
+      erc20: `0x${string}`;
+    },
+    signer: IKeyringPair,
+    options?: Partial<SignerOptions>,
   ) {
     return this.utils.signAndSend(
       signer,
@@ -27,21 +31,19 @@ export class SubAccounts extends SubBase {
   }
 
   private makeSetPermissionTx(params: {
-    erc20: `0x${string}`
-    owner: string,
+    erc20: `0x${string}`;
+    owner: string;
     account: string;
     permissions: AccountPermissions;
   }) {
     const transferSignature = "0xd901570d"; // Signature for "setAccountPermissions(address, permissions)"
     const encodedAccount = params.account.substring(2).padStart(64, "0"); // hex account padded with zeros
-    const encodedPermissions = (params.permissions as number).toString(16).padStart(64, "0"); // hex permissions padded with zeros
+    const encodedPermissions = (params.permissions as number)
+      .toString(16)
+      .padStart(64, "0"); // hex permissions padded with zeros
     const payload = transferSignature + encodedAccount + encodedPermissions;
 
-    return this.evmCall(
-      addressToEvm(params.owner),
-      params.erc20,
-      payload,
-    );
+    return this.evmCall(addressToEvm(params.owner), params.erc20, payload);
   }
 
   async getBalance(address: string) {
@@ -63,10 +65,10 @@ export class SubAccounts extends SubBase {
       options,
     );
   }
-  
+
   private makeMintAssetTx(params: {
-    erc20: `0x${string}`
-    owner: string,
+    erc20: `0x${string}`;
+    owner: string;
     to: string;
     value: bigint;
   }) {
@@ -75,11 +77,7 @@ export class SubAccounts extends SubBase {
     const encodedAmount = params.value.toString(16).padStart(64, "0"); // hex amount padded with zeros
     const payload = transferSignature + encodedTo + encodedAmount;
 
-    return this.evmCall(
-      addressToEvm(params.owner),
-      params.erc20,
-      payload,
-    );
+    return this.evmCall(addressToEvm(params.owner), params.erc20, payload);
   }
 
   async transferAsset(
@@ -149,11 +147,7 @@ export class SubAccounts extends SubBase {
     const encodedAmount = params.value.toString(16).padStart(64, "0"); // hex amount padded with zeros
     const payload = transferSignature + encodedTo + encodedAmount;
 
-    return this.evmCall(
-      addressToEvm(params.from),
-      params.erc20,
-      payload,
-    );
+    return this.evmCall(addressToEvm(params.from), params.erc20, payload);
   }
 
   private evmCall(
