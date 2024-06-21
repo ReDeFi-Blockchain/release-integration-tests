@@ -24,7 +24,7 @@ const TEST_CASES: TestCase[] = [
 
 for (const { ASSET, INITIAL_BALANCE, MINT_VALUE } of TEST_CASES) {
   describe(`Account permissions control`, () => {
-    it(`Owner can set permission and allow another account to mint tokens`, async ({
+    it(`${ASSET} owner can set permission and allow another account to mint tokens`, async ({
       eth,
       sub,
     }) => {
@@ -59,7 +59,7 @@ for (const { ASSET, INITIAL_BALANCE, MINT_VALUE } of TEST_CASES) {
       expect(balance).to.eq(INITIAL_BALANCE[ASSET]! + MINT_VALUE);
     });
 
-    it(`Owner can disallow another account to mint tokens`, async ({
+    it(`${ASSET} owner can disallow another account to mint tokens`, async ({
       eth,
       sub,
     }) => {
@@ -104,7 +104,9 @@ for (const { ASSET, INITIAL_BALANCE, MINT_VALUE } of TEST_CASES) {
       ).revertedWith("UnauthorizedAccount");
     });
 
-    it(`Only owner can set permissions for account`, async ({ eth }) => {
+    it(`Only ${ASSET} owner can set permissions for account`, async ({
+      eth,
+    }) => {
       // Permissions control exists only on parachain.
       if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
 
