@@ -8,26 +8,18 @@ const floatPowerTenToBigInt = (float: number | string, power: number) => {
 };
 
 /**
- * Abstract token
- * @param float
- * @param decimals
- * @returns
- */
-export const TOKEN = (float: number | string, decimals: number) => floatPowerTenToBigInt(float, decimals);
-
-/**
  * Native token - BAX or RED, 18 decimals
  * @param float
  * @returns
  */
-export const NAT = (float: number | string) => TOKEN(float, 18);
+export const NAT = (float: number | string) => floatPowerTenToBigInt(float, 18);
 
 /**
  * GBP Asset, 6 decimals
  * @param float
  * @returns
  */
-export const GBP = (float: number | string) => TOKEN(float, 6);
+export const GBP = (float: number | string) => floatPowerTenToBigInt(float, 6);
 
 
 export type CurrencyConverter = (float: number | string) => bigint;
