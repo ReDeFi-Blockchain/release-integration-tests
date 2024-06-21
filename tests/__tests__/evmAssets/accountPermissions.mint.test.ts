@@ -2,110 +2,138 @@ import { expect } from "chai";
 import { it } from "../../fixtures/standalone";
 import { GBP, NAT } from "../../utils/currency";
 import { NETWORK_CONSTANTS } from "../../utils/constants";
-import { AccountPermissions } from "../../utils/types";
+import {
+  AccountAssetType,
+  AccountBalance,
+  AccountPermissions,
+} from "../../utils/types";
 
-describe(`Test account permissions control`, () => {
-    it(`Owner can set permission and allow another account to mint tokens`, async ({ eth, sub }) => {
-        // Permissions control exists only on parachain.
-        if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
+type TestCase = {
+  ASSET: AccountAssetType;
+  INITIAL_BALANCE: AccountBalance;
+  MINT_VALUE: bigint;
+};
 
-        const initialBalance = { GBP: GBP(10000), NATIVE: NAT(10000) };
-        const [admin] = await eth.accounts.generate([ initialBalance ]);
+const TEST_CASES: TestCase[] = [
+  {
+    ASSET: "GBP",
+    INITIAL_BALANCE: { GBP: GBP(10000), NATIVE: NAT(10000) },
+    MINT_VALUE: GBP(10000),
+  },
+];
 
-        const asset = eth.assets["GBP"];
-        const assetAddress = await asset.getAddress() as `0x${string}`;
-        const mintValue = GBP(10000);
+for (const { ASSET, INITIAL_BALANCE, MINT_VALUE } of TEST_CASES) {
+  describe(`Account permissions control`, () => {
+    it(`Owner can set permission and allow another account to mint tokens`, async ({
+      eth,
+      sub,
+    }) => {
+      // Permissions control exists only on parachain.
+      if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
 
-        // No mint permission.
-        await expect(
-            eth.waitForResult(
-                asset.connect(admin).mint(admin, mintValue)
-            )
-        ).revertedWith("UnauthorizedAccount");
+      const [admin] = await eth.accounts.generate([INITIAL_BALANCE]);
 
-        // Give mint permissions.
-        await sub.accounts.setPermissions(
-            { account: admin.address, permissions: AccountPermissions.Mint, erc20: assetAddress },
-            sub.sudo,
-        );
+      // No mint permission.
+      await expect(
+        eth.waitForResult(
+          eth.assets[ASSET].connect(admin).mint(admin, MINT_VALUE),
+        ),
+      ).revertedWith("UnauthorizedAccount");
 
-        // Check mint.
-        await eth.waitForResult(
-            asset.connect(admin).mint(admin, mintValue)
-        );
+      // Give mint permissions.
+      await sub.accounts.setPermissions(
+        {
+          account: admin.address,
+          permissions: AccountPermissions.Mint,
+          erc20: eth.CONSTANTS[ASSET].ADDRESS,
+        },
+        sub.sudo,
+      );
 
-        const balance = await asset.balanceOf(admin);
-        expect(balance).to.eq(initialBalance.GBP + mintValue);
+      // Check mint.
+      await eth.waitForResult(
+        eth.assets[ASSET].connect(admin).mint(admin, MINT_VALUE),
+      );
+
+      const balance = await eth.assets[ASSET].balanceOf(admin);
+      expect(balance).to.eq(INITIAL_BALANCE[ASSET]! + MINT_VALUE);
     });
 
-    it(`Owner can disallow another account to mint tokens`, async ({ eth, sub }) => {
-        // Permissions control exists only on parachain.
-        if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
+    it(`Owner can disallow another account to mint tokens`, async ({
+      eth,
+      sub,
+    }) => {
+      // Permissions control exists only on parachain.
+      if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
 
-        const initialBalance = { GBP: GBP(10000), NATIVE: NAT(10000) };
-        const [admin] = await eth.accounts.generate([ initialBalance ]);
+      const [admin] = await eth.accounts.generate([INITIAL_BALANCE]);
 
-        const asset = eth.assets["GBP"];
-        const assetAddress = await asset.getAddress() as `0x${string}`;
-        const mintValue = GBP(10000);
+      // Give mint permissions.
+      await sub.accounts.setPermissions(
+        {
+          account: admin.address,
+          permissions: AccountPermissions.Mint,
+          erc20: eth.CONSTANTS[ASSET].ADDRESS,
+        },
+        sub.sudo,
+      );
 
-        // Give mint permissions.
-        await sub.accounts.setPermissions(
-            { account: admin.address, permissions: AccountPermissions.Mint, erc20: assetAddress },
-            sub.sudo,
-        );
+      // Check mint.
+      await eth.waitForResult(
+        eth.assets[ASSET].connect(admin).mint(admin, MINT_VALUE),
+      );
 
-        // Check mint.
-        await eth.waitForResult(
-            asset.connect(admin).mint(admin, mintValue)
-        );
+      const balance = await eth.assets[ASSET].balanceOf(admin);
+      expect(balance).to.eq(INITIAL_BALANCE[ASSET]! + MINT_VALUE);
 
-        const balance = await asset.balanceOf(admin);
-        expect(balance).to.eq(initialBalance.GBP + mintValue);
+      // Take mint permissions.
+      await sub.accounts.setPermissions(
+        {
+          account: admin.address,
+          permissions: AccountPermissions.Empty,
+          erc20: eth.CONSTANTS[ASSET].ADDRESS,
+        },
+        sub.sudo,
+      );
 
-        // Take mint permissions.
-        await sub.accounts.setPermissions(
-            { account: admin.address, permissions: AccountPermissions.Empty, erc20: assetAddress },
-            sub.sudo,
-        );
-
-        // No mint permission.
-        await expect(
-            eth.waitForResult(
-                asset.connect(admin).mint(admin, mintValue)
-            )
-        ).revertedWith("UnauthorizedAccount");
+      // No mint permission.
+      await expect(
+        eth.waitForResult(
+          eth.assets[ASSET].connect(admin).mint(admin, MINT_VALUE),
+        ),
+      ).revertedWith("UnauthorizedAccount");
     });
 
     it(`Only owner can set permissions for account`, async ({ eth }) => {
-        // Permissions control exists only on parachain.
-        if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
+      // Permissions control exists only on parachain.
+      if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
 
-        const initialBalance = { GBP: GBP(10000), NATIVE: NAT(10000) };
-        const [admin] = await eth.accounts.generate([ initialBalance ]);
+      const [admin] = await eth.accounts.generate([INITIAL_BALANCE]);
 
-        const asset = eth.assets["GBP"];
-        const mintValue = GBP(10000);
+      // No mint permission.
 
-        // No mint permission.
-        await expect(
-            eth.waitForResult(
-                asset.connect(admin).mint(admin, mintValue)
-            )
-        ).revertedWith("UnauthorizedAccount");
+      await expect(
+        eth.waitForResult(
+          eth.assets[ASSET].connect(admin).mint(admin, MINT_VALUE),
+        ),
+      ).revertedWith("UnauthorizedAccount");
 
-        // Give permission for yourself.
-        await expect(
-            eth.waitForResult(
-                asset.connect(admin).setAccountPermissions(admin, AccountPermissions.Mint as number)
-            )
-        ).revertedWith("OwnableUnauthorizedAccount");
+      // Give permission for yourself.
+      await expect(
+        eth.waitForResult(
+          eth.assets[ASSET].connect(admin).setAccountPermissions(
+            admin,
+            AccountPermissions.Mint as number,
+          ),
+        ),
+      ).revertedWith("OwnableUnauthorizedAccount");
 
-        // Checking that permissions not changed.
-        await expect(
-            eth.waitForResult(
-                asset.connect(admin).mint(admin, mintValue)
-            )
-        ).revertedWith("UnauthorizedAccount");
+      // Checking that permissions not changed.
+      await expect(
+        eth.waitForResult(
+          eth.assets[ASSET].connect(admin).mint(admin, MINT_VALUE),
+        ),
+      ).revertedWith("UnauthorizedAccount");
     });
-});
+  });
+}
