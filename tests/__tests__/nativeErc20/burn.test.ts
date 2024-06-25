@@ -3,7 +3,6 @@ import { expect } from "chai";
 import { NAT } from "../../utils/currency";
 import { expectWait } from "../../utils/matchers/expectWait";
 import { ethers } from "hardhat";
-import { NETWORK_CONSTANTS } from "../../utils/constants";
 
 // NOTE: burn and burnFrom probaly should not be allowed to anyone except "admin"
 describe(`NATIVE burn`, () => {
@@ -12,9 +11,6 @@ describe(`NATIVE burn`, () => {
   const BURN_AMOUNT = NAT(1);
 
   it("token owner can burn", async ({ eth }) => {
-    // Mint exists only on parachain.
-    if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
-
     const [account] = await eth.accounts.generate([
       { NATIVE: INITIAL_BALANCE },
     ]);
@@ -32,9 +28,6 @@ describe(`NATIVE burn`, () => {
   });
 
   it("approved account can burnFrom", async ({ eth }) => {
-    // Mint exists only on parachain.
-    if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
-
     const [owner, spender] = await eth.accounts.generate([
       { NATIVE: INITIAL_BALANCE },
       { NATIVE: INITIAL_BALANCE },

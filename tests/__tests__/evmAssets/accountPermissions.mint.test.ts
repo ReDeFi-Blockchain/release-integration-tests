@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import { it } from "../../fixtures/standalone";
 import { GBP, NAT } from "../../utils/currency";
-import { NETWORK_CONSTANTS } from "../../utils/constants";
 import {
   AccountAssetType,
   AccountBalance,
@@ -28,9 +27,6 @@ for (const { ASSET, INITIAL_BALANCE, MINT_VALUE } of TEST_CASES) {
       eth,
       sub,
     }) => {
-      // Permissions control exists only on parachain.
-      if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
-
       const [admin] = await eth.accounts.generate([INITIAL_BALANCE]);
 
       // No mint permission.
@@ -63,9 +59,6 @@ for (const { ASSET, INITIAL_BALANCE, MINT_VALUE } of TEST_CASES) {
       eth,
       sub,
     }) => {
-      // Permissions control exists only on parachain.
-      if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
-
       const [admin] = await eth.accounts.generate([INITIAL_BALANCE]);
 
       // Give mint permissions.
@@ -107,9 +100,6 @@ for (const { ASSET, INITIAL_BALANCE, MINT_VALUE } of TEST_CASES) {
     it(`Only ${ASSET} owner can set permissions for account`, async ({
       eth,
     }) => {
-      // Permissions control exists only on parachain.
-      if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
-
       const [admin] = await eth.accounts.generate([INITIAL_BALANCE]);
 
       // No mint permission.

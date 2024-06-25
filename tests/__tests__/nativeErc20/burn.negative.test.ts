@@ -2,7 +2,6 @@ import { it } from "../../fixtures/standalone";
 import { expect } from "chai";
 import { NAT } from "../../utils/currency";
 import { expectWait } from "../../utils/matchers/expectWait";
-import { NETWORK_CONSTANTS } from "../../utils/constants";
 
 // NOTE: burn and burnFrom probaly should not be allowed to anyone except "admin"
 describe(`NATIVE burn`, () => {
@@ -10,9 +9,6 @@ describe(`NATIVE burn`, () => {
   const APPROVE_VALUE = NAT(1000);
 
   it("token owner cannot burn more than balance", async ({ eth }) => {
-    // Mint exists only on parachain.
-    if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
-
     const [account] = await eth.accounts.generate([
       { NATIVE: INITIAL_BALANCE },
     ]);
@@ -28,9 +24,6 @@ describe(`NATIVE burn`, () => {
   it("approved account cannot burnFrom an amount exceeding the approved limit", async ({
     eth,
   }) => {
-    // Mint exists only on parachain.
-    if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
-
     const [owner, spender] = await eth.accounts.generate([
       { NATIVE: INITIAL_BALANCE },
       { NATIVE: INITIAL_BALANCE },
