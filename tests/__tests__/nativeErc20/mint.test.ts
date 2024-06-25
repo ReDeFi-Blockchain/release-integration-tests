@@ -1,11 +1,9 @@
 import { expect } from "chai";
 import { it } from "../../fixtures/standalone";
-import { NAT } from "../../utils/currency";
 import { NETWORK_CONSTANTS } from "../../utils/constants";
+import { NAT } from "../../utils/currency";
 
-it(`NATIVE mint by random account reverted with OwnableUnauthorizedAccount`, async ({
-  eth,
-}) => {
+it(`NATIVE owner can mint new tokens`, async ({ eth, sub }) => {
   // Mint exists only on parachain.
   if (eth.CONSTANTS.CHAIN_ID == NETWORK_CONSTANTS.L1.CHAIN_ID) return;
 
@@ -14,12 +12,15 @@ it(`NATIVE mint by random account reverted with OwnableUnauthorizedAccount`, asy
 
   const [account] = await eth.accounts.generate([{ NATIVE: INITIAL_BALANCE }]);
 
-  await expect(
-    eth.waitForResult(
-      eth.assets.NATIVE.connect(account).mint(account, MINT_VALUE),
-    ),
-  ).revertedWith("UnauthorizedAccount");
+  await sub.accounts.mint(
+    {
+      to: account.address,
+      value: MINT_VALUE,
+      erc20: eth.CONSTANTS.NATIVE.ADDRESS,
+    },
+    sub.sudo,
+  );
 
   const balance = await eth.assets.NATIVE.balanceOf(account);
-  expect(balance).to.eq(INITIAL_BALANCE);
+  expect(balance).to.eq(INITIAL_BALANCE + MINT_VALUE);
 });
