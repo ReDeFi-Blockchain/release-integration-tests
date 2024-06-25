@@ -18,6 +18,10 @@ jobs:
       - name: Clean Workspace
         uses: AutoModality/action-clean@v1.1.0
 
+      - uses: actions/setup-node@v3.5.1
+        with:
+          node-version: 20
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3.1.0
         with:
@@ -37,20 +41,48 @@ jobs:
           args: |
             --build-arg REDEFI_PARACHAIN=${{ env.REDEFI_PARACHAIN_LATEST_VERSION }}
 
-      - name: Build the stack
+      - name: Start the stack
+        id: startStack
         run: docker-compose -f ".docker/docker-compose.parachain-dev-mode.yml" up -d --build --remove-orphans
 
-      - uses: actions/setup-node@v3.5.1
-        with:
-          node-version: 20
-
-      - name: Run tests
-        working-directory: tests/
+      - name: Ensure network is alive before upgrade
+        working-directory: ./tests
+        id: alive1
+        if: steps.startStack.outcome == 'success'
         run: |
           yarn
           ./scripts/wait_for_first_block.sh
-          echo "Ready to start tests"
-          yarn test
+        env:
+          RPC_URL_MAIN: ${{ env.RPC_URL_PARACHAIN }}
+          CROSSCHAIN: false
+
+      - name: Run test:setup before Node upgrade
+        working-directory: ./tests
+        id: test-setup
+        if: steps.alive1.outcome == 'success'
+        run: |
+          echo "Ready to start test:setup"
+          yarn test:setup 
+        env:
+          RPC_URL_MAIN: ${{ env.RPC_URL_PARACHAIN }}
+          CROSSCHAIN: false
+
+      - name: Run test:regular before Node upgrade
+        working-directory: ./tests
+        if: steps.test-setup.outcome == 'success'
+        run: |
+          echo "Ready to start test:regular"
+          yarn test:regular
+        env:
+          RPC_URL_MAIN: ${{ env.RPC_URL_PARACHAIN }}
+          CROSSCHAIN: false
+
+      - name: Run test:serial before Node upgrade
+        working-directory: ./tests
+        if: steps.test-setup.outcome == 'success'
+        run: |
+          echo "Ready to start test:serial"
+          yarn test:serial
         env:
           RPC_URL_MAIN: ${{ env.RPC_URL_PARACHAIN }}
           CROSSCHAIN: false
@@ -62,6 +94,4 @@ jobs:
       - name: Remove builder cache
         if: always()                   # run this step always
         run: |
-          docker builder prune -f -a
-          docker system prune -f
-          docker image prune -f -a
+          docker system prune -f -a

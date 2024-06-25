@@ -85,6 +85,7 @@ jobs:
       - name: Extract wasms
         uses: ./.github/actions/extractDocker
         id: wasm
+        if: steps.redefi-parachain-latest.outcome == 'success'
         with:
           image: ${{ steps.redefi-parachain-latest.outputs.name }}
           directory: /redefi
@@ -118,7 +119,8 @@ jobs:
 
       - name: Ensure network is alive before upgrade
         working-directory: ./tests
-        if: success()
+        if: steps.bdk.outcome == 'success'
+        id: alive1
         run: |
           yarn
           ./scripts/wait_for_first_block.sh
@@ -129,6 +131,8 @@ jobs:
 
       - name: "Reconcile: runtime is upgraded"
         working-directory: ./tests
+        id: reconcile1
+        if: steps.alive1.outcome == 'success'
         run: |
           echo "Executing upgrade"
           yarn node --no-warnings=ExperimentalWarning --loader ts-node/esm scripts/parachainAuthorizeEnactUpgrade.ts ${{ steps.wasm.outputs.dir }}/redefi_runtime.compact.compressed.wasm
@@ -139,7 +143,8 @@ jobs:
 
       - name: Ensure network is alive after upgrade
         working-directory: ./tests
-        if: success()
+        id: alive2
+        if: steps.reconcile1.outcome == 'success'
         run: |
           yarn
           ./scripts/wait_for_first_block.sh
@@ -148,12 +153,37 @@ jobs:
           RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
           CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
-      - name: Run tests after upgrade
+      - name: Run test:setup after upgrade
         working-directory: ./tests
-        if: success() || failure()    # run this step even if previous step failed
+        id: test-setup
+        if: steps.alive2.outcome == 'success'
         run: |
-          echo "Ready to start tests"
-          yarn test
+          echo "Ready to start test:setup"
+          yarn test:setup
+        env:
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
+
+      - name: Run test:regular after upgrade
+        working-directory: ./tests
+        id: test-regular
+        if: steps.test-setup.outcome == 'success'
+        run: |
+          echo "Ready to start test:regular"
+          yarn test:regular
+        env:
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
+
+      - name: Run test:serial after upgrade
+        working-directory: ./tests
+        id: test-serial
+        if: steps.test-setup.outcome == 'success'
+        run: |
+          echo "Ready to start test:serial"
+          yarn test:serial
         env:
           RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
           RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}

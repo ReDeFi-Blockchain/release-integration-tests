@@ -111,22 +111,56 @@ jobs:
             ephemeral:snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.redefi-relay-mainnet.outputs.name }}'}})
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-collator':{dockerImage:'${{ steps.redefi-parachain-mainnet.outputs.name }}'}})
 
-      - name: Run tests before Node upgrade
+      - name: Ensure network is alive before upgrade
         working-directory: ./tests
-        if: success()
+        id: alive1
+        if: steps.bdk.outcome == 'success'
         run: |
           yarn
           ./scripts/wait_for_first_block.sh
-          echo "Ready to start tests"
-          yarn test 
+        env:
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
+
+      - name: Run test:setup before Node upgrade
+        working-directory: ./tests
+        id: test-setup1
+        if: steps.alive1.outcome == 'success'
+        run: |
+          echo "Ready to start test:setup"
+          yarn test:setup 
+        env:
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
+
+      - name: Run test:regular before Node upgrade
+        working-directory: ./tests
+        if: steps.test-setup1.outcome == 'success'
+        run: |
+          echo "Ready to start test:regular"
+          yarn test:regular
+        env:
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
+
+      - name: Run test:serial before Node upgrade
+        working-directory: ./tests
+        if: steps.test-setup1.outcome == 'success'
+        run: |
+          echo "Ready to start test:serial"
+          yarn test:serial
         env:
           RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
           RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
           CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
       - name: "Reconcile: only one old node"
-        if: success() || failure()
         uses: UniqueNetwork/baedeker-action/reconcile@v1-no-debug-output
+        id: reconcile1
+        if: steps.alive1.outcome == 'success'
         with:
           baedeker: ${{ steps.bdk.outputs.baedeker }}
           # Chain should always be built with the mainnet spec, this we first set binary for all nodes expect one, then set mainnet binary for the last node, and then force chainspec to be still generated from mainnet
@@ -137,7 +171,8 @@ jobs:
 
       - name: Ensure network is alive
         working-directory: ./tests
-        if: success()
+        id: alive2
+        if: steps.reconcile1.outcome == 'success'
         run: |
           ./scripts/wait_for_first_block.sh
         env:
@@ -146,8 +181,9 @@ jobs:
           CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
       - name: "Reconcile: all nodes are updated"
-        if: success() || failure()
         uses: UniqueNetwork/baedeker-action/reconcile@v1-no-debug-output
+        id: reconcile2
+        if: steps.alive2.outcome == 'success'
         with:
           baedeker: ${{ steps.bdk.outputs.baedeker }}
           # Chain should always be built with the mainnet spec, this we first set binary for all nodes, and then force chainspec to be still generated from mainnet
@@ -155,14 +191,47 @@ jobs:
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-collator:{dockerImage:'${{ steps.redefi-parachain-latest.outputs.name }}'}}, for_chain = false)
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-collator':{dockerImage:'${{ steps.redefi-parachain-mainnet.outputs.name }}'}})
 
-      - name: Run tests after Node upgrade
+      - name: Ensure network is alive before upgrade
         working-directory: ./tests
-        if: success() || failure()    # run this step even if previous step failed
+        id: alive3
+        if: steps.reconcile2.outcome == 'success'
         run: |
           yarn
           ./scripts/wait_for_first_block.sh
-          echo "Ready to start tests"
-          yarn test
+        env:
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
+
+      - name: Run test:setup before Node upgrade
+        working-directory: ./tests
+        id: test-setup2
+        if: steps.alive3.outcome == 'success'
+        run: |
+          echo "Ready to start test:setup"
+          yarn test:setup 
+        env:
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
+
+      - name: Run test:regular before Node upgrade
+        working-directory: ./tests
+        if: steps.test-setup2.outcome == 'success'
+        run: |
+          echo "Ready to start test:regular"
+          yarn test:regular
+        env:
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
+
+      - name: Run test:serial before Node upgrade
+        working-directory: ./tests
+        if: steps.test-setup2.outcome == 'success'
+        run: |
+          echo "Ready to start test:serial"
+          yarn test:serial
         env:
           RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
           RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
