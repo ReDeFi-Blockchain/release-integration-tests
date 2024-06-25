@@ -1,4 +1,4 @@
-name: nodes-only update
+name: parachain-node-only-update
 
 # Triger: only call from main workflow(re-usable workflows)
 on:

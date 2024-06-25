@@ -1,3 +1,5 @@
+name: relay-forkless-NOdata
+
 on:
   workflow_call:
   workflow_dispatch:

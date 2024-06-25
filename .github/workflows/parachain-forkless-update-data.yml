@@ -1,3 +1,5 @@
+name: parachain-forkless-data
+
 on:
   workflow_call:
   workflow_dispatch:

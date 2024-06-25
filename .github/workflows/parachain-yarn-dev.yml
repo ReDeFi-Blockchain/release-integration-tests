@@ -1,5 +1,5 @@
 # Integration test in --dev mode
-name: yarn dev
+name: parachain-yarn-dev
 
 # Triger: only call from main workflow(re-usable workflows)
 on:

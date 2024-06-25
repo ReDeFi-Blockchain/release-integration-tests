@@ -1,3 +1,5 @@
+name: parachain-forkless-NOdata
+
 on:
   workflow_call:
   workflow_dispatch:
