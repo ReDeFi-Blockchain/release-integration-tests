@@ -20,7 +20,7 @@ const TEST_CASES: TestCase[] = [
 ];
 
 for (const { ASSET, MINT_VALUE } of TEST_CASES) {
-  it(`${ASSET} owner can mint new tokens`, async ({ eth, sub }) => {
+  it(`[serial] ${ASSET} owner can mint new tokens`, async ({ eth, sub }) => {
     const [account] = await eth.accounts.generate([{ NATIVE: NAT(10000) }]);
 
     await sub.accounts.mint(

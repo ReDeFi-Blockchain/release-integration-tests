@@ -5,7 +5,9 @@
   "author": "ReDeFi",
   "license": "Apache-2.0",
   "scripts": {
-    "test": "yarn test:setup && npx hardhat test --parallel",
+    "test": "npx hardhat test --parallel",
+    "test:serial": "npx hardhat test --grep \"\\[serial\\]\"",
+    "test:regular": "hardhat test --grep '^(?!.*\\[serial\\]).*$' --parallel",
     "test:setup": "hardhat run ./global-setup.ts",
     "test:hh": "npx hardhat test --no-compile",
     "run:hh": "npx hardhat run --no-compile",
