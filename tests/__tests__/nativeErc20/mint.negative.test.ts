@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { it } from "../../fixtures/standalone";
 import { NAT } from "../../utils/currency";
 
-it(`NATIVE mint by random account reverted with OwnableUnauthorizedAccount`, async ({
+it(`NATIVE mint by random account reverted with UnauthorizedAccount`, async ({
   eth,
 }) => {
   const INITIAL_BALANCE = NAT(10000);

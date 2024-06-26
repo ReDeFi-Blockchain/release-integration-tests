@@ -6,7 +6,7 @@ import { AccountAssetType } from "../../utils/types";
 const TEST_CASES: AccountAssetType[] = ["GBP", "SIBLING"] as const;
 
 for (const ASSET of TEST_CASES) {
-  it(`${ASSET} mint by random account reverted with OwnableUnauthorizedAccount`, async ({
+  it(`${ASSET} mint by random account reverted with UnauthorizedAccount`, async ({
     eth,
   }) => {
     const MINT_AMOUNT = 1;
