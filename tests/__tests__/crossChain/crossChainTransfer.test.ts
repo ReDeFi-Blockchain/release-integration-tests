@@ -29,7 +29,7 @@ const CASES: TestCase[] = [
     ASSET_TRANSFER: "NATIVE",
     ASSET_RECEIVE: "SIBLING",
     SENDER_BALANCE: { NATIVE: NAT(10) },
-    TRANSFER_VALUE: NAT(2),
+    TRANSFER_VALUE: NAT(10),
   },
 ];
 
@@ -65,9 +65,9 @@ describe("Cross-chain", () => {
       await expectWait(tx)
         .to.emit(ethMain.assets[ASSET_TRANSFER], "Transfer")
         .withArgs(account.address, ethers.ZeroAddress, TRANSFER_VALUE);
-      // TODO check events on receiver chain
 
-      const { fee } = await ethMain.waitForResult(tx);
+      // TODO: cross chain transfers are fee less. Check withdrawal fee from the treasury account
+      await ethMain.waitForResult(tx);
 
       await ethSibling.waitForBlock(3);
 
@@ -80,11 +80,9 @@ describe("Cross-chain", () => {
       ].balanceOf(account.address);
 
       // Sender's balance on the sender's chain should be eq
-      // "initial balance" minus "transfer", and if it is native token minus "fee"
+      // "initial balance" minus "transfer"
       const expectedBalanceMain =
-        SENDER_BALANCE[ASSET_TRANSFER]! -
-        TRANSFER_VALUE -
-        (ASSET_TRANSFER === "NATIVE" ? fee : 0n);
+        SENDER_BALANCE[ASSET_TRANSFER]! - TRANSFER_VALUE;
 
       expect(mainBalanceAfter).to.eq(expectedBalanceMain);
       expect(siblingBalanceAfter).to.eq(TRANSFER_VALUE);
