@@ -189,6 +189,18 @@ jobs:
           RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
           CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
+      - name: Run test:smoke for parachain after upgrade
+        working-directory: ./tests
+        id: test-smoke
+        if: steps.test-setup.outcome == 'success'
+        run: |
+          echo "Ready to start test:smoke"
+          yarn test:smoke
+        env:
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
+
       - name: Remove builder cache
         if: always()                   # run this step always
         run: |

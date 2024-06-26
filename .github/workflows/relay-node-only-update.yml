@@ -157,6 +157,18 @@ jobs:
           RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
           CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
+      - name: Run test:smoke for parachain after upgrade
+        working-directory: ./tests
+        id: test-smoke
+        if: steps.test-setup1.outcome == 'success'
+        run: |
+          echo "Ready to start test:smoke"
+          yarn test:smoke
+        env:
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
+
       - name: "Reconcile: only one old node"
         if: steps.alive1.outcome == 'success'
         id: reconcile1
@@ -230,6 +242,18 @@ jobs:
         env:
           RPC_URL_MAIN: ${{ env.REDEFI_RELAY_HTTP_URL }}
           RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          CROSSCHAIN: ${{ env.CROSSCHAIN }}
+
+      - name: Run test:smoke for parachain after upgrade
+        working-directory: ./tests
+        id: test-smoke
+        if: steps.test-setup2.outcome == 'success'
+        run: |
+          echo "Ready to start test:smoke"
+          yarn test:smoke
+        env:
+          RPC_URL_MAIN: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
+          RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_HTTP_URL }}
           CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
       - name: Remove builder cache
