@@ -6,7 +6,7 @@ describe("Fees", () => {
   // TODO move to constants
   const TREASURY_ADDRESS = "rdhCnasiURA3DLeppbwAWu2VuHjYMWogNtfLpP8UTPY1GbNKV";
 
-  it("[serial] are payed to the treasury and are not burned", async ({
+  it("are payed to the treasury and are not burned [#serial]", async ({
     eth,
     sub,
   }) => {

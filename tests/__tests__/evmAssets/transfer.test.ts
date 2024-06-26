@@ -40,7 +40,7 @@ for (const TEST_CASE of CASES) {
       ]);
     });
 
-    it("can be sent by transfer", async ({ eth }) => {
+    it("can be sent by transfer [#smoke]", async ({ eth }) => {
       await eth.waitForResult(
         eth.assets[TEST_CASE.ASSET]
           .connect(sender)

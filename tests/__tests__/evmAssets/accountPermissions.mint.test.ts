@@ -22,7 +22,7 @@ const TEST_CASES: TestCase[] = [
 ];
 
 for (const { ASSET, INITIAL_BALANCE, MINT_VALUE } of TEST_CASES) {
-  describe(`[serial] Account permissions control`, () => {
+  describe(`Account permissions control [#serial]`, () => {
     it(`${ASSET} owner can set permission and allow another account to mint tokens`, async ({
       eth,
       sub,
