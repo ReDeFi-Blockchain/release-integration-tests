@@ -157,9 +157,9 @@ jobs:
           RPC_URL_SIBLING: ${{ env.REDEFI_RELAY_REDEFI_PARACHAIN_HTTP_URL }}
           CROSSCHAIN: ${{ env.CROSSCHAIN }}
 
-      - name: Run test:smoke for parachain after upgrade
+      - name: Run test:smoke for parachain before upgrade
         working-directory: ./tests
-        id: test-smoke
+        id: test-smoke1
         if: steps.test-setup1.outcome == 'success'
         run: |
           echo "Ready to start test:smoke"
@@ -246,7 +246,7 @@ jobs:
 
       - name: Run test:smoke for parachain after upgrade
         working-directory: ./tests
-        id: test-smoke
+        id: test-smoke2
         if: steps.test-setup2.outcome == 'success'
         run: |
           echo "Ready to start test:smoke"
