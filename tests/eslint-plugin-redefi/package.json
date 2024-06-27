@@ -1,0 +1,12 @@
+{
+  "name": "eslint-plugin-redefi",
+  "version": "1.0.0",
+  "main": "index.js",
+  "keywords": [
+    "eslint",
+    "eslintplugin"
+  ],
+  "peerDependencies": {
+    "eslint": "^8.0.0"
+  }
+}

@@ -10,16 +10,12 @@ export const it = createTestSuite({
       if (!testFileName) throw Error("Cannot determine test name");
       return EvmHelper.init(testFileName, config.rpcEndpointMain);
     },
-    teardown: (evmHelper) => {
-      evmHelper.provider.destroy();
-    },
+    teardown: () => {},
   },
   sub: {
     setup: async () => {
       return SubHelper.init(config.wsEndpointMain);
     },
-    teardown: async (subHelper) => {
-      await subHelper.api.disconnect();
-    },
+    teardown: () => {},
   },
 });

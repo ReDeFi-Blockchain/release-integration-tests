@@ -28,10 +28,14 @@ function reset_check {
     counter=0
 }
 
-while [ ! had_new_block ] && [ $counter -lt 100 ]; do
-    echo "Waiting for next block..."
+while ! had_new_block ; do
+    echo "Waiting for another block..."
     counter=$((counter+1))
+    echo "counter="$counter
     sleep 12
+    if [ $counter -gt 400 ]; then
+        exit 1;
+    fi
 done
 
 reset_check
@@ -39,9 +43,14 @@ reset_check
 echo "Chain is running, but lets wait for another block after a minute, to avoid startup flakiness."
 sleep 60
 
-while ! had_new_block; do
+while ! had_new_block ; do
     echo "Waiting for another block..."
+    counter=$((counter+1))
+    echo "counter="$counter
     sleep 12
+    if [ $counter -gt 400 ]; then
+        exit 1;
+    fi
 done
 
 echo "Chain is running!"

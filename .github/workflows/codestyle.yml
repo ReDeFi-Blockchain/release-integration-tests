@@ -18,12 +18,12 @@ jobs:
     steps:
       - name: Clean Workspace
         uses: AutoModality/action-clean@v1.1.0
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v4.1.7
         with:
           ref: ${{ github.head_ref }}          
 
       - name: Checkout redefi-relay-runtime
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v4.1.7
         with:
           repository: 'ReDeFi-Blockchain/redefi-relay-runtime'
           path: 'redefi-relay-runtime'

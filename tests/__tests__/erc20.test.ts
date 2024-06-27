@@ -15,7 +15,7 @@ describe("Redefi EVM Tests", () => {
   });
 
   describe("ERC20", () => {
-    it("Should deploy contract", async ({ eth }) => {
+    it("Should deploy contract [#smoke]", async ({ eth }) => {
       const erc20Contract = await ERC20Factory.deploy(eth.donor.address).then(
         (c) => c.waitForDeployment(),
       );

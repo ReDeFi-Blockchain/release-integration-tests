@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { it } from "../../fixtures/standalone";
 import { NAT } from "../../utils/currency";
 
-it(`NATIVE owner can mint new tokens`, async ({ eth, sub }) => {
+it(`NATIVE owner can mint new tokens [#serial]`, async ({ eth, sub }) => {
   const INITIAL_BALANCE = NAT(10000);
   const MINT_VALUE = NAT(5000);
 

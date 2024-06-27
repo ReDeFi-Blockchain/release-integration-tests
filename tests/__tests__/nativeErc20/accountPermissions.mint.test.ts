@@ -3,7 +3,7 @@ import { it } from "../../fixtures/standalone";
 import { NAT } from "../../utils/currency";
 import { AccountPermissions } from "../../utils/types";
 
-describe(`Account permissions control`, () => {
+describe(`Account permissions control [#serial]`, () => {
   const INITIAL_BALANCE = NAT(10000);
   const MINT_VALUE = NAT(5000);
 

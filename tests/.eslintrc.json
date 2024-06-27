@@ -22,11 +22,10 @@
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": "latest",
-    "sourceType": "commonjs"
+    "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint", "mocha", "redefi"],
   "rules": {
-    "@typescript-eslint/no-floating-promises": "error",
     "@typescript-eslint/ban-types": [
       "error",
       {
@@ -38,6 +37,8 @@
     ],
     "no-empty-pattern": "off",
     "require-await": "error",
-    "no-return-await": "error"
-  }
+    "no-return-await": "error",
+    "redefi/check-test-tag": "error"
+  },
+  "ignorePatterns": ["/eslint-plugin-redefi", "/scripts"]
 }
