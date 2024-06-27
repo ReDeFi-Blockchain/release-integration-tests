@@ -64,7 +64,7 @@ jobs:
           args: |
             --build-arg REDEFI_RELAY=${{ env.REDEFI_RELAY_MAINNET_VERSION }}     
 
-      - name: Prepare node-redefi-relay latest container
+      - name: Prepare redefi-relay latest container
         uses: ./.github/actions/buildContainer
         id: redefi-relay-latest
         with:
