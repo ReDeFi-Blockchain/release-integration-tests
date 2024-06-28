@@ -59,4 +59,14 @@ describe("Native token as ERC-20", () => {
       .to.emit(eth.assets.NATIVE, "Transfer")
       .withArgs(sender.address, receiver.address, TRANSFER_VALUE);
   });
+
+  it("cannot transfer more than balance", async ({ eth }) => {
+    await expectWait(
+      eth.assets.NATIVE.connect(sender).transfer(
+        receiver.address,
+        SENDER_BALANCE + 1n,
+      ),
+    ).to.be.revertedWith("ERC20InsufficientBalance");
+    // TODO: revertedWithCustomError
+  });
 });
