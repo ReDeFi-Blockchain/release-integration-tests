@@ -40,5 +40,5 @@
     "no-return-await": "error",
     "redefi/check-test-tag": "error"
   },
-  "ignorePatterns": ["/eslint-plugin-redefi", "/scripts"]
+  "ignorePatterns": ["/eslint-plugin-redefi"]
 }
