@@ -48,7 +48,7 @@ jobs:
       - name: Ensure network is alive before upgrade
         working-directory: ./tests
         id: alive1
-        if: steps.startStack.outcome == 'success'
+        if: ${{ !cancelled() && steps.startStack.outcome == 'success' }}
         run: |
           yarn
           ./scripts/wait_for_first_block.sh
@@ -59,7 +59,7 @@ jobs:
       - name: Run test:setup before Node upgrade
         working-directory: ./tests
         id: test-setup
-        if: steps.alive1.outcome == 'success'
+        if: ${{ !cancelled() && steps.alive1.outcome == 'success' }}
         run: |
           echo "Ready to start test:setup"
           yarn test:setup 
@@ -69,7 +69,7 @@ jobs:
 
       - name: Run test:regular before Node upgrade
         working-directory: ./tests
-        if: steps.test-setup.outcome == 'success'
+        if: ${{ !cancelled() && steps.test-setup.outcome == 'success' }}
         run: |
           echo "Ready to start test:regular"
           yarn test:regular
@@ -79,7 +79,7 @@ jobs:
 
       - name: Run test:serial before Node upgrade
         working-directory: ./tests
-        if: steps.test-setup.outcome == 'success'
+        if: ${{ !cancelled() && steps.test-setup.outcome == 'success' }}
         run: |
           echo "Ready to start test:serial"
           yarn test:serial
