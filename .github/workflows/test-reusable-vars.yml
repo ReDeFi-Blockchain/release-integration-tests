@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v4.1.7
         with:
           ref: ${{ inputs.relay-node-branch }}  #Checking out head commit
-          repository: 'https://github.com/ReDeFi-Blockchain/redefi-relay-node.git'
+          repository: 'ReDeFi-Blockchain/redefi-relay-node'
           path: 'redefi-relay-node'
 
       - name: relay runtime test reusable vars
