@@ -42,10 +42,18 @@ jobs:
       # - name: Prepare SHA
       #   uses: ./.github/actions/prepare
 
-      - name: relay test reusable vars
+      - name: relay node test reusable vars
         id: relay-node-test-reusable-vars
         run: |
           echo "Relay node branch: ${{ inputs.relay-node-branch }}"
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: checkout 'redefi-relay' under $GITHUB_WORKSPACE
+        uses: actions/checkout@v4.1.7
+        with:
+          ref: ${{ inputs.relay-node-branch }}  #Checking out head commit
+          repository: 'https://github.com/ReDeFi-Blockchain/redefi-relay-node.git'
+          path: 'redefi-relay-node'
 
       - name: relay runtime test reusable vars
         id: relay-runtime-test-reusable-vars
@@ -55,4 +63,4 @@ jobs:
       - name: paralachain test reusable vars
         id: parachain-test-reusable-vars
         run: |
-          echo "Relay node branch: ${{ inputs.parachain-branch }}"
+          echo "Parachain branch: ${{ inputs.parachain-branch }}"
