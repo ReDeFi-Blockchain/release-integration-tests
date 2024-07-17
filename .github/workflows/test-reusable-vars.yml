@@ -7,15 +7,15 @@ on:
       relay-node-branch:
         type: string
         description: relay branch to build
-        default: main
+        default: "${{ env.RELAY_NODE_MAINNET_VERSION }}"
       relay-runtime-branch:
         type: string
         description: relay runtime branch to build
-        default: main
+        default: "${{ env.RELAY_RUNTIME_MAINNET_VERSION }}"
       parachain-branch:
         type: string
         description: parachain branch to build
-        default: main
+        default: "${{ env.PARACHAIN_MAINNET_VERSION }}"
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
