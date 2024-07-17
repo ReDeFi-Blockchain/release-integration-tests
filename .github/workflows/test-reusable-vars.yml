@@ -38,6 +38,9 @@ jobs:
         with:
           ref: ${{ github.head_ref }}  #Checking out head commit
 
+      - name: Read .env file
+        uses: xom9ikk/dotenv@v2.3.0
+
       # # Prepare SHA  
       # - name: Prepare SHA
       #   uses: ./.github/actions/prepare
