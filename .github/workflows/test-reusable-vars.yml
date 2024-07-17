@@ -7,16 +7,16 @@ on:
       relay-node-branch:
         type: string
         description: relay branch to build
-        default: "${{ env.RELAY_NODE_MAINNET_VERSION }}"
       relay-runtime-branch:
         type: string
         description: relay runtime branch to build
-        default: "${{ env.RELAY_RUNTIME_MAINNET_VERSION }}"
       parachain-branch:
         type: string
         description: parachain branch to build
-        default: "${{ env.PARACHAIN_MAINNET_VERSION }}"
 
+
+env:
+  RELAY_RUNTIME: ${{ inputs.relay-runtime-branch || env.RELAY_RUNTIME_MAINNET_VERSION }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -51,7 +51,7 @@ jobs:
           echo "Relay node branch: ${{ inputs.relay-node-branch }}"
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: checkout 'redefi-relay' under $GITHUB_WORKSPACE
+      - name: checkout 'redefi-relay' 
         uses: actions/checkout@v4.1.7
         with:
           ref: ${{ inputs.relay-node-branch }}  #Checking out head commit
@@ -61,7 +61,7 @@ jobs:
       - name: relay runtime test reusable vars
         id: relay-runtime-test-reusable-vars
         run: |
-          echo "Relay runtime branch: ${{ inputs.relay-runtime-branch }}"
+          echo "Relay runtime branch: ${{ env.RELAY_RUNTIME }}"
 
       - name: paralachain test reusable vars
         id: parachain-test-reusable-vars
