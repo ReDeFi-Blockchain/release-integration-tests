@@ -3,6 +3,19 @@ name: parachain-node-only-update
 # Triger: only call from main workflow(re-usable workflows)
 on:
   workflow_call:
+    inputs:
+      relay-node-version:
+        type: string
+        description: relay branch to build
+        required: true
+      relay-runtime-version:
+        type: string
+        description: relay runtime branch to build
+        required: true
+      parachain-version:
+        type: string
+        description: parachain branch to build
+        required: true
   workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -84,7 +97,7 @@ jobs:
           context: .docker
           dockerfile: Dockerfile-parachain
           args: |
-            --build-arg REDEFI_PARACHAIN=${{ env.REDEFI_PARACHAIN_LATEST_VERSION }}
+            --build-arg REDEFI_PARACHAIN=${{ inputs.parachain-version }}
 
       - uses: actions/setup-node@v4.0.2
         with:

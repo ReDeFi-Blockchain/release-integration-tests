@@ -2,6 +2,19 @@ name: relay-forkless-NOdata
 
 on:
   workflow_call:
+    inputs:
+      relay-node-version:
+        type: string
+        description: relay branch to build
+        required: true
+      relay-runtime-version:
+        type: string
+        description: relay runtime branch to build
+        required: true
+      parachain-version:
+        type: string
+        description: parachain branch to build
+        required: true
   workflow_dispatch:
 
 
@@ -60,7 +73,7 @@ jobs:
           context: .docker
           dockerfile: Dockerfile-relay-runtime
           args: |
-            --build-arg REDEFI_RELAY_RUNTIME=${{ env.REDEFI_RELAY_RUNTIME_LATEST_VERSION }}          
+            --build-arg REDEFI_RELAY_RUNTIME=${{ inputs.relay-runtime-version }}          
 
       - name: Extract wasms
         uses: ./.github/actions/extractDocker
