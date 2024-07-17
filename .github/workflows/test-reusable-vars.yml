@@ -1,69 +1,52 @@
-name: test reusable vars
+name: test-reusable-vars
 
-# Triger: only call from main workflow(re-usable workflows)
 on:
   workflow_call:
     inputs:
-      relay-node-branch:
+      relay-node-version:
         type: string
         description: relay branch to build
-      relay-runtime-branch:
+        required: true
+      relay-runtime-version:
         type: string
         description: relay runtime branch to build
-      parachain-branch:
+        required: true
+      parachain-version:
         type: string
         description: parachain branch to build
+        required: true
 
-
-env:
-  RELAY_RUNTIME: ${{ inputs.relay-runtime-branch || env.RELAY_RUNTIME_MAINNET_VERSION }}
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-
   test-reusable-vars:
-
     runs-on: [ self-hosted ]
-    timeout-minutes: 2880           # 48 hours for execution jobs.
-
     name: test-reusable-vars
-
     steps:
       - name: Clean Workspace
         if: always()
         uses: AutoModality/action-clean@v1.1.0
 
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4.1.7
         with:
-          ref: ${{ github.head_ref }}  #Checking out head commit
-
-      - name: Read .env file
-        uses: xom9ikk/dotenv@v2.3.0
-
-      # # Prepare SHA  
-      # - name: Prepare SHA
-      #   uses: ./.github/actions/prepare
+          ref: ${{ github.head_ref }}  
 
       - name: relay node test reusable vars
         id: relay-node-test-reusable-vars
         run: |
-          echo "Relay node branch: ${{ inputs.relay-node-branch }}"
+          echo "Relay node version: ${{ inputs.relay-node-version }}"
 
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: checkout 'redefi-relay' 
         uses: actions/checkout@v4.1.7
         with:
-          ref: ${{ inputs.relay-node-branch }}  #Checking out head commit
+          ref: ${{ inputs.relay-node-version }}  
           repository: 'ReDeFi-Blockchain/redefi-relay-node'
           path: 'redefi-relay-node'
 
       - name: relay runtime test reusable vars
         id: relay-runtime-test-reusable-vars
         run: |
-          echo "Relay runtime branch: ${{ env.RELAY_RUNTIME }}"
+          echo "Relay runtime version: ${{ inputs.relay-runtime-version }}"
 
       - name: paralachain test reusable vars
         id: parachain-test-reusable-vars
         run: |
-          echo "Parachain branch: ${{ inputs.parachain-branch }}"
+          echo "Parachain version: ${{ inputs.parachain-version }}"
