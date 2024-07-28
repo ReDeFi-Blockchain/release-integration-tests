@@ -11,7 +11,7 @@ module.exports = {
       'CallExpression[callee.name="it"], CallExpression[callee.name="describe"]'(
         node,
       ) {
-        const validTags = ["#serial", "#smoke", "#regular"];
+        const validTags = ["#serial", "#stability", "#smoke", "#regular"];
         const testName = node.arguments[0];
 
         if (
