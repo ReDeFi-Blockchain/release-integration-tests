@@ -49,7 +49,7 @@ jobs:
         run: |
           docker pull parity/polkadot:v1.7.0
 
-      - name: Prepare redefi-relay-runtime container
+      - name: Prepare relay-runtime mainnet container
         uses: ./.github/actions/buildContainer
         id: redefi-relay-runtime-mainnet
         with:
@@ -64,7 +64,7 @@ jobs:
         run: |
           docker run -v $PWD:/infra --rm --entrypoint cp ${{ steps.redefi-relay-runtime-mainnet.outputs.name }} /redefi/redefi_runtime.compact.compressed.wasm /infra/
 
-      - name: Prepare redefi-relay mainnet container
+      - name: Prepare relay-node mainnet container
         uses: ./.github/actions/buildContainer
         id: redefi-relay-mainnet
         with:

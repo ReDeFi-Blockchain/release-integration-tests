@@ -7,9 +7,18 @@ name: codestyle
 on:
   workflow_call:
     inputs:
-      relay-runtime-ref:
+      relay-node-version:
         type: string
-        description: SHA commit from relay-runtime
+        description: relay branch to build
+        required: true
+      relay-runtime-version:
+        type: string
+        description: relay runtime branch to build
+        required: true
+      parachain-version:
+        type: string
+        description: parachain branch to build
+        required: true
   workflow_dispatch:            
 
 jobs:
