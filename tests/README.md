@@ -8,12 +8,11 @@
 
 ## Run
 
-If you want to run all tests in parallel, run `yarn test`. Some tests that used
-sudo account may fail.
-
-To avoid tests fails recommended to run tests first `yarn test:regular`, then `yarn test:serial`.
+To run tests use commands `yarn test:regular` and `yarn test:serial`.
 
 Running all tests takes a long time. To quickly check that a relay or parachain is working, use `yarn test:smoke`.
+
+If you're preparing a new release that changes the consensus, run `yarn test:stability`.
 
 For debugging through VSCode use `yarn test:hh`
 

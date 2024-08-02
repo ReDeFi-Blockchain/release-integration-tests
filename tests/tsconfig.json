@@ -7,7 +7,9 @@
     "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "allowJs": true
+    "allowJs": true,
+    "checkJs": false
   },
-  "exclude": ["eslint-plugin-redefi"]
+  "include": ["./**/*.ts"],
+  "exclude": ["**/node_modules", "eslint-plugin-redefi"]
 }
