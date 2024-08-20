@@ -7,6 +7,8 @@ import {
 import {
   NativeFungibleAssets,
   NativeFungibleAssets__factory,
+  NativeFungible,
+  NativeFungible__factory,
 } from "../../typechain-types";
 import { NETWORK_CONSTANTS } from "../constants";
 import { getFilenameWallet } from "../filename-wallet";
@@ -19,7 +21,11 @@ export default class EvmHelper {
   // Ethers has a bug where the nonce may not increment on time on fast nodes.
   readonly provider: JsonRpcProvider;
   readonly accounts: EthAccount;
-  readonly assets: Record<AccountAssetType, NativeFungibleAssets>;
+  readonly assets: {
+    NATIVE: NativeFungible;
+    SIBLING: NativeFungibleAssets;
+    GBP: NativeFungibleAssets;
+  };
   readonly donor: HDNodeWallet;
   readonly CONSTANTS: NetworkConstants;
 
@@ -31,7 +37,7 @@ export default class EvmHelper {
     this.provider = provider;
     this.CONSTANTS = constants;
     this.assets = {
-      NATIVE: NativeFungibleAssets__factory.connect(
+      NATIVE: NativeFungible__factory.connect(
         constants.NATIVE.ADDRESS,
         this.provider,
       ),
