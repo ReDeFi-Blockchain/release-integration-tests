@@ -1,8 +1,16 @@
 import { expect } from "chai";
 import { it } from "../../fixtures/standalone";
+import * as crypto from "crypto";
 import { expectWait } from "../../utils/matchers/expectWait";
 import { NAT } from "../../utils/currency";
 import { AbiCoder } from "ethers";
+import { extendConfig } from "hardhat/config";
+
+// TODO: get key form node
+const nodeX25519Key: Buffer = Buffer.from([
+  53, 4, 137, 17, 40, 242, 206, 104, 152, 206, 62, 230, 187, 9, 142, 128, 225,
+  195, 194, 6, 230, 177, 89, 73, 168, 231, 38, 228, 38, 146, 236, 116,
+]);
 
 describe("Move some native tokens between private balances", () => {
   it("valid encrypted transfer", async ({ eth }) => {
@@ -31,6 +39,8 @@ describe("Move some native tokens between private balances", () => {
       ["address", "uint256"],
       [recipient.address, PRIVATE_BALANCE],
     );
+    const ecdh = generateSharedSecret(nodeX25519Key);
+    const encrypted = encryptAES256GCM(Buffer.from(tx), ecdh.sharedSecret);
 
     const ephemeralKey = new Uint8Array(32);
     const nonce = new Uint8Array(12);
@@ -38,9 +48,9 @@ describe("Move some native tokens between private balances", () => {
 
     await eth.waitForResult(
       eth.assets.NATIVE.connect(sender).encryptedTransfer(
-        encryptedTx,
-        ephemeralKey,
-        nonce,
+        encrypted.encryptedData,
+        ecdh.ephemeralKey,
+        encrypted.nonce,
       ),
     );
 
@@ -53,3 +63,22 @@ describe("Move some native tokens between private balances", () => {
     expect(recipientPrivateBalanceAfterTransfer).to.eq(PRIVATE_BALANCE);
   });
 });
+
+function encryptAES256GCM(plaintext: Buffer, key: Buffer) {
+  const iv = crypto.randomBytes(12); // Nonce (IV)
+  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+
+  const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+  const authTag = cipher.getAuthTag();
+
+  return { encryptedData: Buffer.concat([encrypted, authTag]), nonce: iv };
+}
+
+function generateSharedSecret(recipientPublicKey: Buffer) {
+  const ecdh = crypto.createECDH("x25519");
+  ecdh.generateKeys();
+  return {
+    ephemeralKey: ecdh.getPublicKey(),
+    sharedSecret: ecdh.computeSecret(recipientPublicKey),
+  };
+}
