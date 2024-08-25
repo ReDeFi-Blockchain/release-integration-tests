@@ -1,7 +1,7 @@
 # https://cryptousetech.atlassian.net/wiki/spaces/CI/pages/2586837012/Code+style+testing
 # Nested workflow for checks related to formatting Rust code 
 
-name: codestyle
+name: codestyle-parachain
 
 # Triger: only call from main workflow(re-usable workflows)
 on:
@@ -31,17 +31,17 @@ jobs:
         with:
           ref: ${{ github.head_ref }}          
 
-      - name: Checkout redefi-relay-runtime
+      - name: Checkout parachain
         uses: actions/checkout@v4.1.7
         with:
-          repository: 'ReDeFi-Blockchain/redefi-relay-runtime'
-          path: 'redefi-relay-runtime'
-          ref: 'main'
+          repository: 'ReDeFi-Blockchain/redefi-parachain'
+          path: 'redefi-parachain'
+          ref: ${{ inputs.parachain-version }}
 
-      - name: Run cargo fmt for redefi-relay-runtime
-        working-directory: redefi-relay-runtime
+      - name: Run cargo fmt for redefi-parachain
+        working-directory: redefi-parachain
         run: cargo fmt -- --check   # In that mode it returns only exit code.
 
-      - name: Cargo fmt state for redefi-relay-runtime
+      - name: Cargo fmt state for redefi-parachain
         if: success()
         run: echo "Nothing to do. Command 'cargo fmt -- --check' returned exit code 0."
