@@ -49,6 +49,7 @@ export class EthAccount {
     return receipt;
   }
 
+  // TODO: Support private balances.
   async generate(balances: AccountBalance[], donor = this.donor) {
     let nonce = await this.donor.getNonce();
     const transfers = [];
