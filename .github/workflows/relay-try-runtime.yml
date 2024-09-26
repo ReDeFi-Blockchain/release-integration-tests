@@ -1,0 +1,47 @@
+name: relay-try-runtime
+
+on:
+  pull_request:
+    branches: [ 'main' ]
+    types: [ opened, reopened, synchronize, ready_for_review, converted_to_draft ]
+  workflow_dispatch:
+
+jobs:
+  relay-try-runtime:
+    runs-on: [ self-hosted ]
+    timeout-minutes: 2880           # 48 hours for execution jobs.
+    name: relay-try-runtime
+    continue-on-error: true
+
+    steps:
+      - name: Skip if pull request is in Draft
+        if: github.event.pull_request.draft == true
+        run: exit 1
+
+      - name: Clean Workspace
+        if: always()
+        uses: AutoModality/action-clean@v1.1.0
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4.1.7
+        with:
+          ref: ${{ github.head_ref }}  #Checking out head commit
+
+      - name: Read .env file
+        uses: xom9ikk/dotenv@v2.3.0
+
+      - name: checkout redefi-relay-runtime
+        uses: actions/checkout@v4.1.7
+        with:
+          repository: 'ReDeFi-Blockchain/redefi-relay-runtime'
+          path: 'redefi-relay-runtime'
+          ref: ${{ env.L1_RUNTIME_TARGET_VERSION }}
+
+      - name: 
+        working-directory: ./redefi-relay-runtime
+        run: |
+          cargo run --profile=production --features=try-runtime -- try-runtime --runtime target/production/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm -lruntime=debug -ltry-runtime::cli=debug on-runtime-upgrade --checks live --uri wss://layer1.redefi.world:443
+        shell: bash
+
+
+
