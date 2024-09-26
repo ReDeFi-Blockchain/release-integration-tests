@@ -4,8 +4,8 @@ m = import 'baedeker-library/mixin/spec.libsonnet',
 
 function(relay_spec)
 
-local relay = {
-	name: 'redefi-relay',
+local l1 = {
+	name: 'l1',
 	bin: 'bin/polkadot',
 	validatorIdAssignment: 'staking',
 	spec: {Genesis:{
@@ -29,7 +29,7 @@ local relay = {
 	nodes: {
 		[name]: {
 			bin: 'bin/redefi-relay',
-			wantedKeys: 'relay',
+			wantedKeys: 'l1',
 			extraArgs: [
       			'--blocks-pruning=archive',
 				'--state-pruning=archive',
@@ -39,8 +39,8 @@ local relay = {
 	}
 };
 
-local parachain = {
-	name: 'redefi-parachain',
+local l2 = {
+	name: 'l2',
 	bin: 'bin/redefi-collator',
 	paraId: 2001,
 	spec: {Genesis:{
@@ -51,13 +51,13 @@ local parachain = {
 			bin: $.bin,
 			wantedKeys: 'para',
 		},
-		for name in ['alice', 'bob']
+		for name in ['alice', 'bob', 'charlie']
 	},
 };
 
-relay + {
+l1 + {
 	parachains: {
 		[para.name]: para,
-		for para in [parachain]
+		for para in [l2]
 	},
 }

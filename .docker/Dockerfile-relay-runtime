@@ -17,10 +17,10 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain none
 # ===== BUILD =====
 FROM rust-builder AS builder-runtime-wasm
 
-ARG REDEFI_RELAY_RUNTIME
+ARG L1_RUNTIME_VERSION
 
-RUN git clone -b $REDEFI_RELAY_RUNTIME --depth 1 https://github.com/ReDeFi-Blockchain/redefi-relay-runtime.git /redefi-relay-runtime-src && \
-    cd /redefi-relay-runtime-src && \
+RUN git clone -b $L1_RUNTIME_VERSION --depth 1 https://github.com/ReDeFi-Blockchain/redefi-relay-runtime.git /relay-runtime-src && \
+    cd /relay-runtime-src && \
     CARGO_INCREMENTAL=0 cargo build --profile=release --features=fast-runtime --locked
 
 #===== BIN ======
@@ -29,5 +29,5 @@ FROM ubuntu:22.04
 
 RUN mkdir /redefi
 
-COPY --from=builder-runtime-wasm /redefi-relay-runtime-src/target/release/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm /redefi/redefi_runtime.compact.compressed.wasm
+COPY --from=builder-runtime-wasm /relay-runtime-src/target/release/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm /redefi/redefi_runtime.compact.compressed.wasm
 
