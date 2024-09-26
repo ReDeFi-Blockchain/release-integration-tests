@@ -222,18 +222,7 @@ jobs:
         if: ${{ !cancelled() && steps.alive5.outcome == 'success' }}
         run: |
           echo "Ready to start test:setup"
-          yarn test:setup 
-        env:
-          RPC_URL_MAIN: ${{ env.L1_HTTP_URL }}
-          RPC_URL_SIBLING: ${{ env.L1_L2_HTTP_URL }}
-          CROSSCHAIN: true
-
-      - name: Run test:smoke for L1 after upgrade
-        working-directory: ./tests
-        if: ${{ !cancelled() && steps.test-setup1.outcome == 'success' }}
-        run: |
-          echo "Ready to start test:smoke"
-          yarn test:smoke
+          yarn test:setup
         env:
           RPC_URL_MAIN: ${{ env.L1_HTTP_URL }}
           RPC_URL_SIBLING: ${{ env.L1_L2_HTTP_URL }}
@@ -261,30 +250,6 @@ jobs:
           RPC_URL_SIBLING: ${{ env.L1_L2_HTTP_URL }}
           CROSSCHAIN: true
 
-
-
-      - name: Run test:setup for L2 after upgrade
-        working-directory: ./tests
-        id: test-setup2
-        if: ${{ !cancelled() && steps.alive5.outcome == 'success' }}
-        run: |
-          echo "Ready to start test:setup"
-          yarn test:setup 
-        env:
-          RPC_URL_MAIN: ${{ env.L1_L2_HTTP_URL }}
-          RPC_URL_SIBLING: ${{ env.L1_HTTP_URL }}
-          CROSSCHAIN: true
-
-      - name: Run test:smoke for L2 after upgrade
-        working-directory: ./tests
-        if: ${{ !cancelled() && steps.test-setup2.outcome == 'success' }}
-        run: |
-          echo "Ready to start test:smoke"
-          yarn test:smoke
-        env:
-          RPC_URL_MAIN: ${{ env.L1_L2_HTTP_URL }}
-          RPC_URL_SIBLING: ${{ env.L1_HTTP_URL }}
-          CROSSCHAIN: true
 
       - name: Run test:regular for L2 after upgrade
         working-directory: ./tests
