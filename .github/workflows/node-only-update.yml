@@ -120,7 +120,7 @@ jobs:
             .baedeker/redefi.jsonnet
             snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/polkadot':{dockerImage:'parity/polkadot:v1.7.0'}})
             ephemeral:snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-relay':{dockerImage:'${{ steps.relay-node-mainnet.outputs.name }}'}})
-            snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-collator':{dockerImage:'${{ steps.parachain-mainnet.outputs.name }}'}})
+            ephemeral:snippet:(import 'baedeker-library/ops/rewrites.libsonnet').rewriteNodePaths({'bin/redefi-collator':{dockerImage:'${{ steps.parachain-mainnet.outputs.name }}'}})
 
       - name: Ensure network is alive
         working-directory: ./tests
