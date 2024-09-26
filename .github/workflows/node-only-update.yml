@@ -230,7 +230,6 @@ jobs:
 
       - name: Run test:smoke for L1 after upgrade
         working-directory: ./tests
-        id: test-smoke1
         if: ${{ !cancelled() && steps.test-setup1.outcome == 'success' }}
         run: |
           echo "Ready to start test:smoke"
@@ -242,7 +241,7 @@ jobs:
 
       - name: Run test:regular for L1 after upgrade
         working-directory: ./tests
-        if: ${{ !cancelled() && steps.test-setup2.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.test-setup1.outcome == 'success' }}
         run: |
           echo "Ready to start test:regular"
           yarn test:regular
@@ -253,7 +252,7 @@ jobs:
 
       - name: Run test:serial for L1 after upgrade
         working-directory: ./tests
-        if: ${{ !cancelled() && steps.test-setup2.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.test-setup1.outcome == 'success' }}
         run: |
           echo "Ready to start test:serial"
           yarn test:serial
@@ -278,8 +277,7 @@ jobs:
 
       - name: Run test:smoke for L2 after upgrade
         working-directory: ./tests
-        id: test-smoke1
-        if: ${{ !cancelled() && steps.test-setup1.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.test-setup2.outcome == 'success' }}
         run: |
           echo "Ready to start test:smoke"
           yarn test:smoke
