@@ -10,7 +10,7 @@ on:
 
 jobs:
   node-only-update:
-    runs-on: [ self-hosted ]
+    runs-on: [ ci-03 ]
     timeout-minutes: 2880           # 48 hours for execution jobs.
     name: node-only-update
     continue-on-error: true
