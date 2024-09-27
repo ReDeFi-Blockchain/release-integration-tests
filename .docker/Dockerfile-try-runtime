@@ -1,0 +1,33 @@
+# ===== Rust builder =====
+FROM ubuntu:22.04 as rust-builder
+LABEL maintainer="ReDeFi"
+
+ENV CARGO_HOME="/cargo-home"
+ENV PATH="/cargo-home/bin:$PATH"
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN apt-get update && \
+    apt-get install -y curl cmake pkg-config libssl-dev git clang llvm libudev-dev protobuf-compiler && \
+    apt-get clean && \
+    rm -r /var/lib/apt/lists/*
+
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain none
+
+# ===== BUILD ======
+FROM rust-builder as builder-bin
+
+ARG REPO_URL
+ARG REPLICA_FROM
+ARG RUNTIME_VERSION
+
+RUN mkdir ./redefi
+RUN cd ./redefi
+
+RUN git clone -b $RUNTIME_VERSION --depth 1 $REPO_URL .
+
+RUN echo "Requested Repo: $REPO_URL\n" && \
+    echo "Fork from: $REPLICA_FROM\n" && \
+    cargo build --features=try-runtime --profile=production
+
+CMD cargo run --profile=production --features try-runtime -- try-runtime --runtime target/release/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm -lruntime=debug -ltry-runtime::cli=debug on-runtime-upgrade --checks live --uri $REPLICA_FROM

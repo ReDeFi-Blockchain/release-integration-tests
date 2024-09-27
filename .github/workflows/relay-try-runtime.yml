@@ -37,11 +37,88 @@ jobs:
           path: 'redefi-relay-runtime'
           ref: ${{ env.L1_RUNTIME_TARGET_VERSION }}
 
-      - name: 
-        working-directory: ./redefi-relay-runtime
+      - name: Prepare runtime container
+        uses: ./.github/actions/buildContainer
+        id: runtime
+        with:
+          container: runtime
+          tag: target
+          context: .docker
+          dockerfile: Dockerfile-try-runtime
+          args: |
+            --build-arg RUNTIME_VERSION=${{ env.L1_RUNTIME_TARGET_VERSION }}
+            --build-arg FORK_SOURCE=${{ env.L1_FORK_SOURCE }}        
+            --build-arg REPO_URL=https://github.com/ReDeFi-Blockchain/redefi-relay-runtime.git
+
+      - name: Build the stack
+        run: docker compose -f ".docker/docker-compose.try-runtime.yml" up -d --remove-orphans --force-recreate --timeout 300
+
+      - name: Check if docker logs consist logs related to Runtime Upgrade testing.
+        if: success()
         run: |
-          cargo run --profile=production --features=try-runtime -- try-runtime --runtime target/production/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm -lruntime=debug -ltry-runtime::cli=debug on-runtime-upgrade --checks live --uri wss://layer1.redefi.world:443
+          counter=300
+          counter_life=0
+          function check_container_status {
+                docker inspect -f {{.State.Running}} try-runtime
+          }
+          function do_docker_logs {
+                docker logs --details try-runtime 2>&1 | grep -i 'TryRuntime_on_runtime_upgrade executed without errors. Consumed'
+          }
+          function is_started {
+                if [ "$(check_container_status)" == "true" ]; then
+                        echo "Container: try-runtime RUNNING";
+                        echo "Check Docker logs"
+                        DOCKER_LOGS=$(do_docker_logs)
+                        if [[ -n ${DOCKER_LOGS} ]]; then
+                                echo "TryRuntime_on_runtime_upgrade executed without errors."
+                                return 0
+                        else
+                                echo "Message not found in logs output, repeating..."
+                                return 1
+                        fi
+                else
+                    (( counter_life++ ))
+                    echo "Container try-runtime not RUNNING" $counter_life "time"
+                    return 1
+                fi
+          }
+
+          while ! is_started; do
+                echo "Waiting for special message in log files "
+                sleep 30s
+                counter=$(( $counter - 1 ))
+                echo "Counter: $counter"
+                if [ "$counter" -gt "0" ] && [ "$counter_life" -lt "3" ]; then
+                         continue
+                else
+                         echo "Counter reached zero, yet upgrade is not finished correctly or Container try-runtime is not RUNNING"
+                         exit 1
+                fi
+          done
+          echo "Halting script"
+          exit 0
         shell: bash
+
+      - name: Collect Docker Logs
+        if: success() || failure()
+        uses: jwalton/gh-docker-logs@v2.2.1
+        with:
+          dest: './try-runtime-logs'
+
+      - name: Show docker logs
+        if: success() || failure()
+        run: cat './try-runtime-logs/try-runtime.log'
+
+      - name: Stop running containers
+        if: always()                   # run this step always
+        run: docker compose -f ".docker/docker-compose.try-runtime.yml" down
+
+      - name: Remove builder cache
+        if: always()                   # run this step always
+        run: |
+          docker builder prune -f -a
+          docker system prune -f
+          docker image prune -f -a
 
 
 

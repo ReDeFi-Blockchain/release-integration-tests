@@ -4,7 +4,7 @@ name: node-only-update
 # Triger: only call from main workflow(re-usable workflows)
 on:
   pull_request:
-    branches: [ 'main' ]
+    branches: [ 'pause' ]
     types: [ opened, reopened, synchronize, ready_for_review, converted_to_draft ]
   workflow_dispatch:
 
@@ -127,7 +127,8 @@ jobs:
         id: alive1
         if: ${{ !cancelled() && steps.bdk.outcome == 'success' }}
         run: |
-          yarn        
+          yarn install
+          yarn compile        
           ./scripts/wait_for_first_block.sh
         env:
           RPC_URL_MAIN: ${{ env.L1_L2_HTTP_URL }}
@@ -253,7 +254,7 @@ jobs:
 
       - name: Run test:regular for L2 after upgrade
         working-directory: ./tests
-        if: ${{ !cancelled() && steps.test-setup2.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.test-setup1.outcome == 'success' }}
         run: |
           echo "Ready to start test:regular"
           yarn test:regular
@@ -264,7 +265,7 @@ jobs:
 
       - name: Run test:serial for L2 after upgrade
         working-directory: ./tests
-        if: ${{ !cancelled() && steps.test-setup2.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.test-setup1.outcome == 'success' }}
         run: |
           echo "Ready to start test:serial"
           yarn test:serial
