@@ -1,16 +1,16 @@
-name: relay-try-runtime
+name: L1-try-runtime
 
 on:
   pull_request:
-    branches: [ 'main' ]
+    branches: [ 'pause' ]
     types: [ opened, reopened, synchronize, ready_for_review, converted_to_draft ]
   workflow_dispatch:
 
 jobs:
-  relay-try-runtime:
+  L1-try-runtime:
     runs-on: [ self-hosted ]
     timeout-minutes: 2880           # 48 hours for execution jobs.
-    name: relay-try-runtime
+    name: L1-try-runtime
     continue-on-error: true
 
     steps:
@@ -29,13 +29,6 @@ jobs:
 
       - name: Read .env file
         uses: xom9ikk/dotenv@v2.3.0
-
-      - name: checkout redefi-relay-runtime
-        uses: actions/checkout@v4.1.7
-        with:
-          repository: 'ReDeFi-Blockchain/redefi-relay-runtime'
-          path: 'redefi-relay-runtime'
-          ref: ${{ env.L1_RUNTIME_TARGET_VERSION }}
 
       - name: Prepare runtime container
         uses: ./.github/actions/buildContainer
