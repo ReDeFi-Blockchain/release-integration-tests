@@ -18,8 +18,13 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain none
 FROM rust-builder as builder-bin
 
 ARG REPO_URL
-ARG REPLICA_FROM
+ARG FORK_SOURCE
 ARG RUNTIME_VERSION
+
+RUN echo "REPO_URL: $REPO_URL"
+RUN echo "FORK_SOURCE: $FORK_SOURCE"
+RUN echo "RUNTIME_VERSION: $RUNTIME_VERSION"
+
 
 RUN mkdir ./redefi
 RUN cd ./redefi
@@ -27,7 +32,7 @@ RUN cd ./redefi
 RUN git clone -b $RUNTIME_VERSION --depth 1 $REPO_URL .
 
 RUN echo "Requested Repo: $REPO_URL\n" && \
-    echo "Fork from: $REPLICA_FROM\n" && \
+    echo "Fork from: $FORK_SOURCE\n" && \
     cargo build --features=try-runtime --profile=production
 
-CMD cargo run --profile=production --features try-runtime -- try-runtime --runtime target/release/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm -lruntime=debug -ltry-runtime::cli=debug on-runtime-upgrade --checks live --uri $REPLICA_FROM
+CMD cargo run --profile=production --features try-runtime -- try-runtime --runtime target/release/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm -lruntime=debug -ltry-runtime::cli=debug on-runtime-upgrade --checks live --uri $FORK_SOURCE
