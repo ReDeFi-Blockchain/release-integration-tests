@@ -12,7 +12,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -r /var/lib/apt/lists/*
 
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain none
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 
 # ===== BUILD ======
 FROM rust-builder as builder-bin
