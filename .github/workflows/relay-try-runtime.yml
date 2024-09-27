@@ -8,7 +8,7 @@ on:
 
 jobs:
   relay-try-runtime:
-    runs-on: [ ci-01 ]
+    runs-on: [ self-hosted ]
     timeout-minutes: 2880           # 48 hours for execution jobs.
     name: relay-try-runtime
     continue-on-error: true
