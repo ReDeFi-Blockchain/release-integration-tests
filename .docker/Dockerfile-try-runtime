@@ -14,12 +14,18 @@ RUN apt-get update && \
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 
+RUN cargo install --git https://github.com/paritytech/try-runtime-cli --tag v0.8.0 --locked
+
 # ===== BUILD ======
 FROM rust-builder AS builder-bin
 
 ARG REPO_URL
 ARG FORK_SOURCE
 ARG RUNTIME_VERSION
+
+ENV REPO_URL=$REPO_URL
+ENV FORK_SOURCE=$FORK_SOURCE
+ENV RUNTIME_VERSION=$RUNTIME_VERSION
 
 RUN echo "REPO_URL: $REPO_URL"
 RUN echo "FORK_SOURCE: $FORK_SOURCE"
@@ -28,8 +34,8 @@ RUN echo "RUNTIME_VERSION: $RUNTIME_VERSION"
 RUN mkdir /redefi
 WORKDIR /redefi
 
-RUN git clone -b $RUNTIME_VERSION --depth 1 $REPO_URL .
+RUN git clone -b ${RUNTIME_VERSION} --depth 1 ${REPO_URL} .
 
 RUN cargo build --features=try-runtime --profile=production
 
-CMD cargo run --profile=production --features try-runtime -- try-runtime --runtime target/release/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm -lruntime=debug -ltry-runtime::cli=debug on-runtime-upgrade --checks live --uri $FORK_SOURCE
+CMD try-runtime --runtime target/production/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm on-runtime-upgrade --checks all live --uri ${FORK_SOURCE}

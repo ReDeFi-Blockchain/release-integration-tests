@@ -30,11 +30,11 @@ jobs:
       - name: Read .env file
         uses: xom9ikk/dotenv@v2.3.0
 
-      - name: Prepare runtime container
+      - name: Prepare container
         uses: ./.github/actions/buildContainer
-        id: runtime
+        id: try-runtime
         with:
-          container: runtime
+          container: try-runtime
           tag: target
           context: .docker
           dockerfile: Dockerfile-try-runtime
@@ -43,7 +43,7 @@ jobs:
             --build-arg FORK_SOURCE=${{ env.L2_FORK_SOURCE }}        
             --build-arg REPO_URL=https://github.com/ReDeFi-Blockchain/redefi-parachain.git
 
-      - name: Build the stack
+      - name: RUN the stack
         run: docker compose -f ".docker/docker-compose.try-runtime.yml" up -d --remove-orphans --force-recreate --timeout 300
 
       - name: Check if docker logs consist logs related to Runtime Upgrade testing.
