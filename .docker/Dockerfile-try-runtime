@@ -38,4 +38,4 @@ RUN git clone -b ${RUNTIME_VERSION} --depth 1 ${REPO_URL} .
 
 RUN cargo build --features=try-runtime --profile=production
 
-CMD try-runtime --runtime target/production/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm on-runtime-upgrade --checks all live --uri ${FORK_SOURCE}
+CMD try-runtime --runtime target/production/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm on-runtime-upgrade --blocktime 6000 --checks all live --uri ${FORK_SOURCE}
