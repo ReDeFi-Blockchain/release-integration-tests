@@ -165,7 +165,7 @@ jobs:
         if: ${{ !cancelled() && steps.alive1.outcome == 'success' }}
         run: |
           echo "Executing upgrade"
-          yarn node --no-warnings=ExperimentalWarning --loader ts-node/esm ./scripts/relayAuthorizeEnactUpgrade.ts ${{ steps.relay-target-wasm.outputs.dir }}/redefi_runtime.compact.compressed.wasm
+          npx hardhat run ./scripts/relayAuthorizeEnactUpgrade.ts ${{ steps.relay-target-wasm.outputs.dir }}/redefi_runtime.compact.compressed.wasm
         env:
           RPC_URL: ${{ env.L1_HTTP_URL }}
 
@@ -185,7 +185,7 @@ jobs:
         if: ${{ !cancelled() && steps.alive2.outcome == 'success' }}
         run: |
           echo "Executing upgrade"
-          yarn node --no-warnings=ExperimentalWarning --loader ts-node/esm ./scripts/parachainAuthorizeEnactUpgrade.ts ${{ steps.parachain-target-wasm.outputs.dir }}/redefi_runtime.compact.compressed.wasm
+          npx hardhat run ./scripts/parachainAuthorizeEnactUpgrade.ts ${{ steps.parachain-target-wasm.outputs.dir }}/redefi_runtime.compact.compressed.wasm
         env:
           RPC_URL: ${{ env.L1_L2_HTTP_URL }}
 
