@@ -7,14 +7,16 @@ const getConfig = () => {
   const protocolRegexp = /^(http:\/\/|https:\/\/|ws:\/\/|wss:\/\/)/;
 
   const rpcMain = RPC_URL_MAIN.replace(protocolRegexp, "");
-  const rpcSibling = RPC_URL_SIBLING.replace(protocolRegexp, "");
+  const rpcSibling = RPC_URL_SIBLING
+    ? RPC_URL_SIBLING.replace(protocolRegexp, "")
+    : undefined;
 
   return {
     isCrosschain: CROSSCHAIN,
     wsEndpointMain: `ws://${rpcMain}`,
     rpcEndpointMain: `http://${rpcMain}`,
     wsEndpointSibling: `ws://${rpcSibling}`,
-    rpcEndpointSibling: `http://${rpcSibling}`,
+    rpcEndpointSibling: rpcSibling ? `http://${rpcSibling}` : undefined,
     ethSeed: Mnemonic.fromPhrase(
       "test test test test test test test test test test test junk",
     ),
