@@ -13,6 +13,7 @@ const main = async () => {
 
   const setCodeTx = sub.api.tx.sudo.sudoUncheckedWeight(
     sub.api.tx.system.setCode(u8aToHex(code)),
+    {refTime: 0, proofSize: 0}
   );
 
   await sub.utils.signAndSend(sub.sudo, setCodeTx);
