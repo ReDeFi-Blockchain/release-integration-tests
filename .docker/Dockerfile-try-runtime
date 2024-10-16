@@ -1,0 +1,41 @@
+# ===== Rust builder =====
+FROM ubuntu:22.04 AS rust-builder
+LABEL maintainer="ReDeFi"
+
+ENV CARGO_HOME="/cargo-home"
+ENV PATH="/cargo-home/bin:$PATH"
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN apt-get update && \
+    apt-get install -y curl cmake pkg-config libssl-dev git clang llvm libudev-dev protobuf-compiler && \
+    apt-get clean && \
+    rm -r /var/lib/apt/lists/*
+
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+
+RUN cargo install --git https://github.com/paritytech/try-runtime-cli --tag v0.8.0 --locked
+
+# ===== BUILD ======
+FROM rust-builder AS builder-bin
+
+ARG REPO_URL
+ARG FORK_SOURCE
+ARG RUNTIME_VERSION
+
+ENV REPO_URL=$REPO_URL
+ENV FORK_SOURCE=$FORK_SOURCE
+ENV RUNTIME_VERSION=$RUNTIME_VERSION
+
+RUN echo "REPO_URL: $REPO_URL"
+RUN echo "FORK_SOURCE: $FORK_SOURCE"
+RUN echo "RUNTIME_VERSION: $RUNTIME_VERSION"
+
+RUN mkdir /redefi
+WORKDIR /redefi
+
+RUN git clone -b ${RUNTIME_VERSION} --depth 1 ${REPO_URL} .
+
+RUN cargo build --features=try-runtime --profile=production
+
+CMD try-runtime --runtime target/production/wbuild/redefi-runtime/redefi_runtime.compact.compressed.wasm on-runtime-upgrade --blocktime 6000 --checks all live --uri ${FORK_SOURCE}

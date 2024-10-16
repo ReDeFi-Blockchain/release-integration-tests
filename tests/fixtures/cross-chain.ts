@@ -15,6 +15,7 @@ export const it = createTestSuite({
     setup: async () => {
       const testFileName = module.parent?.filename;
       if (!testFileName) throw Error("Cannot determine test name");
+      if (!config.rpcEndpointSibling) throw Error("Sibling RPC undefined");
       return EvmHelper.init(testFileName, config.rpcEndpointSibling);
     },
     teardown: () => {},

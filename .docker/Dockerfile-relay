@@ -19,10 +19,10 @@ FROM rust-builder AS builder-relay-bin
 
 RUN mkdir /redefi
 
-ARG REDEFI_RELAY
+ARG L1_NODE_VERSION
 
-RUN git clone -b $REDEFI_RELAY --depth 1 https://github.com/ReDeFi-Blockchain/redefi-relay-node.git /redefi-relay-node-src && \
-    cd /redefi-relay-node-src && \
+RUN git clone -b $L1_NODE_VERSION --depth 1 https://github.com/ReDeFi-Blockchain/redefi-relay-node.git /relay-node-src && \
+    cd /relay-node-src && \
     CARGO_INCREMENTAL=0 cargo build --profile=release --locked && \
     mv ./target/release/polkadot /redefi/ && \
     mv ./target/release/polkadot-execute-worker /redefi/ && \
