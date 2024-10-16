@@ -168,7 +168,8 @@ jobs:
           npx hardhat run ./scripts/relayAuthorizeEnactUpgrade.ts
         env:
           CODE_PATH: ${{ steps.relay-target-wasm.outputs.dir }}/redefi_runtime.compact.compressed.wasm
-          RPC_URL: ${{ env.L1_HTTP_URL }}
+          RPC_URL_MAIN: ${{ env.L1_HTTP_URL }}
+          CROSSCHAIN: false
 
       - name: Ensure network is alive
         working-directory: ./tests
@@ -189,7 +190,8 @@ jobs:
           npx hardhat run ./scripts/parachainAuthorizeEnactUpgrade.ts
         env:
           CODE_PATH: ${{ steps.parachain-target-wasm.outputs.dir }}/redefi_runtime.compact.compressed.wasm
-          RPC_URL: ${{ env.L1_L2_HTTP_URL }}
+          RPC_URL_MAIN: ${{ env.L1_L2_HTTP_URL }}
+          CROSSCHAIN: false
 
       - name: Ensure network is alive
         working-directory: ./tests
